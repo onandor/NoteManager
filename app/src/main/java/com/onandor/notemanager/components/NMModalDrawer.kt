@@ -1,6 +1,5 @@
 package com.onandor.notemanager.components
 
-import android.content.res.Resources
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -72,7 +71,7 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(painterResource(id = R.drawable.archive_list),
+            icon = { Icon(painterResource(id = R.drawable.ic_menu_archive_list),
                 contentDescription = stringResource(id = R.string.drawer_archive)) },
             label = { Text(stringResource(id = R.string.drawer_archive)) },
             selected = currentRoute == NMDestinations.ARCHIVE_ROUTE,
