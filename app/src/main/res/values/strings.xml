@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">NoteManager</string>
+    <string name="app_name">Note Manager</string>
+    <string name="drawer_notes">Notes</string>
+    <string name="drawer_archive">Archive</string>
+    <string name="drawer_trash">Trash</string>
+    <string name="drawer_settings">Settings</string>
 </resources>

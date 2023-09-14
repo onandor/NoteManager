@@ -1,5 +1,6 @@
 package com.onandor.notemanager.components
 
+import android.content.res.Resources
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.onandor.notemanager.NMDestinations
 import com.onandor.notemanager.R
@@ -57,8 +59,8 @@ fun AppDrawer(
     ModalDrawerSheet {
         Spacer(modifier = Modifier.height(12.dp))
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.List, contentDescription = "Notes") },
-            label = { Text("Notes") },
+            icon = { Icon(Icons.Filled.List, contentDescription = stringResource(id = R.string.drawer_notes)) },
+            label = { Text(stringResource(id = R.string.drawer_notes)) },
             selected = currentRoute == NMDestinations.NOTE_LIST_ROUTE,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -70,8 +72,9 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(painterResource(id = R.drawable.archive_list), contentDescription = "Archive") },
-            label = { Text("Archive") },
+            icon = { Icon(painterResource(id = R.drawable.archive_list),
+                contentDescription = stringResource(id = R.string.drawer_archive)) },
+            label = { Text(stringResource(id = R.string.drawer_archive)) },
             selected = currentRoute == NMDestinations.ARCHIVE_ROUTE,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -83,8 +86,8 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.Delete, contentDescription = "Trash") },
-            label = { Text("Trash") },
+            icon = { Icon(Icons.Filled.Delete, contentDescription = stringResource(id = R.string.drawer_trash)) },
+            label = { Text(stringResource(id = R.string.drawer_trash)) },
             selected = currentRoute == NMDestinations.TRASH_ROUTE,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -96,8 +99,8 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
-            label = { Text("Settings") },
+            icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(id = R.string.drawer_settings)) },
+            label = { Text(stringResource(id = R.string.drawer_settings)) },
             selected = currentRoute == NMDestinations.SETTINGS_ROUTE,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
