@@ -59,4 +59,8 @@ class NMNavigationActions(private val navController: NavHostController) {
             launchSingleTop = true
         }
     }
+
+    fun navigateUp() {
+        navController.navigateUp()
+    }
 }

@@ -29,7 +29,10 @@ fun TopBar(openDrawer: () -> Unit) {
         modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
         color = MaterialTheme.colorScheme.secondaryContainer
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             IconButton(onClick = { openDrawer() }) {
                 Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.topbar_drawer))
             }

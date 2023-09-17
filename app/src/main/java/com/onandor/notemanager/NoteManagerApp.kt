@@ -76,11 +76,13 @@ fun NoteManagerApp(
                     navActions = navActions,
                     currentRoute = currentRoute,
                 ) {
-                    TrashScreen()
+                    TrashScreen(
+                        openDrawer = { coroutineScope.launch { drawerState.open() } }
+                    )
                 }
             }
             composable(NMDestinations.SETTINGS_ROUTE) {
-                SettingsScreen()
+                SettingsScreen(navActions = navActions)
             }
         }
     }

@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.onandor.notemanager.NMDestinations
 import com.onandor.notemanager.R
 import kotlinx.coroutines.CoroutineScope
@@ -56,7 +57,13 @@ fun AppDrawer(
     closeDrawer: () -> Unit
 ) {
     ModalDrawerSheet {
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            stringResource(R.string.note_manager),
+            fontSize = 22.sp,
+            modifier = Modifier.padding(start = 25.dp)
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         NavigationDrawerItem(
             icon = { Icon(Icons.Filled.List, contentDescription = stringResource(id = R.string.drawer_notes)) },
             label = { Text(stringResource(id = R.string.drawer_notes)) },
