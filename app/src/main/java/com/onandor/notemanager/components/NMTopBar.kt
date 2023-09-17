@@ -21,12 +21,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.onandor.notemanager.R
+import com.onandor.notemanager.ui.theme.NoteManagerTheme
 
 @Composable
 fun TopBar(openDrawer: () -> Unit) {
     Surface(
         shape = RoundedCornerShape(50),
-        modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
         color = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Row(
@@ -48,5 +51,7 @@ fun TopBar(openDrawer: () -> Unit) {
 @Preview(name = "Dark mode", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun TopBarPreview() {
-    TopBar(openDrawer = { })
+    NoteManagerTheme {
+        TopBar(openDrawer = { })
+    }
 }
