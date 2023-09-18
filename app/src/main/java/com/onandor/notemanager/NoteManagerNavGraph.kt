@@ -25,7 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun NoteManagerApp(
+fun NoteManagerNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
@@ -57,7 +57,9 @@ fun NoteManagerApp(
                 }
             }
             composable(NMDestinations.ADD_EDIT_NOTE_ROUTE) {
-                AddEditNoteScreen()
+                AddEditNoteScreen(
+                    goBack = { navActions.navigateUp() }
+                )
             }
             composable(NMDestinations.ARCHIVE_ROUTE) {
                 AppModalDrawer(
