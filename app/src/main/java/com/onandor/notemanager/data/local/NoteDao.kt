@@ -3,6 +3,7 @@ package com.onandor.notemanager.data.local
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import com.onandor.notemanager.data.NoteLocation
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
@@ -12,11 +13,17 @@ interface NoteDao {
     @Query("SELECT * FROM notes")
     fun observeAll(): Flow<List<LocalNote>>
 
+    @Query("SELECT * FROM notes WHERE location = :noteLocation")
+    fun observeAllByLocation(noteLocation: NoteLocation): Flow<List<LocalNote>>
+
     @Query("SELECT * FROM notes WHERE id = :noteId")
-    fun observerById(noteId: String): Flow<LocalNote>
+    fun observeById(noteId: String): Flow<LocalNote>
 
     @Query("SELECT * FROM notes")
     suspend fun getAll(): List<LocalNote>
+
+    @Query("SELECT * FROM notes WHERE location = :noteLocation")
+    suspend fun getAllByLocation(noteLocation: NoteLocation): List<LocalNote>
 
     @Query("SELECT * FROM notes WHERE id = :noteId")
     suspend fun getById(noteId: String): LocalNote?
@@ -32,6 +39,13 @@ interface NoteDao {
         noteId: String,
         title: String,
         content: String,
+        modificationDate: LocalDateTime
+    )
+
+    @Query("UPDATE notes SET label_list = :labelList, modification_date = :modificationDate WHERE id = :noteId")
+    suspend fun updateLabels(
+        noteId: String,
+        labelList: LabelList,
         modificationDate: LocalDateTime
     )
 

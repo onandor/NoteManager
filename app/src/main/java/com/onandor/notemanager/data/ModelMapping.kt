@@ -5,7 +5,6 @@ import com.onandor.notemanager.data.local.LocalLabel
 import com.onandor.notemanager.data.local.LocalNote
 
 fun Label.toLocal() = LocalLabel(
-    id = id,
     name = name,
     color = color
 )
@@ -13,7 +12,6 @@ fun Label.toLocal() = LocalLabel(
 fun List<Label>.toLocal() = LabelList(map(Label::toLocal))
 
 fun LocalLabel.toExternal() = Label(
-    id = id,
     name = name,
     color = color
 )
@@ -25,6 +23,7 @@ fun Note.toLocal() = LocalNote(
     title = title,
     content = content,
     labelList = labels.toLocal(),
+    location = location,
     creationDate = creationDate,
     modificationDate = modificationDate
 )
@@ -36,6 +35,7 @@ fun LocalNote.toExternal() = Note(
     title = title,
     content = content,
     labels = labelList.toExternal(),
+    location = location,
     creationDate = creationDate,
     modificationDate = modificationDate
 )

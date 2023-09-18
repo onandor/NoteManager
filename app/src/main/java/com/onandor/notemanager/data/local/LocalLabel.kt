@@ -1,7 +1,12 @@
 package com.onandor.notemanager.data.local
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(
+    tableName = "labels"
+)
 data class LocalLabel(
-    var id: Int,
-    var name: String,
+    @PrimaryKey var name: String,
     var color: String
 )
