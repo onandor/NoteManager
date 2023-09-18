@@ -13,6 +13,7 @@ data class LocalNote(
     @PrimaryKey val id: String,
     var title: String,
     var content: String,
+    var labelList: LabelList,
     @ColumnInfo(name = "creation_date") var creationDate: LocalDateTime = LocalDateTime.now(),
-    @ColumnInfo(name = "modification_date")var modificationDate: LocalDateTime = LocalDateTime.now()
+    @ColumnInfo(name = "modification_date") var modificationDate: LocalDateTime = LocalDateTime.now()
 )

@@ -6,6 +6,7 @@ data class Note(
     val id: String,
     val title: String,
     val content: String,
+    val labels: List<Label>,
     val creationDate: LocalDateTime,
     val modificationDate: LocalDateTime
 )
