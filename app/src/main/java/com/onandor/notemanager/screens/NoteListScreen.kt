@@ -16,13 +16,13 @@ import com.onandor.notemanager.components.TopBar
 
 @Composable
 fun NoteListScreen(
-    navActions: NMNavigationActions,
+    onAddTask: () -> Unit,
     openDrawer: () -> Unit
 ) {
     Scaffold (
         topBar = { TopBar(openDrawer) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { navActions.navigateToAddEditNote() }) {
+            FloatingActionButton(onClick = { onAddTask() }) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.note_list_new_note))
             }
         }

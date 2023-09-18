@@ -51,7 +51,7 @@ fun NoteManagerApp(
                     currentRoute = currentRoute,
                 ) {
                     NoteListScreen(
-                        navActions = navActions,
+                        onAddTask = { navActions.navigateToAddEditNote() },
                         openDrawer = { coroutineScope.launch { drawerState.open() } }
                     )
                 }
@@ -82,7 +82,7 @@ fun NoteManagerApp(
                 }
             }
             composable(NMDestinations.SETTINGS_ROUTE) {
-                SettingsScreen(navActions = navActions)
+                SettingsScreen(goBack = { navActions.navigateUp() })
             }
         }
     }

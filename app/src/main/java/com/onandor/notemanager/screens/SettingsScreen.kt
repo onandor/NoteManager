@@ -22,21 +22,21 @@ import com.onandor.notemanager.NMNavigationActions
 import com.onandor.notemanager.R
 
 @Composable
-fun SettingsScreen(navActions: NMNavigationActions) {
+fun SettingsScreen(goBack: () -> Unit) {
     Scaffold(
-        topBar = { SettingsTopBar(navActions = navActions)}
+        topBar = { SettingsTopBar(goBack = goBack)}
     ) { innerPadding ->
         Text(text = "Settings", modifier = Modifier.padding(innerPadding))
     }
 }
 
 @Composable
-fun SettingsTopBar(navActions: NMNavigationActions) {
+fun SettingsTopBar(goBack: () -> Unit) {
     Surface(modifier = Modifier.fillMaxWidth().height(65.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { navActions.navigateUp() }) {
+            IconButton(onClick = { goBack() }) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
             }
             Text(stringResource(R.string.settings), fontSize = 20.sp)
