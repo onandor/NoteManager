@@ -1,6 +1,5 @@
 package com.onandor.notemanager
 
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.onandor.notemanager.NMDestinationsArgs.NOTE_ID_ARG
 import com.onandor.notemanager.NMScreens.ADD_EDIT_NOTE_SCREEN
@@ -23,7 +22,7 @@ object NMDestinationsArgs {
 
 object NMDestinations {
     const val NOTE_LIST_ROUTE = NOTE_LIST_SCREEN
-    const val ADD_EDIT_NOTE_ROUTE = "$ADD_EDIT_NOTE_SCREEN/{$NOTE_ID_ARG}"
+    const val ADD_EDIT_NOTE_ROUTE = "$ADD_EDIT_NOTE_SCREEN?$NOTE_ID_ARG={$NOTE_ID_ARG}"
     const val ARCHIVE_ROUTE = ARCHIVE_SCREEN
     const val TRASH_ROUTE = TRASH_SCREEN
     const val SETTINGS_ROUTE = SETTINGS_SCREEN
@@ -39,8 +38,10 @@ class NMNavigationActions(private val navController: NavHostController) {
         }
     }
 
-    fun navigateToAddEditNote() {
-        navController.navigate(NMDestinations.ADD_EDIT_NOTE_ROUTE) {
+    fun navigateToAddEditNote(noteId: String?) {
+        navController.navigate(
+            if (noteId == null) ADD_EDIT_NOTE_SCREEN else "$ADD_EDIT_NOTE_SCREEN?$NOTE_ID_ARG=$noteId"
+        ) {
             launchSingleTop = true
         }
     }

@@ -60,8 +60,9 @@ fun NoteManagerNavGraph(
                     currentRoute = currentRoute,
                 ) {
                     NoteListScreen(
-                        onAddTask = { navActions.navigateToAddEditNote() },
-                        openDrawer = { coroutineScope.launch { drawerState.open() } }
+                        onAddTask = { navActions.navigateToAddEditNote(null) },
+                        openDrawer = { coroutineScope.launch { drawerState.open() } },
+                        onNoteClick = { note -> navActions.navigateToAddEditNote(note.id) }
                     )
                 }
             }

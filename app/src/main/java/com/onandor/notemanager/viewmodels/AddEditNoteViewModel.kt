@@ -25,7 +25,7 @@ data class AddEditNoteUiState(
 @HiltViewModel
 class AddEditNoteViewModel @Inject constructor(
     private val noteRepository: INoteRepository,
-    savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val noteId: String? = savedStateHandle[NMDestinationsArgs.NOTE_ID_ARG]
@@ -56,7 +56,18 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun saveNote() {
+        if (_uiState.value.title.isEmpty() and _uiState.value.content.isEmpty()) {
+            if (noteId == null) {
+                return
+            }
+            viewModelScope.launch {
+                // TODO: notification
+                noteRepository.deleteNote(noteId)
+            }
+        }
+
         viewModelScope.launch {
+            // TODO: notification
             if (noteId == null) {
                 createNewNote()
             }

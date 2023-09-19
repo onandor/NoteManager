@@ -34,7 +34,12 @@ fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
     Scaffold(
-        topBar = { AddEditNoteTopBar(goBack) }
+        topBar = {
+            AddEditNoteTopBar(
+                onGoBack = viewModel::saveNote,
+                goBack = goBack
+            )
+        }
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -74,7 +79,7 @@ fun AddEditNoteTitleAndContent(
             onValueChange = onTitleChanged,
             colors = textFieldColors,
             placeholder = {
-                Text("Title")
+                Text("Title") // TODO: resource
             }
         )
         TextField(
@@ -89,14 +94,17 @@ fun AddEditNoteTitleAndContent(
 }
 
 @Composable
-fun AddEditNoteTopBar(goBack: () -> Unit) {
+fun AddEditNoteTopBar(
+    onGoBack: () -> Unit,
+    goBack: () -> Unit
+) {
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { goBack() }) {
+            IconButton(onClick = { onGoBack(); goBack() }) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
             }
         }
