@@ -17,26 +17,45 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 
 @Composable
 fun AddEditNoteScreen(
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
     Scaffold(
         topBar = { AddEditNoteTopBar(goBack) }
     ) { innerPadding ->
-        AddEditTitleAndContent(Modifier.padding(innerPadding))
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+        AddEditNoteTitleAndContent(
+            title = uiState.title,
+            content = uiState.content,
+            onTitleChanged = viewModel::updateTitle,
+            onContentChanged = viewModel::updateContent,
+            Modifier.padding(innerPadding)
+        )
     }
 }
 
 @Composable
-fun AddEditTitleAndContent(modifier: Modifier) {
+fun AddEditNoteTitleAndContent(
+    title: String,
+    content: String,
+    onTitleChanged: (String) -> Unit,
+    onContentChanged: (String) -> Unit,
+    modifier: Modifier
+) {
     Column (
         modifier = modifier
             .fillMaxWidth()
@@ -49,19 +68,18 @@ fun AddEditTitleAndContent(modifier: Modifier) {
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )
-        val title: String = ""
 
         TextField(
             value = title,
-            onValueChange = { },
+            onValueChange = onTitleChanged,
             colors = textFieldColors,
             placeholder = {
                 Text("Title")
             }
         )
         TextField(
-            value = title,
-            onValueChange = { },
+            value = content,
+            onValueChange = onContentChanged,
             colors = textFieldColors,
             placeholder = {
                 Text("Your note goes here...")

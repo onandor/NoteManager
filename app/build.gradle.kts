@@ -73,8 +73,12 @@ dependencies {
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.48")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     ksp("com.google.dagger:hilt-android-compiler:2.48")
+
+    // Viewmodel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

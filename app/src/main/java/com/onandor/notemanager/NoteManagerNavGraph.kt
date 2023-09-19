@@ -11,10 +11,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.onandor.notemanager.components.AppModalDrawer
 import com.onandor.notemanager.screens.AddEditNoteScreen
 import com.onandor.notemanager.screens.ArchiveScreen
@@ -44,7 +46,14 @@ fun NoteManagerNavGraph(
             startDestination = startDestination,
             modifier = modifier.padding(innerPadding)
         ) {
-            composable(NMDestinations.NOTE_LIST_ROUTE) {
+            composable(
+                NMDestinations.NOTE_LIST_ROUTE,
+                arguments = listOf(
+                    navArgument(NMDestinationsArgs.NOTE_ID_ARG) {
+                        type = NavType.StringType
+                        nullable = true
+                    })
+            ) {
                 AppModalDrawer(
                     drawerState = drawerState,
                     navActions = navActions,
