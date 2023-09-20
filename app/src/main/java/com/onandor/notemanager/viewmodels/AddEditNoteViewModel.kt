@@ -19,7 +19,8 @@ import javax.inject.Inject
 
 data class AddEditNoteUiState(
     val title: String = "",
-    val content: String = ""
+    val content: String = "",
+    val noteLocation: NoteLocation = NoteLocation.NOTES
 )
 
 @HiltViewModel
@@ -48,7 +49,8 @@ class AddEditNoteViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         title = note.title,
-                        content = note.content
+                        content = note.content,
+                        noteLocation = note.location
                     )
                 }
             }
@@ -127,6 +129,28 @@ class AddEditNoteViewModel @Inject constructor(
         }
         viewModelScope.launch {
             noteRepository.updateNoteLocation(noteId, NoteLocation.ARCHIVE)
+            // TODO: notify
+        }
+    }
+
+    fun unArchiveNote() {
+        if (noteId == null) {
+            // TODO: notify user that empty note was deleted
+            return
+        }
+        viewModelScope.launch {
+            noteRepository.updateNoteLocation(noteId, NoteLocation.NOTES)
+            // TODO: notify
+        }
+    }
+
+    fun trashNote() {
+        if (noteId == null) {
+            // TODO: notify user that empty note was deleted
+            return
+        }
+        viewModelScope.launch {
+            noteRepository.updateNoteLocation(noteId, NoteLocation.TRASH)
             // TODO: notify
         }
     }

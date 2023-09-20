@@ -15,4 +15,5 @@
     <string name="note_manager">Note Manager</string>
     <string name="addeditnote_archive_note">Archive note</string>
     <string name="addeditnote_delete_note">Delete note</string>
+    <string name="addeditnote_add_labels">Add labels</string>
 </resources>

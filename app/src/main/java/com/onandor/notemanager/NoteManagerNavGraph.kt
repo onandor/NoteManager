@@ -46,14 +46,7 @@ fun NoteManagerNavGraph(
             startDestination = startDestination,
             modifier = modifier.padding(innerPadding)
         ) {
-            composable(
-                NMDestinations.NOTES_ROUTE,
-                arguments = listOf(
-                    navArgument(NMDestinationsArgs.NOTE_ID_ARG) {
-                        type = NavType.StringType
-                        nullable = true
-                    })
-            ) {
+            composable(NMDestinations.NOTES_ROUTE) {
                 AppModalDrawer(
                     drawerState = drawerState,
                     navActions = navActions,
@@ -66,7 +59,15 @@ fun NoteManagerNavGraph(
                     )
                 }
             }
-            composable(NMDestinations.ADD_EDIT_NOTE_ROUTE) {
+            composable(
+                NMDestinations.ADD_EDIT_NOTE_ROUTE,
+                arguments = listOf(
+                    navArgument(NMDestinationsArgs.NOTE_ID_ARG) {
+                        type = NavType.StringType
+                        nullable = true
+                    }
+                )
+            ) {
                 AddEditNoteScreen(
                     goBack = { navActions.navigateUp() }
                 )

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
@@ -29,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.data.NoteLocation
+import com.onandor.notemanager.viewmodels.AddEditNoteUiState
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 
 @Composable
@@ -36,19 +39,18 @@ fun AddEditNoteScreen(
     goBack: () -> Unit,
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = {
-            AddEditNoteTopBar(
-                onSaveNote = viewModel::saveNote,
-                goBack = goBack,
-                onArchiveNote = viewModel::archiveNote,
-                onDeleteNote = viewModel::deleteNote
+            AddEditNoteTopAppBar(
+                viewModel = viewModel,
+                uiState = uiState,
+                goBack = goBack
             )
         }
     ) { innerPadding ->
-        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-        AddEditNoteTitleAndContent(
+            AddEditNoteTitleAndContent(
             title = uiState.title,
             content = uiState.content,
             onTitleChanged = viewModel::updateTitle,
@@ -99,11 +101,46 @@ fun AddEditNoteTitleAndContent(
 }
 
 @Composable
-fun AddEditNoteTopBar(
+fun AddEditNoteTopAppBar(
+    viewModel: AddEditNoteViewModel,
+    uiState: AddEditNoteUiState,
+    goBack: () -> Unit,
+) {
+    when(uiState.noteLocation) {
+        NoteLocation.NOTES -> {
+            AddEditNoteTopAppBar_Notes(
+                onSaveNote = viewModel::saveNote,
+                goBack = goBack,
+                onArchiveNote = viewModel::archiveNote,
+                onTrashNote = viewModel::trashNote,
+                onAddLabels = { }
+            )
+        }
+        NoteLocation.ARCHIVE -> {
+            AddEditNoteTopAppBar_Archive(
+                onSaveNote = viewModel::saveNote,
+                goBack = goBack,
+                onUnArchiveNote = viewModel::unArchiveNote,
+                onTrashNote = viewModel::trashNote,
+                onAddLabels = { }
+            )
+        }
+        NoteLocation.TRASH -> {
+            AddEditNoteTopAppBar_Trash(
+                goBack = goBack,
+                onDeleteNote = viewModel::deleteNote
+            )
+        }
+    }
+}
+
+@Composable
+fun AddEditNoteTopAppBar_Notes(
     onSaveNote: () -> Unit,
     goBack: () -> Unit,
-    onDeleteNote: () -> Unit,
-    onArchiveNote: () -> Unit
+    onTrashNote: () -> Unit,
+    onArchiveNote: () -> Unit,
+    onAddLabels: () -> Unit
 ) {
     Surface(modifier = Modifier
         .fillMaxWidth()
@@ -118,18 +155,93 @@ fun AddEditNoteTopBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(onClick = { onAddLabels() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.addeditnote_add_labels)
+                    )
+                }
                 IconButton(onClick = { onArchiveNote(); goBack() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_menu_archive_list),
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
                     )
                 }
-                IconButton(onClick = { onDeleteNote(); goBack() }) {
+                IconButton(onClick = { onTrashNote(); goBack() }) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
                         contentDescription = stringResource(id = R.string.addeditnote_delete_note)
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun AddEditNoteTopAppBar_Archive(
+    onSaveNote: () -> Unit,
+    goBack: () -> Unit,
+    onTrashNote: () -> Unit,
+    onUnArchiveNote: () -> Unit,
+    onAddLabels: () -> Unit
+) {
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .height(65.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(onClick = { onSaveNote(); goBack() }) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { onAddLabels(); goBack() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.addeditnote_add_labels)
+                    )
+                }
+                IconButton(onClick = { onUnArchiveNote(); goBack() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_menu_archive_list),
+                        contentDescription = stringResource(id = R.string.addeditnote_archive_note)
+                    )
+                }
+                IconButton(onClick = { onTrashNote(); goBack() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(id = R.string.addeditnote_delete_note)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AddEditNoteTopAppBar_Trash(
+    goBack: () -> Unit,
+    onDeleteNote: () -> Unit
+) {
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .height(65.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(onClick = { goBack() }) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
+            }
+            IconButton(onClick = { onDeleteNote(); goBack() }) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(id = R.string.addeditnote_delete_note)
+                )
             }
         }
     }
