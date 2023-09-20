@@ -20,18 +20,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.onandor.notemanager.NMNavigationActions
 import com.onandor.notemanager.R
+import com.onandor.notemanager.components.NoteList
 import com.onandor.notemanager.components.TopBar
 import com.onandor.notemanager.data.Note
-import com.onandor.notemanager.viewmodels.NoteListViewModel
+import com.onandor.notemanager.viewmodels.NotesViewModel
 
 @Composable
-fun NoteListScreen(
+fun NotesScreen(
     onAddTask: () -> Unit,
     openDrawer: () -> Unit,
     onNoteClick: (Note) -> Unit,
-    viewModel: NoteListViewModel = hiltViewModel()
+    viewModel: NotesViewModel = hiltViewModel()
 ) {
     Scaffold (
         topBar = { TopBar(openDrawer) },
@@ -43,50 +43,16 @@ fun NoteListScreen(
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-        NoteListContent(
+        NoteList(
             notes = uiState.notes,
             onNoteClick = onNoteClick,
-            modifier = Modifier.padding(innerPadding)
+            modifier = Modifier.padding(innerPadding),
+            emptyContent = { NotesEmptyContent() }
         )
     }
 }
 
 @Composable
-fun NoteListContent(
-    notes: List<Note>,
-    onNoteClick: (Note) -> Unit,
-    modifier: Modifier
-) {
-    Box(modifier = modifier.fillMaxSize()) {
-        if (notes.isEmpty()) {
-            NoteListEmptyContent(modifier)
-        }
-        else {
-            LazyColumn {
-                items(notes) { note ->
-                    NoteItem(note, onNoteClick)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun NoteItem(
-    note: Note,
-    onNoteClick: (Note) -> Unit
-) {
-    Column (
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onNoteClick(note) }
-    ) {
-        Text(note.title)
-        Text(note.content)
-    }
-}
-
-@Composable
-fun NoteListEmptyContent(modifier: Modifier) {
+fun NotesEmptyContent() {
     Text("You don't have any notes")
 }

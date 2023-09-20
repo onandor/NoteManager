@@ -20,7 +20,7 @@ import androidx.navigation.navArgument
 import com.onandor.notemanager.components.AppModalDrawer
 import com.onandor.notemanager.screens.AddEditNoteScreen
 import com.onandor.notemanager.screens.ArchiveScreen
-import com.onandor.notemanager.screens.NoteListScreen
+import com.onandor.notemanager.screens.NotesScreen
 import com.onandor.notemanager.screens.SettingsScreen
 import com.onandor.notemanager.screens.TrashScreen
 import kotlinx.coroutines.CoroutineScope
@@ -31,7 +31,7 @@ fun NoteManagerNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-    startDestination: String = NMDestinations.NOTE_LIST_ROUTE,
+    startDestination: String = NMDestinations.NOTES_ROUTE,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     navActions: NMNavigationActions = remember(navController) {
         NMNavigationActions(navController)
@@ -47,7 +47,7 @@ fun NoteManagerNavGraph(
             modifier = modifier.padding(innerPadding)
         ) {
             composable(
-                NMDestinations.NOTE_LIST_ROUTE,
+                NMDestinations.NOTES_ROUTE,
                 arguments = listOf(
                     navArgument(NMDestinationsArgs.NOTE_ID_ARG) {
                         type = NavType.StringType
@@ -59,7 +59,7 @@ fun NoteManagerNavGraph(
                     navActions = navActions,
                     currentRoute = currentRoute,
                 ) {
-                    NoteListScreen(
+                    NotesScreen(
                         onAddTask = { navActions.navigateToAddEditNote(null) },
                         openDrawer = { coroutineScope.launch { drawerState.open() } },
                         onNoteClick = { note -> navActions.navigateToAddEditNote(note.id) }

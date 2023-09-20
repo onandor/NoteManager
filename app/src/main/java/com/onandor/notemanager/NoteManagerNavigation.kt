@@ -4,12 +4,12 @@ import androidx.navigation.NavHostController
 import com.onandor.notemanager.NMDestinationsArgs.NOTE_ID_ARG
 import com.onandor.notemanager.NMScreens.ADD_EDIT_NOTE_SCREEN
 import com.onandor.notemanager.NMScreens.ARCHIVE_SCREEN
-import com.onandor.notemanager.NMScreens.NOTE_LIST_SCREEN
+import com.onandor.notemanager.NMScreens.NOTES_SCREEN
 import com.onandor.notemanager.NMScreens.SETTINGS_SCREEN
 import com.onandor.notemanager.NMScreens.TRASH_SCREEN
 
 private object NMScreens {
-    const val NOTE_LIST_SCREEN = "noteList"
+    const val NOTES_SCREEN = "noteList"
     const val ADD_EDIT_NOTE_SCREEN = "addEditNote"
     const val ARCHIVE_SCREEN = "archive"
     const val TRASH_SCREEN = "trash"
@@ -21,7 +21,7 @@ object NMDestinationsArgs {
 }
 
 object NMDestinations {
-    const val NOTE_LIST_ROUTE = NOTE_LIST_SCREEN
+    const val NOTES_ROUTE = NOTES_SCREEN
     const val ADD_EDIT_NOTE_ROUTE = "$ADD_EDIT_NOTE_SCREEN?$NOTE_ID_ARG={$NOTE_ID_ARG}"
     const val ARCHIVE_ROUTE = ARCHIVE_SCREEN
     const val TRASH_ROUTE = TRASH_SCREEN
@@ -32,7 +32,7 @@ class NMNavigationActions(private val navController: NavHostController) {
 
     fun navigateToNoteList() {
         navController.popBackStack()
-        navController.navigate(NMDestinations.NOTE_LIST_ROUTE) {
+        navController.navigate(NMDestinations.NOTES_ROUTE) {
             launchSingleTop = true
             restoreState = true
         }

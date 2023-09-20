@@ -67,7 +67,7 @@ fun AppDrawer(
         NavigationDrawerItem(
             icon = { Icon(Icons.Filled.List, contentDescription = stringResource(id = R.string.drawer_notes)) },
             label = { Text(stringResource(id = R.string.drawer_notes)) },
-            selected = currentRoute == NMDestinations.NOTE_LIST_ROUTE,
+            selected = currentRoute == NMDestinations.NOTES_ROUTE,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
                 .height(50.dp)

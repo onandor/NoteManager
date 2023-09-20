@@ -18,7 +18,7 @@ data class NoteListUiState(
 )
 
 @HiltViewModel
-class NoteListViewModel @Inject constructor(
+class NotesViewModel @Inject constructor(
     private val noteRepository: INoteRepository
 ) : ViewModel() {
 
