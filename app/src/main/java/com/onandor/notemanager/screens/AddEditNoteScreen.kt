@@ -1,5 +1,6 @@
 package com.onandor.notemanager.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -21,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -36,8 +39,10 @@ fun AddEditNoteScreen(
     Scaffold(
         topBar = {
             AddEditNoteTopBar(
-                onGoBack = viewModel::saveNote,
-                goBack = goBack
+                onSaveNote = viewModel::saveNote,
+                goBack = goBack,
+                onArchiveNote = viewModel::archiveNote,
+                onDeleteNote = viewModel::deleteNote
             )
         }
     ) { innerPadding ->
@@ -95,17 +100,36 @@ fun AddEditNoteTitleAndContent(
 
 @Composable
 fun AddEditNoteTopBar(
-    onGoBack: () -> Unit,
-    goBack: () -> Unit
+    onSaveNote: () -> Unit,
+    goBack: () -> Unit,
+    onDeleteNote: () -> Unit,
+    onArchiveNote: () -> Unit
 ) {
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)) {
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = { onGoBack(); goBack() }) {
+            IconButton(onClick = { onSaveNote(); goBack() }) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { onArchiveNote(); goBack() }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_menu_archive_list),
+                        contentDescription = stringResource(id = R.string.addeditnote_archive_note)
+                    )
+                }
+                IconButton(onClick = { onDeleteNote(); goBack() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(id = R.string.addeditnote_delete_note)
+                    )
+                }
             }
         }
     }

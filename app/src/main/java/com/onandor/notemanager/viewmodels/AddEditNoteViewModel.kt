@@ -119,4 +119,26 @@ class AddEditNoteViewModel @Inject constructor(
             )
         }
     }
+
+    fun archiveNote() {
+        if (noteId == null) {
+            // TODO: notify user that empty note was deleted
+            return
+        }
+        viewModelScope.launch {
+            noteRepository.updateNoteLocation(noteId, NoteLocation.ARCHIVE)
+            // TODO: notify
+        }
+    }
+
+    fun deleteNote() {
+        if (noteId == null) {
+            // TODO: notify
+            return
+        }
+        viewModelScope.launch {
+            noteRepository.deleteNote(noteId)
+            // TODO: notify
+        }
+    }
 }

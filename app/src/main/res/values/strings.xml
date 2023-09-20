@@ -13,4 +13,6 @@
     <string name="settings">Settings</string>
     <string name="settings_go_back">Go back</string>
     <string name="note_manager">Note Manager</string>
+    <string name="addeditnote_archive_note">Archive note</string>
+    <string name="addeditnote_delete_note">Delete note</string>
 </resources>
