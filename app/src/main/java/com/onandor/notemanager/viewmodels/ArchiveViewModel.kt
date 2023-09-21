@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Note
+import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.utils.AsyncResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +23,7 @@ class ArchiveViewModel @Inject constructor(
     private val noteRepository: INoteRepository
 ) : ViewModel() {
 
-    private val _notesAsync = noteRepository.getNotesStream()
+    private val _notesAsync = noteRepository.getNotesStream(NoteLocation.ARCHIVE)
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 

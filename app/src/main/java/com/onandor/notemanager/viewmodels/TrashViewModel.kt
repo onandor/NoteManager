@@ -3,6 +3,7 @@ package com.onandor.notemanager.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.Note
+import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.data.NoteRepository
 import com.onandor.notemanager.utils.AsyncResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,7 @@ class TrashViewModel @Inject constructor(
     private val noteRepository: NoteRepository
 ) : ViewModel() {
 
-    private val _notesAsync = noteRepository.getNotesStream()
+    private val _notesAsync = noteRepository.getNotesStream(NoteLocation.TRASH)
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 

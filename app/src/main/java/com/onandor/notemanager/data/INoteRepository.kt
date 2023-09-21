@@ -7,7 +7,7 @@ interface INoteRepository {
 
     fun getNoteStream(noteId: String): Flow<Note?>
 
-    fun getNotesStream(): Flow<List<Note>>
+    fun getNotesStream(location: NoteLocation): Flow<List<Note>>
 
     suspend fun getNote(noteId: String): Note?
 

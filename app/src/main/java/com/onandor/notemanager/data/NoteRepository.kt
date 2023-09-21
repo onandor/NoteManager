@@ -23,8 +23,8 @@ class NoteRepository @Inject constructor(
         return localDataSource.observeById(noteId).map { it.toExternal() }
     }
 
-    override fun getNotesStream(): Flow<List<Note>> {
-        return localDataSource.observeAll().map { notes ->
+    override fun getNotesStream(location: NoteLocation): Flow<List<Note>> {
+        return localDataSource.observeAllByLocation(location).map { notes ->
             withContext(dispatcher) {
                 notes.toExternal()
             }
