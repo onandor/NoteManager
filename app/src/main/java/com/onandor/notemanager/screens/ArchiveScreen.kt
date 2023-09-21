@@ -35,5 +35,5 @@ fun ArchiveScreen(
 
 @Composable
 fun ArchiveEmptyContent() {
-    Text("You don't have any notes")
+    Text("Your archive is empty")
 }

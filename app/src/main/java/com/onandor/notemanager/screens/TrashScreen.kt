@@ -48,14 +48,14 @@ fun TrashScreen(
             notes = uiState.notes,
             onNoteClick = onNoteClick,
             modifier = Modifier.padding(innerPadding),
-            emptyContent = { NotesEmptyContent() }
+            emptyContent = { TrashEmptyContent() }
         )
     }
 }
 
 @Composable
 fun TrashEmptyContent() {
-    Text("You don't have any notes")
+    Text("The trash is empty")
 }
 
 @Composable

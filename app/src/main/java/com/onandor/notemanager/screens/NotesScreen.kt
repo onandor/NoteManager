@@ -37,7 +37,7 @@ fun NotesScreen(
         topBar = { TopBar(openDrawer) },
         floatingActionButton = {
             FloatingActionButton(onClick = { onAddTask() }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.note_list_new_note))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.notes_new_note))
             }
         }
     ) { innerPadding ->
@@ -54,5 +54,6 @@ fun NotesScreen(
 
 @Composable
 fun NotesEmptyContent() {
+    // TODO
     Text("You don't have any notes")
 }
