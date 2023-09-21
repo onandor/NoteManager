@@ -108,6 +108,7 @@ fun AddEditNoteTopAppBar(
 ) {
     when(uiState.noteLocation) {
         NoteLocation.NOTES -> {
+            println("TopAppBar: NOTES")
             AddEditNoteTopAppBar_Notes(
                 onSaveNote = viewModel::saveNote,
                 goBack = goBack,
@@ -117,6 +118,7 @@ fun AddEditNoteTopAppBar(
             )
         }
         NoteLocation.ARCHIVE -> {
+            println("TopAppBar: ARCHIVE")
             AddEditNoteTopAppBar_Archive(
                 onSaveNote = viewModel::saveNote,
                 goBack = goBack,
@@ -126,6 +128,7 @@ fun AddEditNoteTopAppBar(
             )
         }
         NoteLocation.TRASH -> {
+            println("TopAppBar: TRASH")
             AddEditNoteTopAppBar_Trash(
                 goBack = goBack,
                 onDeleteNote = viewModel::deleteNote

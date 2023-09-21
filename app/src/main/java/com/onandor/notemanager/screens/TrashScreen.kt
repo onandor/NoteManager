@@ -1,7 +1,6 @@
 package com.onandor.notemanager.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,24 +14,55 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.components.NoteList
+import com.onandor.notemanager.components.TopBar
+import com.onandor.notemanager.data.Note
+import com.onandor.notemanager.viewmodels.TrashViewModel
 
 @Composable
-fun TrashScreen(openDrawer: () -> Unit) {
-    Scaffold(
-        topBar = { TrashTopBar(openDrawer = openDrawer) }
+fun TrashScreen(
+    openDrawer: () -> Unit,
+    onNoteClick: (Note) -> Unit,
+    viewModel: TrashViewModel = hiltViewModel()
+) {
+    Scaffold (
+        topBar = {
+            TrashTopBar(
+                openDrawer = openDrawer,
+                onEmptyTrash = viewModel::emptyTrash
+            )
+        },
     ) { innerPadding ->
-        Text(text = "Trash", modifier = Modifier.padding(innerPadding))
+        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+        NoteList(
+            notes = uiState.notes,
+            onNoteClick = onNoteClick,
+            modifier = Modifier.padding(innerPadding),
+            emptyContent = { NotesEmptyContent() }
+        )
     }
 }
 
 @Composable
-fun TrashTopBar(openDrawer: () -> Unit) {
+fun TrashEmptyContent() {
+    Text("You don't have any notes")
+}
+
+@Composable
+fun TrashTopBar(
+    openDrawer: () -> Unit,
+    onEmptyTrash: () -> Unit
+) {
     Surface(modifier = Modifier.fillMaxWidth().height(65.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -47,7 +77,7 @@ fun TrashTopBar(openDrawer: () -> Unit) {
                 }
                 Text(stringResource(R.string.trash), fontSize = 20.sp)
             }
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = { onEmptyTrash() }) {
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.trash_empty_trash))
             }
         }

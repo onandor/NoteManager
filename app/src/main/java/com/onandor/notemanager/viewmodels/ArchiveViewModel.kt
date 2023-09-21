@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-data class NotesUiState(
+data class ArchiveUiState(
     val notes: List<Note> = listOf()
 )
 
 @HiltViewModel
-class NotesViewModel @Inject constructor(
+class ArchiveViewModel @Inject constructor(
     private val noteRepository: INoteRepository
 ) : ViewModel() {
 
@@ -26,24 +26,24 @@ class NotesViewModel @Inject constructor(
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
-    val uiState: StateFlow<NotesUiState> = _notesAsync.map { notesAsync ->
+    val uiState: StateFlow<ArchiveUiState> = _notesAsync.map { notesAsync ->
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
-                NotesUiState()
+                ArchiveUiState()
             }
             is AsyncResult.Error -> {
                 // TODO
-                NotesUiState()
+                ArchiveUiState()
             }
             is AsyncResult.Success -> {
-                NotesUiState(notes = notesAsync.data)
+                ArchiveUiState(notes = notesAsync.data)
             }
         }
     }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = NotesUiState()
+            initialValue = ArchiveUiState()
         )
 }

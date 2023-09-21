@@ -79,7 +79,8 @@ fun NoteManagerNavGraph(
                     currentRoute = currentRoute,
                 ) {
                     ArchiveScreen(
-                        openDrawer = { coroutineScope.launch { drawerState.open() } }
+                        openDrawer = { coroutineScope.launch { drawerState.open() } },
+                        onNoteClick = { note -> navActions.navigateToAddEditNote(note.id) }
                     )
                 }
             }
@@ -90,7 +91,8 @@ fun NoteManagerNavGraph(
                     currentRoute = currentRoute,
                 ) {
                     TrashScreen(
-                        openDrawer = { coroutineScope.launch { drawerState.open() } }
+                        openDrawer = { coroutineScope.launch { drawerState.open() } },
+                        onNoteClick = { note -> navActions.navigateToAddEditNote(note.id) }
                     )
                 }
             }
