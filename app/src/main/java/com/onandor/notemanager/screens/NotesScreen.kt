@@ -59,6 +59,7 @@ fun NotesScreen(
                 scope.launch {
                     snackbarHostState.showSnackbar(resultText)
                 }
+                viewModel.addEditResultSnackbarShown()
             }
         }
     }

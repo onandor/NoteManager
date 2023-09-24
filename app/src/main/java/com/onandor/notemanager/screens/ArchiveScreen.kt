@@ -48,6 +48,7 @@ fun ArchiveScreen(
                 scope.launch {
                     snackbarHostState.showSnackbar(resultText)
                 }
+                viewModel.addEditResultSnackbarShown()
             }
         }
     }

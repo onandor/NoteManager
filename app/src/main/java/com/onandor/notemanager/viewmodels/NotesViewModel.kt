@@ -13,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -32,8 +33,9 @@ class NotesViewModel @Inject constructor(
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
-    val uiState: StateFlow<NotesUiState> = _notesAsync.map { notesAsync ->
-        val addEditResult: AddEditResult = addEditResultState.pop()
+    val uiState: StateFlow<NotesUiState> = combine(
+        _notesAsync, addEditResultState.result
+    ) { notesAsync, addEditResult ->
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
@@ -53,4 +55,8 @@ class NotesViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = NotesUiState()
         )
+
+    fun addEditResultSnackbarShown() {
+        addEditResultState.clear()
+    }
 }

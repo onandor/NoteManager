@@ -13,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -32,25 +33,30 @@ class ArchiveViewModel @Inject constructor(
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
-    val uiState: StateFlow<ArchiveUiState> = _notesAsync.map { notesAsync ->
-        val addEditResult = addEditResultState.pop()
+    val uiState: StateFlow<NotesUiState> = combine(
+        _notesAsync, addEditResultState.result
+    ) { notesAsync, addEditResult ->
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
-                ArchiveUiState(addEditResult = addEditResult)
+                NotesUiState(addEditResult = addEditResult)
             }
             is AsyncResult.Error -> {
                 // TODO
-                ArchiveUiState(addEditResult = addEditResult)
+                NotesUiState(addEditResult = addEditResult)
             }
             is AsyncResult.Success -> {
-                ArchiveUiState(notes = notesAsync.data, addEditResult = addEditResult)
+                NotesUiState(notes = notesAsync.data, addEditResult = addEditResult)
             }
         }
     }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = ArchiveUiState()
+            initialValue = NotesUiState()
         )
+
+    fun addEditResultSnackbarShown() {
+        addEditResultState.clear()
+    }
 }

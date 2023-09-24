@@ -67,6 +67,7 @@ fun TrashScreen(
                 scope.launch {
                     snackbarHostState.showSnackbar(resultText)
                 }
+                viewModel.addEditResultSnackbarShown()
             }
         }
     }

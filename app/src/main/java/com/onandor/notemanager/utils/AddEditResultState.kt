@@ -1,20 +1,24 @@
 package com.onandor.notemanager.utils
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AddEditResultState @Inject constructor() {
 
-    private var _result: AddEditResult = AddEditResults.NONE
+    private val _result = MutableStateFlow(AddEditResults.NONE)
+    val result = _result.asStateFlow()
 
     fun set(newResult: AddEditResult) {
-        _result = newResult
+        _result.value = newResult
     }
 
-    fun pop(): AddEditResult {
-        val currentResult = _result
-        _result = AddEditResults.NONE
-        return currentResult
+    fun clear() {
+        _result.value = AddEditResults.NONE
     }
 }

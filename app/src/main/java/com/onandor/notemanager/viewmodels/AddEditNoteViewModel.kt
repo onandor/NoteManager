@@ -33,6 +33,7 @@ class AddEditNoteViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var noteId: String = savedStateHandle[NMDestinationsArgs.NOTE_ID_ARG] ?: ""
+    private var modified: Boolean = false
 
     private val _uiState = MutableStateFlow(AddEditNoteUiState())
     val uiState: StateFlow<AddEditNoteUiState> = _uiState.asStateFlow()
@@ -63,6 +64,7 @@ class AddEditNoteViewModel @Inject constructor(
     fun saveNote() {
         if (_uiState.value.title.isEmpty() and _uiState.value.content.isEmpty()) {
             if (noteId.isEmpty()) {
+                addEditResultState.set(AddEditResults.DISCARDED)
                 return
             }
             viewModelScope.launch {
@@ -70,6 +72,9 @@ class AddEditNoteViewModel @Inject constructor(
             }
             addEditResultState.set(AddEditResults.DELETED)
         }
+
+        if (!modified)
+            return
 
         viewModelScope.launch {
             if (noteId.isEmpty()) {
@@ -84,14 +89,14 @@ class AddEditNoteViewModel @Inject constructor(
 
     private fun createNewNote() {
         viewModelScope.launch {
-            println("asd: " + noteRepository.createNote(
+            noteRepository.createNote(
                 title = _uiState.value.title,
                 content = _uiState.value.content,
                 labels = listOf(),
                 location = NoteLocation.NOTES,
                 creationDate = LocalDateTime.now(),
                 modificationDate = LocalDateTime.now()
-            ))
+            )
         }
     }
 
@@ -110,6 +115,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun updateTitle(newTitle: String) {
+        modified = true
         _uiState.update {
             it.copy(
                 title = newTitle
@@ -118,6 +124,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun updateContent(newContent: String) {
+        modified = true
         _uiState.update {
             it.copy(
                 content = newContent
