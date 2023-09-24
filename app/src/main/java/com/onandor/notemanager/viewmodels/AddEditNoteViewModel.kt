@@ -70,7 +70,8 @@ class AddEditNoteViewModel @Inject constructor(
             viewModelScope.launch {
                 noteRepository.deleteNote(noteId)
             }
-            addEditResultState.set(AddEditResults.DELETED)
+            addEditResultState.set(AddEditResults.DISCARDED)
+            return
         }
 
         if (!modified)
@@ -114,6 +115,23 @@ class AddEditNoteViewModel @Inject constructor(
         }
     }
 
+    private fun createAndArchiveNewNote() {
+        viewModelScope.launch {
+            val noteId = noteRepository.createNote(
+                title = _uiState.value.title,
+                content = _uiState.value.content,
+                labels = listOf(),
+                location = NoteLocation.NOTES,
+                creationDate = LocalDateTime.now(),
+                modificationDate = LocalDateTime.now()
+            )
+            noteRepository.updateNoteLocation(
+                noteId = noteId,
+                location = NoteLocation.ARCHIVE
+            )
+        }
+    }
+
     fun updateTitle(newTitle: String) {
         modified = true
         _uiState.update {
@@ -134,11 +152,16 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun archiveNote() {
         if (noteId.isEmpty()) {
-            addEditResultState.set(AddEditResults.DISCARDED)
-            return
+            if (_uiState.value.title.isEmpty() and _uiState.value.content.isEmpty()) {
+                addEditResultState.set(AddEditResults.DISCARDED)
+                return
+            }
+            createAndArchiveNewNote()
         }
-        viewModelScope.launch {
-            noteRepository.updateNoteLocation(noteId, NoteLocation.ARCHIVE)
+        else {
+            viewModelScope.launch {
+                noteRepository.updateNoteLocation(noteId, NoteLocation.ARCHIVE)
+            }
         }
         addEditResultState.set(AddEditResults.ARCHIVED)
     }
