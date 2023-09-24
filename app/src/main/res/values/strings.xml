@@ -19,4 +19,10 @@
     <string name="addeditnote_delete_note">Delete note</string>
     <string name="addeditnote_add_labels">Add labels</string>
     <string name="archive_note_list_empty">Your archive is empty</string>
+    <string name="addeditresult_saved">Note saved</string>
+    <string name="addeditresult_archived">Note archived</string>
+    <string name="addeditresult_unarchived">Note unarchived</string>
+    <string name="addeditresult_trashed">Note trashed</string>
+    <string name="addeditresult_deleted">Note deleted</string>
+    <string name="addeditresult_discarded">Note discarded</string>
 </resources>

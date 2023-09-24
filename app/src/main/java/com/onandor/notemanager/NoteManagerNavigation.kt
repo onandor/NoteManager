@@ -9,7 +9,7 @@ import com.onandor.notemanager.NMScreens.SETTINGS_SCREEN
 import com.onandor.notemanager.NMScreens.TRASH_SCREEN
 
 private object NMScreens {
-    const val NOTES_SCREEN = "noteList"
+    const val NOTES_SCREEN = "notes"
     const val ADD_EDIT_NOTE_SCREEN = "addEditNote"
     const val ARCHIVE_SCREEN = "archive"
     const val TRASH_SCREEN = "trash"
@@ -30,7 +30,7 @@ object NMDestinations {
 
 class NMNavigationActions(private val navController: NavHostController) {
 
-    fun navigateToNoteList() {
+    fun navigateToNotes() {
         navController.popBackStack()
         navController.navigate(NMDestinations.NOTES_ROUTE) {
             launchSingleTop = true

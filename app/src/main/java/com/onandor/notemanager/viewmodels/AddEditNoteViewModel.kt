@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.NMDestinationsArgs
 import com.onandor.notemanager.data.INoteRepository
-import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.NoteLocation
+import com.onandor.notemanager.utils.AddEditResult
+import com.onandor.notemanager.utils.AddEditResultState
+import com.onandor.notemanager.utils.AddEditResults
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,16 +28,17 @@ data class AddEditNoteUiState(
 @HiltViewModel
 class AddEditNoteViewModel @Inject constructor(
     private val noteRepository: INoteRepository,
+    private val addEditResultState: AddEditResultState,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val noteId: String? = savedStateHandle[NMDestinationsArgs.NOTE_ID_ARG]
+    private var noteId: String = savedStateHandle[NMDestinationsArgs.NOTE_ID_ARG] ?: ""
 
     private val _uiState = MutableStateFlow(AddEditNoteUiState())
     val uiState: StateFlow<AddEditNoteUiState> = _uiState.asStateFlow()
 
     init {
-        if (noteId != null) {
+        if (noteId.isNotEmpty()) {
             loadNote(noteId)
         }
     }
@@ -59,41 +62,41 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun saveNote() {
         if (_uiState.value.title.isEmpty() and _uiState.value.content.isEmpty()) {
-            if (noteId == null) {
+            if (noteId.isEmpty()) {
                 return
             }
             viewModelScope.launch {
-                // TODO: notification
                 noteRepository.deleteNote(noteId)
             }
+            addEditResultState.set(AddEditResults.DELETED)
         }
 
         viewModelScope.launch {
-            // TODO: notification
-            if (noteId == null) {
+            if (noteId.isEmpty()) {
                 createNewNote()
             }
             else {
                 updateExistingNote()
             }
         }
+        addEditResultState.set(AddEditResults.SAVED)
     }
 
     private fun createNewNote() {
         viewModelScope.launch {
-            noteRepository.createNote(
+            println("asd: " + noteRepository.createNote(
                 title = _uiState.value.title,
                 content = _uiState.value.content,
                 labels = listOf(),
                 location = NoteLocation.NOTES,
                 creationDate = LocalDateTime.now(),
                 modificationDate = LocalDateTime.now()
-            )
+            ))
         }
     }
 
     private fun updateExistingNote() {
-        if (noteId == null) {
+        if (noteId.isEmpty()) {
             throw RuntimeException("AddEditNoteViewModel.updateExistingNote(): cannot update nonexistent note")
         }
         viewModelScope.launch {
@@ -123,46 +126,38 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun archiveNote() {
-        if (noteId == null) {
-            // TODO: notify user that empty note was deleted
+        if (noteId.isEmpty()) {
+            addEditResultState.set(AddEditResults.DISCARDED)
             return
         }
         viewModelScope.launch {
             noteRepository.updateNoteLocation(noteId, NoteLocation.ARCHIVE)
-            // TODO: notify
         }
+        addEditResultState.set(AddEditResults.ARCHIVED)
     }
 
     fun unArchiveNote() {
-        if (noteId == null) {
-            // TODO: notify user that empty note was deleted
-            return
-        }
         viewModelScope.launch {
             noteRepository.updateNoteLocation(noteId, NoteLocation.NOTES)
-            // TODO: notify
         }
+        addEditResultState.set(AddEditResults.UNARCHIVED)
     }
 
     fun trashNote() {
-        if (noteId == null) {
-            // TODO: notify user that empty note was deleted
+        if (noteId.isEmpty()) {
+            addEditResultState.set(AddEditResults.DISCARDED)
             return
         }
         viewModelScope.launch {
             noteRepository.updateNoteLocation(noteId, NoteLocation.TRASH)
-            // TODO: notify
         }
+        addEditResultState.set(AddEditResults.TRASHED)
     }
 
     fun deleteNote() {
-        if (noteId == null) {
-            // TODO: notify
-            return
-        }
         viewModelScope.launch {
             noteRepository.deleteNote(noteId)
-            // TODO: notify
         }
+        addEditResultState.set(AddEditResults.DELETED)
     }
 }

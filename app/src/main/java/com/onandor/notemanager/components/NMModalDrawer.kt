@@ -73,7 +73,7 @@ fun AppDrawer(
                 .height(50.dp)
                 .width(250.dp),
             onClick = {
-                navActions.navigateToNoteList()
+                navActions.navigateToNotes()
                 closeDrawer()
             }
         )

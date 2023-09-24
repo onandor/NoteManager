@@ -2,16 +2,24 @@ package com.onandor.notemanager.screens
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.components.NoteList
 import com.onandor.notemanager.components.TopBar
 import com.onandor.notemanager.data.Note
+import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.ArchiveViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun ArchiveScreen(
@@ -19,8 +27,11 @@ fun ArchiveScreen(
     onNoteClick: (Note) -> Unit,
     viewModel: ArchiveViewModel = hiltViewModel()
 ) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     Scaffold (
         topBar = { TopBar(openDrawer) },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -30,6 +41,15 @@ fun ArchiveScreen(
             modifier = Modifier.padding(innerPadding),
             emptyContent = { ArchiveEmptyContent() }
         )
+
+        if (uiState.addEditResult != AddEditResults.NONE) {
+            val resultText = stringResource(id = uiState.addEditResult.resource)
+            LaunchedEffect(uiState.addEditResult) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(resultText)
+                }
+            }
+        }
     }
 }
 

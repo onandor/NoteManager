@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
+import com.onandor.notemanager.utils.AddEditResult
+import com.onandor.notemanager.utils.AddEditResultState
+import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.utils.AsyncResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,12 +18,14 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 data class ArchiveUiState(
-    val notes: List<Note> = listOf()
+    val notes: List<Note> = listOf(),
+    val addEditResult: AddEditResult = AddEditResults.NONE
 )
 
 @HiltViewModel
 class ArchiveViewModel @Inject constructor(
-    private val noteRepository: INoteRepository
+    private val noteRepository: INoteRepository,
+    private val addEditResultState: AddEditResultState
 ) : ViewModel() {
 
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.ARCHIVE)
@@ -28,17 +33,18 @@ class ArchiveViewModel @Inject constructor(
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
     val uiState: StateFlow<ArchiveUiState> = _notesAsync.map { notesAsync ->
+        val addEditResult = addEditResultState.pop()
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
-                ArchiveUiState()
+                ArchiveUiState(addEditResult = addEditResult)
             }
             is AsyncResult.Error -> {
                 // TODO
-                ArchiveUiState()
+                ArchiveUiState(addEditResult = addEditResult)
             }
             is AsyncResult.Success -> {
-                ArchiveUiState(notes = notesAsync.data)
+                ArchiveUiState(notes = notesAsync.data, addEditResult = addEditResult)
             }
         }
     }

@@ -50,7 +50,7 @@ fun AddEditNoteScreen(
             )
         }
     ) { innerPadding ->
-            AddEditNoteTitleAndContent(
+        AddEditNoteTitleAndContent(
             title = uiState.title,
             content = uiState.content,
             onTitleChanged = viewModel::updateTitle,

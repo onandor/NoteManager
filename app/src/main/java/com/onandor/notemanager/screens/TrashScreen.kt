@@ -11,10 +11,15 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,7 +31,9 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.components.NoteList
 import com.onandor.notemanager.components.TopBar
 import com.onandor.notemanager.data.Note
+import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.TrashViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun TrashScreen(
@@ -34,6 +41,8 @@ fun TrashScreen(
     onNoteClick: (Note) -> Unit,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
+    val scope = rememberCoroutineScope()
+    val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     Scaffold (
         topBar = {
             TrashTopBar(
@@ -41,6 +50,7 @@ fun TrashScreen(
                 onEmptyTrash = viewModel::emptyTrash
             )
         },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -50,6 +60,15 @@ fun TrashScreen(
             modifier = Modifier.padding(innerPadding),
             emptyContent = { TrashEmptyContent() }
         )
+
+        if (uiState.addEditResult != AddEditResults.NONE) {
+            val resultText = stringResource(id = uiState.addEditResult.resource)
+            LaunchedEffect(uiState.addEditResult) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(resultText)
+                }
+            }
+        }
     }
 }
 

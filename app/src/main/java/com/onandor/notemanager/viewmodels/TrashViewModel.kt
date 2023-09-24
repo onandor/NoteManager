@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.data.NoteRepository
+import com.onandor.notemanager.utils.AddEditResult
+import com.onandor.notemanager.utils.AddEditResultState
+import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.utils.AsyncResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,12 +19,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TrashUiState(
-    val notes: List<Note> = listOf()
+    val notes: List<Note> = listOf(),
+    val addEditResult: AddEditResult = AddEditResults.NONE
 )
 
 @HiltViewModel
 class TrashViewModel @Inject constructor(
-    private val noteRepository: NoteRepository
+    private val noteRepository: NoteRepository,
+    private val addEditResultState: AddEditResultState
 ) : ViewModel() {
 
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.TRASH)
@@ -29,17 +34,18 @@ class TrashViewModel @Inject constructor(
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
     val uiState: StateFlow<TrashUiState> = _notesAsync.map { notesAsync ->
+        val addEditResult = addEditResultState.pop()
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
-                TrashUiState()
+                TrashUiState(addEditResult = addEditResult)
             }
             is AsyncResult.Error -> {
                 // TODO
-                TrashUiState()
+                TrashUiState(addEditResult = addEditResult)
             }
             is AsyncResult.Success -> {
-                TrashUiState(notes = notesAsync.data)
+                TrashUiState(notes = notesAsync.data, addEditResult = addEditResult)
             }
         }
     }
