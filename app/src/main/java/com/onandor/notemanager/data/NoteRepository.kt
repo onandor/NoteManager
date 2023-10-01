@@ -1,6 +1,6 @@
 package com.onandor.notemanager.data
 
-import com.onandor.notemanager.data.local.NoteDao
+import com.onandor.notemanager.data.local.db.NoteDao
 import com.onandor.notemanager.di.ApplicationScope
 import com.onandor.notemanager.di.DefaultDispatcher
 import kotlinx.coroutines.CoroutineDispatcher

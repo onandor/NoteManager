@@ -1,4 +1,4 @@
-package com.onandor.notemanager.data.local
+package com.onandor.notemanager.data.local.models
 
 import androidx.room.TypeConverter
 import com.google.gson.Gson

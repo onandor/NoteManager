@@ -1,4 +1,4 @@
-package com.onandor.notemanager.data.local
+package com.onandor.notemanager.data.local.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

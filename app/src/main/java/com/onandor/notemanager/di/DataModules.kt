@@ -4,14 +4,13 @@ import android.content.Context
 import androidx.room.Room
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.NoteRepository
-import com.onandor.notemanager.data.local.LabelDao
-import com.onandor.notemanager.data.local.NMDatabase
-import com.onandor.notemanager.data.local.NoteDao
+import com.onandor.notemanager.data.local.db.LabelDao
+import com.onandor.notemanager.data.local.db.NMDatabase
+import com.onandor.notemanager.data.local.db.NoteDao
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton

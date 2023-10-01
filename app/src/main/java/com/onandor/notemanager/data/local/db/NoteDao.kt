@@ -1,9 +1,11 @@
-package com.onandor.notemanager.data.local
+package com.onandor.notemanager.data.local.db
 
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
 import com.onandor.notemanager.data.NoteLocation
+import com.onandor.notemanager.data.local.models.LabelList
+import com.onandor.notemanager.data.local.models.LocalNote
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
