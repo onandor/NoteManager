@@ -12,9 +12,9 @@ class OnboardingViewModel @Inject constructor(
     private val settings: ISettingsDataStore
 ) : ViewModel() {
 
-    fun saveFirstLaunch(firstLaunch: Boolean) {
+    fun completeFirstLaunch() {
         viewModelScope.launch {
-            settings.saveFirstLaunch(firstLaunch = firstLaunch)
+            settings.saveFirstLaunch(firstLaunch = false)
         }
     }
 }

@@ -101,7 +101,7 @@ fun NoteManagerNavGraph(
                 SettingsScreen(goBack = { navActions.navigateUp() })
             }
             composable(NMDestinations.ONBOARDING_ROUTE) {
-                OnboardingScreen()
+                OnboardingScreen(onSignIn = { })
             }
         }
     }
