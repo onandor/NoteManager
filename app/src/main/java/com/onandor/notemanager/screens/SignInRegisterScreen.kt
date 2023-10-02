@@ -1,5 +1,7 @@
 package com.onandor.notemanager.screens
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
-import com.onandor.notemanager.viewmodels.FormType
+import com.onandor.notemanager.viewmodels.SignInRegisterFormType
 import com.onandor.notemanager.viewmodels.SignInRegisterViewModel
 
 @Composable
@@ -42,28 +44,34 @@ fun SignInRegisterScreen(
     Scaffold(
         topBar = { SignInRegisterTopAppBar(goBack) }
     ) { innerPadding ->
-        if (uiState.formType == FormType.SIGN_IN) {
-            SignInForm(
-                modifier = Modifier.padding(innerPadding),
-                email = uiState.form.email,
-                password = uiState.form.password,
-                onEmailChanged = viewModel::updateEmail,
-                onPasswordChanged = viewModel::updatePassword,
-                onChangeFormType = viewModel::changeFormType
-            )
+        Crossfade(
+            targetState = uiState.formType,
+            label = "SignInRegisterFormCrossfade",
+        ) { targetState ->
+            if (targetState == SignInRegisterFormType.SIGN_IN) {
+                SignInForm(
+                    modifier = Modifier.padding(innerPadding),
+                    email = uiState.form.email,
+                    password = uiState.form.password,
+                    onEmailChanged = viewModel::updateEmail,
+                    onPasswordChanged = viewModel::updatePassword,
+                    onChangeFormType = viewModel::changeFormType
+                )
+            }
+            else {
+                RegisterForm(
+                    modifier = Modifier.padding(innerPadding),
+                    email = uiState.form.email,
+                    password = uiState.form.password,
+                    passwordConfirmation = uiState.form.passwordConfirmation,
+                    onEmailChanged = viewModel::updateEmail,
+                    onPasswordChanged = viewModel::updatePassword,
+                    onPasswordConfirmationChanged = viewModel::updatePasswordConfirmation,
+                    onChangeFormType = viewModel::changeFormType
+                )
+            }
         }
-        else {
-            RegisterForm(
-                modifier = Modifier.padding(innerPadding),
-                email = uiState.form.email,
-                password = uiState.form.password,
-                passwordConfirmation = uiState.form.passwordConfirmation,
-                onEmailChanged = viewModel::updateEmail,
-                onPasswordChanged = viewModel::updatePassword,
-                onPasswordConfirmationChanged = viewModel::updatePasswordConfirmation,
-                onChangeFormType = viewModel::changeFormType
-            )
-        }
+
     }
 }
 
@@ -74,7 +82,7 @@ fun SignInForm(
     password: String,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
-    onChangeFormType: (FormType) -> Unit
+    onChangeFormType: (SignInRegisterFormType) -> Unit
 ) {
     Column (
         modifier = modifier
@@ -119,7 +127,7 @@ fun SignInForm(
             Text(text = stringResource(R.string.sign_in_register_need_an_account))
             TextButton(
                 modifier = Modifier.padding(start = 10.dp),
-                onClick = { onChangeFormType(FormType.REGISTER) }
+                onClick = { onChangeFormType(SignInRegisterFormType.REGISTER) }
             ) {
                 Text(text = stringResource(id = R.string.sign_in_register_button_register))
             }
@@ -141,7 +149,7 @@ fun RegisterForm(
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onPasswordConfirmationChanged: (String) -> Unit,
-    onChangeFormType: (FormType) -> Unit
+    onChangeFormType: (SignInRegisterFormType) -> Unit
 ) {
     Column (
         modifier = modifier
@@ -197,7 +205,7 @@ fun RegisterForm(
             Text(text = stringResource(id = R.string.sign_in_register_have_an_account))
             TextButton(
                 modifier = Modifier.padding(start = 10.dp),
-                onClick = { onChangeFormType(FormType.SIGN_IN) }
+                onClick = { onChangeFormType(SignInRegisterFormType.SIGN_IN) }
             ) {
                 Text(text = stringResource(id = R.string.sign_in_register_button_sign_in))
             }

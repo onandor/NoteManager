@@ -14,13 +14,13 @@ data class SignInRegisterForm(
     val passwordConfirmation: String = ""
 )
 
-enum class FormType {
+enum class SignInRegisterFormType {
     SIGN_IN,
     REGISTER
 }
 
 data class SignInRegisterUiState(
-    val formType: FormType = FormType.SIGN_IN,
+    val formType: SignInRegisterFormType = SignInRegisterFormType.SIGN_IN,
     val form: SignInRegisterForm = SignInRegisterForm("", "", "")
 )
 
@@ -33,7 +33,7 @@ class SignInRegisterViewModel @Inject constructor(
         = MutableStateFlow(SignInRegisterUiState())
     val uiState: StateFlow<SignInRegisterUiState> = _uiState
 
-    fun changeFormType(formType: FormType) {
+    fun changeFormType(formType: SignInRegisterFormType) {
         _uiState.update {
             it.copy(formType = formType)
         }
