@@ -21,6 +21,7 @@ import com.onandor.notemanager.components.AppModalDrawer
 import com.onandor.notemanager.screens.AddEditNoteScreen
 import com.onandor.notemanager.screens.ArchiveScreen
 import com.onandor.notemanager.screens.NotesScreen
+import com.onandor.notemanager.screens.OnboardingScreen
 import com.onandor.notemanager.screens.SettingsScreen
 import com.onandor.notemanager.screens.TrashScreen
 import kotlinx.coroutines.CoroutineScope
@@ -98,6 +99,9 @@ fun NoteManagerNavGraph(
             }
             composable(NMDestinations.SETTINGS_ROUTE) {
                 SettingsScreen(goBack = { navActions.navigateUp() })
+            }
+            composable(NMDestinations.ONBOARDING_ROUTE) {
+                OnboardingScreen()
             }
         }
     }

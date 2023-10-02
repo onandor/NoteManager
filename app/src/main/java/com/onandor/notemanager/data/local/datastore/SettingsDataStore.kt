@@ -25,7 +25,7 @@ class SettingsDataStore @Inject constructor(
                 emit(emptyPreferences())
             }
             .map { preference ->
-                preference[KEY_FIRST_LAUNCH] ?: false
+                preference[KEY_FIRST_LAUNCH] ?: true
             }
     }
 

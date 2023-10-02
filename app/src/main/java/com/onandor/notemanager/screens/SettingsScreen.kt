@@ -1,12 +1,14 @@
 package com.onandor.notemanager.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -18,21 +20,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.onandor.notemanager.NMNavigationActions
 import com.onandor.notemanager.R
+import com.onandor.notemanager.viewmodels.SettingsViewModel
 
 @Composable
-fun SettingsScreen(goBack: () -> Unit) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    goBack: () -> Unit
+) {
     Scaffold(
         topBar = { SettingsTopBar(goBack = goBack)}
     ) { innerPadding ->
-        Text(text = "Settings", modifier = Modifier.padding(innerPadding))
+        Column {
+            Text(text = "Settings", modifier = Modifier.padding(innerPadding))
+            Button(onClick = { viewModel.resetFirstLaunch() }) {
+                Text(text = "Reset first launch to true")
+            }
+        }
     }
 }
 
 @Composable
 fun SettingsTopBar(goBack: () -> Unit) {
-    Surface(modifier = Modifier.fillMaxWidth().height(65.dp)) {
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .height(65.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {

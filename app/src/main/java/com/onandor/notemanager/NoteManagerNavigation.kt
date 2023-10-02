@@ -5,6 +5,7 @@ import com.onandor.notemanager.NMDestinationsArgs.NOTE_ID_ARG
 import com.onandor.notemanager.NMScreens.ADD_EDIT_NOTE_SCREEN
 import com.onandor.notemanager.NMScreens.ARCHIVE_SCREEN
 import com.onandor.notemanager.NMScreens.NOTES_SCREEN
+import com.onandor.notemanager.NMScreens.ONBOARDING_SCREEN
 import com.onandor.notemanager.NMScreens.SETTINGS_SCREEN
 import com.onandor.notemanager.NMScreens.TRASH_SCREEN
 
@@ -14,6 +15,7 @@ private object NMScreens {
     const val ARCHIVE_SCREEN = "archive"
     const val TRASH_SCREEN = "trash"
     const val SETTINGS_SCREEN = "settings"
+    const val ONBOARDING_SCREEN = "onboarding"
 }
 
 object NMDestinationsArgs {
@@ -26,6 +28,7 @@ object NMDestinations {
     const val ARCHIVE_ROUTE = ARCHIVE_SCREEN
     const val TRASH_ROUTE = TRASH_SCREEN
     const val SETTINGS_ROUTE = SETTINGS_SCREEN
+    const val ONBOARDING_ROUTE = ONBOARDING_SCREEN
 }
 
 class NMNavigationActions(private val navController: NavHostController) {
