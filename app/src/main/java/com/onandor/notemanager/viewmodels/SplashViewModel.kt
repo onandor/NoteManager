@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.NMDestinations
 import com.onandor.notemanager.data.local.datastore.ISettingsDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -26,7 +28,7 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            settingsDataStore.firstLaunch().collect { firstLaunch ->
+            settingsDataStore.firstLaunch().cancellable().collect { firstLaunch ->
                 val startDestination = firstLaunch.let {
                     if (it)
                         NMDestinations.ONBOARDING_ROUTE
@@ -39,7 +41,9 @@ class SplashViewModel @Inject constructor(
                         startDestination = startDestination
                     )
                 }
+                cancel()
             }
+
         }
     }
 }

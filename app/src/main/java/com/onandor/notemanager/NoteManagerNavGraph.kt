@@ -23,6 +23,7 @@ import com.onandor.notemanager.screens.ArchiveScreen
 import com.onandor.notemanager.screens.NotesScreen
 import com.onandor.notemanager.screens.OnboardingScreen
 import com.onandor.notemanager.screens.SettingsScreen
+import com.onandor.notemanager.screens.SignInRegisterScreen
 import com.onandor.notemanager.screens.TrashScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -98,10 +99,16 @@ fun NoteManagerNavGraph(
                 }
             }
             composable(NMDestinations.SETTINGS_ROUTE) {
-                SettingsScreen(goBack = { navActions.navigateUp() })
+                SettingsScreen(goBack = { navActions.navigateUp() } )
             }
             composable(NMDestinations.ONBOARDING_ROUTE) {
-                OnboardingScreen(onSignIn = { })
+                OnboardingScreen(
+                    onSkip =  { navActions.navigateToNotes() },
+                    onSignIn = { navActions.navigateToSignInRegister() }
+                )
+            }
+            composable(NMDestinations.SIGN_IN_REGISTER_ROUTE) {
+                SignInRegisterScreen(goBack = { navActions.navigateUp() } )
             }
         }
     }

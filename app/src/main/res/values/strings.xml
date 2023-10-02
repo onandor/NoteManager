@@ -30,4 +30,14 @@
     <string name="onboarding_account_description">You can back up and synchronize your notes across multiple devices by signing into your account.\nIf you don\'t care about that, you can also use the app without an account.</string>
     <string name="onboarding_button_sign_in">Sign in</string>
     <string name="onboarding_button_skip">Skip</string>
+    <string name="sign_in_register_go_back">Go back</string>
+    <string name="sign_in_register_hint_email">Email</string>
+    <string name="sign_in_register_hint_password">Password</string>
+    <string name="sign_in_register_hint_password_again">Password again</string>
+    <string name="sign_in_register_title_sign_in">Sign In</string>
+    <string name="sign_in_register_title_register">Register</string>
+    <string name="sign_in_register_button_sign_in">Sign in</string>
+    <string name="sign_in_register_button_register">Register</string>
+    <string name="sign_in_register_need_an_account">Need an account?</string>
+    <string name="sign_in_register_have_an_account">Have an account?</string>
 </resources>

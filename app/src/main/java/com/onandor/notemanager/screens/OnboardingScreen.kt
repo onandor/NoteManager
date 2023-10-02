@@ -24,10 +24,14 @@ import com.onandor.notemanager.viewmodels.OnboardingViewModel
 @Composable
 fun OnboardingScreen(
     viewModel: OnboardingViewModel = hiltViewModel(),
+    onSkip: () -> Unit,
     onSignIn: () -> Unit
 ) {
     OnboardingContent(
-        onSkip = { viewModel.completeFirstLaunch() },
+        onSkip = {
+            viewModel.completeFirstLaunch()
+            onSkip()
+        },
         onSignIn = {
             viewModel.completeFirstLaunch()
             onSignIn()
@@ -41,30 +45,38 @@ fun OnboardingContent(
     onSignIn: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp),
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 20.dp, end = 20.dp, top = 200.dp, bottom = 30.dp),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(id = R.string.onboarding_title_1),
-            fontSize = MaterialTheme.typography.titleLarge.fontSize,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 30.dp),
-            text = stringResource(id = R.string.onboarding_title_2),
-            fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-        Text(
-            modifier = Modifier.padding(bottom = 30.dp),
-            text = stringResource(id = R.string.onboarding_account_description),
-            textAlign = TextAlign.Center
-        )
+        Column {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.onboarding_title_1),
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 30.dp),
+                text = stringResource(id = R.string.onboarding_title_2),
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                modifier = Modifier.padding(bottom = 30.dp),
+                text = stringResource(id = R.string.onboarding_account_description),
+                textAlign = TextAlign.Center
+            )
+        }
         Row(
-            modifier = Modifier.fillMaxWidth().padding(end = 15.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 15.dp),
             horizontalArrangement = Arrangement.End
         ) {
             TextButton(
