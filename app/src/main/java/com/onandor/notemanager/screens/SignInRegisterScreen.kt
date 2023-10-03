@@ -55,7 +55,8 @@ fun SignInRegisterScreen(
                     password = uiState.form.password,
                     onEmailChanged = viewModel::updateEmail,
                     onPasswordChanged = viewModel::updatePassword,
-                    onChangeFormType = viewModel::changeFormType
+                    onChangeFormType = viewModel::changeFormType,
+                    onSignIn = viewModel::signIn
                 )
             }
             else {
@@ -67,7 +68,8 @@ fun SignInRegisterScreen(
                     onEmailChanged = viewModel::updateEmail,
                     onPasswordChanged = viewModel::updatePassword,
                     onPasswordConfirmationChanged = viewModel::updatePasswordConfirmation,
-                    onChangeFormType = viewModel::changeFormType
+                    onChangeFormType = viewModel::changeFormType,
+                    onRegister = viewModel::register
                 )
             }
         }
@@ -82,7 +84,8 @@ fun SignInForm(
     password: String,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
-    onChangeFormType: (SignInRegisterFormType) -> Unit
+    onChangeFormType: (SignInRegisterFormType) -> Unit,
+    onSignIn: () -> Unit
 ) {
     Column (
         modifier = modifier
@@ -132,7 +135,7 @@ fun SignInForm(
                 Text(text = stringResource(id = R.string.sign_in_register_button_register))
             }
         }
-        Button(onClick = { }) {
+        Button(onClick = onSignIn) {
             Spacer(modifier = Modifier.weight(1f))
             Text(text = stringResource(id = R.string.sign_in_register_button_sign_in))
             Spacer(modifier = Modifier.weight(1f))
@@ -149,7 +152,8 @@ fun RegisterForm(
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onPasswordConfirmationChanged: (String) -> Unit,
-    onChangeFormType: (SignInRegisterFormType) -> Unit
+    onChangeFormType: (SignInRegisterFormType) -> Unit,
+    onRegister: () -> Unit
 ) {
     Column (
         modifier = modifier
@@ -210,7 +214,7 @@ fun RegisterForm(
                 Text(text = stringResource(id = R.string.sign_in_register_button_sign_in))
             }
         }
-        Button(onClick = { }) {
+        Button(onClick = onRegister) {
             Spacer(modifier = Modifier.weight(1f))
             Text(text = stringResource(id = R.string.sign_in_register_button_register))
             Spacer(modifier = Modifier.weight(1f))
@@ -245,7 +249,8 @@ fun SignInFormPreview() {
         password = "",
         onEmailChanged = { },
         onPasswordChanged = { },
-        onChangeFormType = { }
+        onChangeFormType = { },
+        onSignIn = { }
     )
 }
 
@@ -260,6 +265,7 @@ fun RegisterFormPreview() {
         onEmailChanged = { },
         onPasswordChanged = { },
         onPasswordConfirmationChanged = { },
-        onChangeFormType = { }
+        onChangeFormType = { },
+        onRegister = { }
     )
 }

@@ -13,6 +13,8 @@ import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.NoteRepository
+import com.onandor.notemanager.data.local.datastore.AuthDataStore
+import com.onandor.notemanager.data.local.datastore.IAuthDataStore
 import com.onandor.notemanager.data.local.datastore.ISettingsDataStore
 import com.onandor.notemanager.data.local.datastore.SettingsDataStore
 import com.onandor.notemanager.data.local.db.LabelDao
@@ -104,4 +106,12 @@ abstract class SettingsDataStoreModule {
 
     @Binds
     abstract fun bindSettingsDataStore(settingsDataStore: SettingsDataStore): ISettingsDataStore
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class AuthDataStoreModule {
+
+    @Binds
+    abstract fun bindAuthDataStore(authDataStore: AuthDataStore): IAuthDataStore
 }

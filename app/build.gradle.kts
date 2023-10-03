@@ -55,6 +55,8 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
+    // Compose
     implementation("androidx.activity:activity-compose:1.7.2")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.compose.ui:ui")
@@ -63,6 +65,8 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.1.1")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("androidx.compose.runtime:runtime-livedata:1.5.1")
+
+    // Serialization
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Room
@@ -90,6 +94,14 @@ dependencies {
 
     // Splash Screen
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // Ktor Client
+    implementation("io.ktor:ktor-client-core:2.3.4")
+    implementation("io.ktor:ktor-client-okhttp:2.3.4")
+    implementation("io.ktor:ktor-client-serialization:2.3.4")
+    implementation("io.ktor:ktor-client-auth:2.3.4")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.4")
+    implementation("io.ktor:ktor-serialization-gson:2.3.4")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
