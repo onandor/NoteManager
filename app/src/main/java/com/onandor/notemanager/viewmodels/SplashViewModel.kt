@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 data class SplashUiState(
@@ -28,12 +29,14 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            settingsDataStore.firstLaunch().cancellable().collect { firstLaunch ->
-                val startDestination = firstLaunch.let {
-                    if (it)
-                        NMDestinations.ONBOARDING_ROUTE
-                    else
-                        NMDestinations.NOTES_ROUTE
+            settingsDataStore.getFirstLaunch().cancellable().collect { firstLaunch ->
+                var startDestination = ""
+                if (firstLaunch) {
+                    startDestination = NMDestinations.ONBOARDING_ROUTE
+                    settingsDataStore.saveInstallationId(UUID.randomUUID())
+                }
+                else {
+                    startDestination = NMDestinations.NOTES_ROUTE
                 }
                 _uiState.update {
                     it.copy(
@@ -43,7 +46,6 @@ class SplashViewModel @Inject constructor(
                 }
                 cancel()
             }
-
         }
     }
 }
