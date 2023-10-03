@@ -86,6 +86,7 @@ dependencies {
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("io.github.osipxd:security-crypto-datastore-preferences:1.0.0-beta01")
 
     // Splash Screen
     implementation("androidx.core:core-splashscreen:1.0.1")

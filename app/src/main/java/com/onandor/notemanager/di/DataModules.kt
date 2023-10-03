@@ -3,11 +3,14 @@ package com.onandor.notemanager.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.dataStoreFile
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKeys
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.NoteRepository
 import com.onandor.notemanager.data.local.datastore.ISettingsDataStore
@@ -22,6 +25,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.github.osipxd.security.crypto.createEncrypted
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -54,19 +59,42 @@ object DatabaseModule {
     fun provideLabelDao(database: NMDatabase): LabelDao = database.labelDao()
 }
 
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class DefaultDataStore
+
+@Qualifier
+@Retention(AnnotationRetention.RUNTIME)
+annotation class EncryptedDataStore
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DataStoreModule {
 
     @Singleton
     @Provides
-    fun provideDataStore(@ApplicationContext context: Context) : DataStore<Preferences> {
+    @DefaultDataStore
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
         return PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler(
                 produceNewData = { emptyPreferences() }
             ),
-            produceFile = { context.preferencesDataStoreFile("settings_data") }
+            produceFile = { context.preferencesDataStoreFile("settings") }
         )
+    }
+
+    @Singleton
+    @Provides
+    @EncryptedDataStore
+    fun provideEncryptedDataStore(@ApplicationContext context: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.createEncrypted {
+            EncryptedFile.Builder(
+                context.dataStoreFile("settings_crypt.preferences_pb"),
+                context,
+                MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
+                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build()
+        }
     }
 }
 
