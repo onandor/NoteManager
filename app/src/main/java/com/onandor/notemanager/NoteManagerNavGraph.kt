@@ -109,10 +109,16 @@ fun NoteManagerNavGraph(
                 )
             }
             composable(NMDestinations.SIGN_IN_REGISTER_ROUTE) {
-                SignInRegisterScreen(goBack = { navActions.navigateUp() } )
+                SignInRegisterScreen(
+                    goBack = { navActions.navigateUp() },
+                    onSignInSuccessful = { navActions.navigateToNotes() }
+                )
             }
             composable(NMDestinations.USER_DETAILS_ROUTE) {
-                UserDetailsScreen(goBack = { navActions.navigateUp() })
+                UserDetailsScreen(
+                    goBack = { navActions.navigateUp() },
+                    onSignIn = { navActions.navigateToSignInRegister() }
+                )
             }
         }
     }

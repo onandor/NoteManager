@@ -32,7 +32,8 @@ data class SignInRegisterUiState(
     val loading: Boolean = false,
     val formType: SignInRegisterFormType = SignInRegisterFormType.SIGN_IN,
     val form: SignInRegisterForm = SignInRegisterForm("", "", ""),
-    val snackbarMessageResource: Int? = null
+    val snackbarMessageResource: Int? = null,
+    val signInSuccessful: Boolean = false
 )
 
 @HiltViewModel
@@ -92,6 +93,12 @@ class SignInRegisterViewModel @Inject constructor(
         }
     }
 
+    fun signInSignaled() {
+        _uiState.update {
+            it.copy(signInSuccessful = false)
+        }
+    }
+
     fun signIn() {
         viewModelScope.launch {
             updateLoading(true)
@@ -102,8 +109,13 @@ class SignInRegisterViewModel @Inject constructor(
             )
             authDataSource.login(authUser)
                 .onSuccess { tokenPair ->
+                    settings.save(SettingsKeys.USER_EMAIL, authUser.email)
+                    settings.save(SettingsKeys.USER_ID, tokenPair.userId)
                     settings.save(SettingsKeys.ACCESS_TOKEN, tokenPair.accessToken)
                     settings.save(SettingsKeys.REFRESH_TOKEN, tokenPair.refreshToken)
+                    _uiState.update {
+                        it.copy(signInSuccessful = true)
+                    }
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -123,9 +135,7 @@ class SignInRegisterViewModel @Inject constructor(
                 deviceId = null
             )
             authDataSource.register(authUser)
-                .onSuccess { userDetails ->
-                    settings.save(SettingsKeys.USER_ID, userDetails.id)
-                    settings.save(SettingsKeys.USER_EMAIL, userDetails.email)
+                .onSuccess {
                     _uiState.update {
                         it.copy(
                             snackbarMessageResource = R.string.sign_in_register_registration_ok,

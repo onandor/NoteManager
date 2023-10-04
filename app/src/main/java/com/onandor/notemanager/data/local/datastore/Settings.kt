@@ -104,4 +104,11 @@ class Settings @Inject constructor(
             preferences[key.dataKey] = value
         }
     }
+
+    override suspend fun <T> remove(key: SettingsKey<T>) {
+        val dataStore = if (key.encrypted) encryptedDataStore else defaultDataStore
+        dataStore.edit { preferences ->
+            preferences.remove(key.dataKey)
+        }
+    }
 }

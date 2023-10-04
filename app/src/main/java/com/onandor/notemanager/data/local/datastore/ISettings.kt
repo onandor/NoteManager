@@ -18,4 +18,6 @@ interface ISettings {
     suspend fun getBoolean(key: SettingsKey<Boolean>, defaultValue: Boolean): Boolean
 
     suspend fun <T> save(key: SettingsKey<T>, value: T)
+
+    suspend fun <T> remove(key: SettingsKey<T>)
 }

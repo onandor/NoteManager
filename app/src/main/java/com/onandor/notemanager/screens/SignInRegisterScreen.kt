@@ -45,7 +45,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun SignInRegisterScreen(
     viewModel: SignInRegisterViewModel = hiltViewModel(),
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    onSignInSuccessful: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
@@ -91,13 +92,19 @@ fun SignInRegisterScreen(
         }
 
         if (uiState.snackbarMessageResource != null) {
-            println("snack bar show")
             val snackbarText = stringResource(id = uiState.snackbarMessageResource!!)
             LaunchedEffect(uiState.snackbarMessageResource) {
                 scope.launch {
                     snackbarHostState.showSnackbar(snackbarText)
                 }
                 viewModel.snackbarShown()
+            }
+        }
+
+        LaunchedEffect(uiState.signInSuccessful) {
+            if (uiState.signInSuccessful) {
+                viewModel.signInSignaled()
+                onSignInSuccessful()
             }
         }
     }
