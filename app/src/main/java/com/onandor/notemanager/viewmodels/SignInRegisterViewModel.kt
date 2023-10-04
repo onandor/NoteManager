@@ -2,9 +2,12 @@ package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
+import com.onandor.notemanager.data.local.datastore.IAuthDataStore
 import com.onandor.notemanager.data.local.datastore.ISettingsDataStore
 import com.onandor.notemanager.data.remote.models.AuthUser
-import com.onandor.notemanager.data.remote.sources.IAuthApiService
+import com.onandor.notemanager.data.remote.sources.IAuthDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,13 +30,15 @@ enum class SignInRegisterFormType {
 
 data class SignInRegisterUiState(
     val formType: SignInRegisterFormType = SignInRegisterFormType.SIGN_IN,
-    val form: SignInRegisterForm = SignInRegisterForm("", "", "")
+    val form: SignInRegisterForm = SignInRegisterForm("", "", ""),
+    val errorMessage: String? = null
 )
 
 @HiltViewModel
 class SignInRegisterViewModel @Inject constructor(
     private val settings: ISettingsDataStore,
-    private val authApiService: IAuthApiService
+    private val authStore: IAuthDataStore,
+    private val authDataSource: IAuthDataSource
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<SignInRegisterUiState>
@@ -89,8 +94,14 @@ class SignInRegisterViewModel @Inject constructor(
                 deviceId = runBlocking { settings.getInstallationId() }.first()
             )
 
-            val tokenPair = authApiService.login(authUser)
-            println("access: ${tokenPair.accessToken}, refresh: ${tokenPair.refreshToken}")
+            authDataSource.login(authUser)
+                .onSuccess { tokenPair ->
+                    println("access: ${tokenPair.accessToken}, refresh: ${tokenPair.refreshToken}")
+
+                }
+                .onFailure { error ->
+                    println("Error: ${error.messageResource}")
+                }
         }
     }
 
@@ -101,8 +112,14 @@ class SignInRegisterViewModel @Inject constructor(
                 password = _uiState.value.form.password,
                 deviceId = null
             )
-            val userDetails = authApiService.register(authUser)
-            println("id: ${userDetails.id}, email: ${userDetails.email}")
+
+            authDataSource.register(authUser)
+                .onSuccess { userDetails ->
+                    println("id: ${userDetails.id}, email: ${userDetails.email}")
+                }
+                .onFailure { error ->
+                    println("Error: ${error.messageResource}")
+                }
         }
     }
 }

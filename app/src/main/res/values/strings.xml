@@ -40,4 +40,7 @@
     <string name="sign_in_register_button_register">Register</string>
     <string name="sign_in_register_need_an_account">Need an account?</string>
     <string name="sign_in_register_have_an_account">Have an account?</string>
+    <string name="apierror_invalid_creds">Invalid username or password</string>
+    <string name="apierror_email_taken">The provided email is already taken</string>
+    <string name="apierror_server_error">There has been an error on the server, please try again later</string>
 </resources>

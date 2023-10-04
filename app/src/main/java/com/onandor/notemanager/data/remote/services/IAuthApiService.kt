@@ -1,4 +1,4 @@
-package com.onandor.notemanager.data.remote.sources
+package com.onandor.notemanager.data.remote.services
 
 import com.onandor.notemanager.data.remote.models.AuthUser
 import com.onandor.notemanager.data.remote.models.TokenPair

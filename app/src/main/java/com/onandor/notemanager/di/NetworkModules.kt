@@ -2,8 +2,10 @@ package com.onandor.notemanager.di
 
 import com.onandor.notemanager.data.remote.models.TokenPair
 import com.onandor.notemanager.data.local.datastore.IAuthDataStore
-import com.onandor.notemanager.data.remote.sources.AuthApiService
-import com.onandor.notemanager.data.remote.sources.IAuthApiService
+import com.onandor.notemanager.data.remote.services.AuthApiService
+import com.onandor.notemanager.data.remote.services.IAuthApiService
+import com.onandor.notemanager.data.remote.sources.AuthDataSource
+import com.onandor.notemanager.data.remote.sources.IAuthDataSource
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -36,6 +38,7 @@ object HttpClientModule {
     @Provides
     fun provideHttpClient(authDataStore: IAuthDataStore): HttpClient {
         return HttpClient(OkHttp) {
+            expectSuccess = true
             defaultRequest {
                 host = "10.0.2.2"
                 port = 8443
@@ -82,4 +85,12 @@ abstract class ApiServiceModule {
 
     @Binds
     abstract fun bindAuthApiService(authApiService: AuthApiService): IAuthApiService
+}
+
+@Module
+@InstallIn(ViewModelComponent::class)
+abstract class DataSourceModule {
+
+    @Binds
+    abstract fun bindAuthDataSource(authDataSource: AuthDataSource): IAuthDataSource
 }

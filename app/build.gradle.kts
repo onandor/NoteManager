@@ -103,6 +103,9 @@ dependencies {
     implementation("io.ktor:ktor-client-content-negotiation:2.3.4")
     implementation("io.ktor:ktor-serialization-gson:2.3.4")
 
+    // Result
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

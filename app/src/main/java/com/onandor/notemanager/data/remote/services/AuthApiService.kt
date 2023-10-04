@@ -1,4 +1,4 @@
-package com.onandor.notemanager.data.remote.sources
+package com.onandor.notemanager.data.remote.services
 
 import com.onandor.notemanager.data.remote.models.AuthUser
 import com.onandor.notemanager.data.remote.models.TokenPair
@@ -14,17 +14,14 @@ class AuthApiService @Inject constructor(
 ) : IAuthApiService {
 
     override suspend fun register(authUser: AuthUser): UserDetails {
-        val response = httpClient.post("auth/register") {
+        return httpClient.post("auth/register") {
             setBody(authUser)
-        }
-        return response.body()
+        }.body()
     }
 
     override suspend fun login(authUser: AuthUser): TokenPair {
-        val response = httpClient.post("auth/login") {
+        return httpClient.post("auth/login") {
             setBody(authUser)
-        }
-        return response.body()
+        }.body()
     }
-
 }
