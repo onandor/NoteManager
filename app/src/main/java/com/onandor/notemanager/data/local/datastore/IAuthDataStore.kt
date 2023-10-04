@@ -1,17 +1,17 @@
 package com.onandor.notemanager.data.local.datastore
 
+import androidx.datastore.preferences.core.Preferences
 import kotlinx.coroutines.flow.Flow
 
 interface IAuthDataStore {
-    fun observeAccessToken(): Flow<String>
 
-    suspend fun getAccessToken(): String
+    fun observeString(key: Preferences.Key<String>): Flow<String>
 
-    suspend fun saveAccessToken(accessToken: String)
+    suspend fun getString(key: Preferences.Key<String>): String
 
-    fun observeRefreshToken(): Flow<String>
+    fun observeInt(key: Preferences.Key<Int>): Flow<Int>
 
-    suspend fun getRefreshToken(): String
+    suspend fun getInt(key: Preferences.Key<Int>): Int
 
-    suspend fun saveRefreshToken(refreshToken: String)
+    suspend fun <T> save(key: Preferences.Key<T>, value: T)
 }

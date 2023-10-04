@@ -1,28 +1,35 @@
 package com.onandor.notemanager.screens
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.viewmodels.SignInRegisterFormType
 import com.onandor.notemanager.viewmodels.SignInRegisterViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun SignInRegisterScreen(
@@ -40,40 +48,58 @@ fun SignInRegisterScreen(
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
+    val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     Scaffold(
-        topBar = { SignInRegisterTopAppBar(goBack) }
+        topBar = { SignInRegisterTopAppBar(goBack) },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Crossfade(
             targetState = uiState.formType,
             label = "SignInRegisterFormCrossfade",
         ) { targetState ->
-            if (targetState == SignInRegisterFormType.SIGN_IN) {
-                SignInForm(
-                    modifier = Modifier.padding(innerPadding),
-                    email = uiState.form.email,
-                    password = uiState.form.password,
-                    onEmailChanged = viewModel::updateEmail,
-                    onPasswordChanged = viewModel::updatePassword,
-                    onChangeFormType = viewModel::changeFormType,
-                    onSignIn = viewModel::signIn
-                )
-            }
-            else {
-                RegisterForm(
-                    modifier = Modifier.padding(innerPadding),
-                    email = uiState.form.email,
-                    password = uiState.form.password,
-                    passwordConfirmation = uiState.form.passwordConfirmation,
-                    onEmailChanged = viewModel::updateEmail,
-                    onPasswordChanged = viewModel::updatePassword,
-                    onPasswordConfirmationChanged = viewModel::updatePasswordConfirmation,
-                    onChangeFormType = viewModel::changeFormType,
-                    onRegister = viewModel::register
-                )
+            Column {
+                Spacer(modifier = Modifier.weight(1f))
+                if (targetState == SignInRegisterFormType.SIGN_IN) {
+                    SignInForm(
+                        modifier = Modifier.padding(innerPadding),
+                        email = uiState.form.email,
+                        password = uiState.form.password,
+                        loading = uiState.loading,
+                        onEmailChanged = viewModel::updateEmail,
+                        onPasswordChanged = viewModel::updatePassword,
+                        onChangeFormType = viewModel::changeFormType,
+                        onSignIn = viewModel::signIn
+                    )
+                }
+                else {
+                    RegisterForm(
+                        modifier = Modifier.padding(innerPadding),
+                        email = uiState.form.email,
+                        password = uiState.form.password,
+                        passwordConfirmation = uiState.form.passwordConfirmation,
+                        loading = uiState.loading,
+                        onEmailChanged = viewModel::updateEmail,
+                        onPasswordChanged = viewModel::updatePassword,
+                        onPasswordConfirmationChanged = viewModel::updatePasswordConfirmation,
+                        onChangeFormType = viewModel::changeFormType,
+                        onRegister = viewModel::register
+                    )
+                }
+                Spacer(modifier = Modifier.weight(3f))
             }
         }
 
+        if (uiState.snackbarMessageResource != null) {
+            println("snack bar show")
+            val snackbarText = stringResource(id = uiState.snackbarMessageResource!!)
+            LaunchedEffect(uiState.snackbarMessageResource) {
+                scope.launch {
+                    snackbarHostState.showSnackbar(snackbarText)
+                }
+                viewModel.snackbarShown()
+            }
+        }
     }
 }
 
@@ -82,15 +108,14 @@ fun SignInForm(
     modifier: Modifier,
     email: String,
     password: String,
+    loading: Boolean,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onChangeFormType: (SignInRegisterFormType) -> Unit,
     onSignIn: () -> Unit
 ) {
     Column (
-        modifier = modifier
-            .fillMaxSize()
-            .padding(start = 50.dp, end = 50.dp, top = 150.dp, bottom = 30.dp),
+        modifier = modifier.padding(start = 50.dp, end = 50.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column {
@@ -135,9 +160,25 @@ fun SignInForm(
                 Text(text = stringResource(id = R.string.sign_in_register_button_register))
             }
         }
-        Button(onClick = onSignIn) {
+        Button(
+            modifier = Modifier.height(50.dp),
+            onClick = onSignIn,
+            enabled = !loading
+        ) {
             Spacer(modifier = Modifier.weight(1f))
-            Text(text = stringResource(id = R.string.sign_in_register_button_sign_in))
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .width(25.dp)
+                        .width(50.dp)
+                        .aspectRatio(1f),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    trackColor = MaterialTheme.colorScheme.secondary
+                )
+            }
+            else {
+                Text(text = stringResource(id = R.string.sign_in_register_button_sign_in))
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
     }
@@ -149,6 +190,7 @@ fun RegisterForm(
     email: String,
     password: String,
     passwordConfirmation: String,
+    loading: Boolean,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onPasswordConfirmationChanged: (String) -> Unit,
@@ -156,9 +198,7 @@ fun RegisterForm(
     onRegister: () -> Unit
 ) {
     Column (
-        modifier = modifier
-            .fillMaxSize()
-            .padding(start = 50.dp, end = 50.dp, top = 150.dp, bottom = 30.dp),
+        modifier = modifier.padding(start = 50.dp, end = 50.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Column {
@@ -214,9 +254,25 @@ fun RegisterForm(
                 Text(text = stringResource(id = R.string.sign_in_register_button_sign_in))
             }
         }
-        Button(onClick = onRegister) {
+        Button(
+            modifier = Modifier.height(50.dp),
+            onClick = onRegister,
+            enabled = !loading
+        ) {
             Spacer(modifier = Modifier.weight(1f))
-            Text(text = stringResource(id = R.string.sign_in_register_button_register))
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .width(25.dp)
+                        .width(50.dp)
+                        .aspectRatio(1f),
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    trackColor = MaterialTheme.colorScheme.secondary
+                )
+            }
+            else {
+                Text(text = stringResource(id = R.string.sign_in_register_button_register))
+            }
             Spacer(modifier = Modifier.weight(1f))
         }
     }
@@ -247,6 +303,7 @@ fun SignInFormPreview() {
         modifier = Modifier.padding(all = 0.dp),
         email = "",
         password = "",
+        loading = false,
         onEmailChanged = { },
         onPasswordChanged = { },
         onChangeFormType = { },
@@ -262,6 +319,7 @@ fun RegisterFormPreview() {
         email = "",
         password = "",
         passwordConfirmation = "",
+        loading = false,
         onEmailChanged = { },
         onPasswordChanged = { },
         onPasswordConfirmationChanged = { },

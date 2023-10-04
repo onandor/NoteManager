@@ -4,9 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.onandor.notemanager.data.local.datastore.AuthKeys.ACCESS_TOKEN
-import com.onandor.notemanager.data.local.datastore.AuthKeys.REFRESH_TOKEN
 import com.onandor.notemanager.di.EncryptedDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -14,62 +13,58 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-private object AuthKeys {
+object AuthStoreKeys {
     val ACCESS_TOKEN = stringPreferencesKey("access_token")
     val REFRESH_TOKEN = stringPreferencesKey("refresh_token")
+    val USER_ID = intPreferencesKey("user_id")
+    val USER_EMAIL = stringPreferencesKey("user_email")
 }
 
 class AuthDataStore @Inject constructor(
     @EncryptedDataStore private val dataStore: DataStore<Preferences>
 ) : IAuthDataStore {
 
-    override fun observeAccessToken(): Flow<String> {
+    override fun observeString(key: Preferences.Key<String>): Flow<String> {
         return dataStore.data
             .catch {
                 emit(emptyPreferences())
             }
             .map { preferences ->
-                preferences[ACCESS_TOKEN] ?: ""
+                preferences[key] ?: ""
             }
     }
 
-    override suspend fun getAccessToken(): String {
+    override suspend fun getString(key: Preferences.Key<String>): String {
         val preferences = dataStore.data
             .catch {
                 emit(emptyPreferences())
             }
             .first()
-        return preferences[ACCESS_TOKEN] ?: ""
+        return preferences[key] ?: ""
     }
 
-    override suspend fun saveAccessToken(accessToken: String) {
-        dataStore.edit { preferences ->
-            preferences[ACCESS_TOKEN] = accessToken
-        }
-    }
-
-    override fun observeRefreshToken(): Flow<String> {
+    override fun observeInt(key: Preferences.Key<Int>): Flow<Int> {
         return dataStore.data
             .catch {
                 emit(emptyPreferences())
             }
             .map { preferences ->
-                preferences[REFRESH_TOKEN] ?: ""
+                preferences[key] ?: -1
             }
     }
 
-    override suspend fun getRefreshToken(): String {
+    override suspend fun getInt(key: Preferences.Key<Int>): Int {
         val preferences = dataStore.data
             .catch {
                 emit(emptyPreferences())
             }
             .first()
-        return preferences[REFRESH_TOKEN] ?: ""
+        return preferences[key] ?: -1
     }
 
-    override suspend fun saveRefreshToken(refreshToken: String) {
+    override suspend fun <T> save(key: Preferences.Key<T>, value: T) {
         dataStore.edit { preferences ->
-            preferences[REFRESH_TOKEN] = refreshToken
+            preferences[key] = value
         }
     }
 }

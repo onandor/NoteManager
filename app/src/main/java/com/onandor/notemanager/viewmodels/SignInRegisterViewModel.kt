@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
+import com.onandor.notemanager.R
+import com.onandor.notemanager.data.local.datastore.AuthStoreKeys
 import com.onandor.notemanager.data.local.datastore.IAuthDataStore
 import com.onandor.notemanager.data.local.datastore.ISettingsDataStore
 import com.onandor.notemanager.data.remote.models.AuthUser
@@ -29,9 +31,10 @@ enum class SignInRegisterFormType {
 }
 
 data class SignInRegisterUiState(
+    val loading: Boolean = false,
     val formType: SignInRegisterFormType = SignInRegisterFormType.SIGN_IN,
     val form: SignInRegisterForm = SignInRegisterForm("", "", ""),
-    val errorMessage: String? = null
+    val snackbarMessageResource: Int? = null
 )
 
 @HiltViewModel
@@ -86,40 +89,65 @@ class SignInRegisterViewModel @Inject constructor(
         updateForm(form)
     }
 
+    fun snackbarShown() {
+        _uiState.update {
+            it.copy(snackbarMessageResource = null)
+        }
+    }
+
     fun signIn() {
         viewModelScope.launch {
+            updateLoading(true)
             val authUser = AuthUser(
                 email = _uiState.value.form.email,
                 password = _uiState.value.form.password,
                 deviceId = runBlocking { settings.getInstallationId() }.first()
             )
-
             authDataSource.login(authUser)
                 .onSuccess { tokenPair ->
-                    println("access: ${tokenPair.accessToken}, refresh: ${tokenPair.refreshToken}")
-
+                    authStore.save(AuthStoreKeys.ACCESS_TOKEN, tokenPair.accessToken)
+                    authStore.save(AuthStoreKeys.REFRESH_TOKEN, tokenPair.refreshToken)
                 }
                 .onFailure { error ->
-                    println("Error: ${error.messageResource}")
+                    _uiState.update {
+                        it.copy(snackbarMessageResource = error.messageResource)
+                    }
                 }
+            updateLoading(false)
         }
     }
 
     fun register() {
         viewModelScope.launch {
+            updateLoading(true)
             val authUser = AuthUser(
                 email = _uiState.value.form.email,
                 password = _uiState.value.form.password,
                 deviceId = null
             )
-
             authDataSource.register(authUser)
                 .onSuccess { userDetails ->
-                    println("id: ${userDetails.id}, email: ${userDetails.email}")
+                    authStore.save(AuthStoreKeys.USER_ID, userDetails.id)
+                    authStore.save(AuthStoreKeys.USER_EMAIL, userDetails.email)
+                    _uiState.update {
+                        it.copy(
+                            snackbarMessageResource = R.string.sign_in_register_registration_ok,
+                        )
+                    }
+                    changeFormType(SignInRegisterFormType.SIGN_IN)
                 }
                 .onFailure { error ->
-                    println("Error: ${error.messageResource}")
+                    _uiState.update {
+                        it.copy(snackbarMessageResource = error.messageResource)
+                    }
                 }
+            updateLoading(false)
+        }
+    }
+
+    private fun updateLoading(loading: Boolean) {
+        _uiState.update {
+            it.copy(loading = loading)
         }
     }
 }

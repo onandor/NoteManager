@@ -1,5 +1,6 @@
 package com.onandor.notemanager.di
 
+import com.onandor.notemanager.data.local.datastore.AuthStoreKeys
 import com.onandor.notemanager.data.remote.models.TokenPair
 import com.onandor.notemanager.data.local.datastore.IAuthDataStore
 import com.onandor.notemanager.data.remote.services.AuthApiService
@@ -52,12 +53,12 @@ object HttpClientModule {
             Auth {
                 bearer {
                     loadTokens {
-                        val accessToken = authDataStore.getAccessToken()
-                        val refreshToken = authDataStore.getRefreshToken()
+                        val accessToken = authDataStore.getString(AuthStoreKeys.ACCESS_TOKEN)
+                        val refreshToken = authDataStore.getString(AuthStoreKeys.REFRESH_TOKEN)
                         BearerTokens(accessToken, refreshToken)
                     }
                     refreshTokens {
-                        val refreshToken = authDataStore.getRefreshToken()
+                        val refreshToken = authDataStore.getString(AuthStoreKeys.REFRESH_TOKEN)
                         val response = client.get {
                             markAsRefreshTokenRequest()
                             url("auth/refresh")
@@ -65,8 +66,8 @@ object HttpClientModule {
                         }
                         val tokenPair = response.body<TokenPair>()
 
-                        authDataStore.saveAccessToken(tokenPair.accessToken)
-                        authDataStore.saveRefreshToken(tokenPair.refreshToken)
+                        authDataStore.save(AuthStoreKeys.ACCESS_TOKEN, tokenPair.accessToken)
+                        authDataStore.save(AuthStoreKeys.REFRESH_TOKEN, tokenPair.refreshToken)
                         BearerTokens(tokenPair.accessToken, tokenPair.refreshToken)
                     }
                     sendWithoutRequest { request ->
