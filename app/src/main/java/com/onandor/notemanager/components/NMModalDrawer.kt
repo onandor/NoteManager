@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
@@ -114,6 +115,20 @@ fun AppDrawer(
                 .width(250.dp),
             onClick = {
                 navActions.navigateToSettings()
+                closeDrawer()
+            }
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        NavigationDrawerItem(
+            icon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(id = R.string.drawer_account)) },
+            label = { Text(stringResource(id = R.string.drawer_account)) },
+            selected = currentRoute == NMDestinations.USER_DETAILS_ROUTE,
+            modifier = Modifier
+                .padding(NavigationDrawerItemDefaults.ItemPadding).padding(bottom = 10.dp)
+                .height(50.dp)
+                .width(250.dp),
+            onClick = {
+                navActions.navigateToUserDetails()
                 closeDrawer()
             }
         )

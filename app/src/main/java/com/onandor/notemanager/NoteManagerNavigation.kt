@@ -9,6 +9,7 @@ import com.onandor.notemanager.NMScreens.ONBOARDING_SCREEN
 import com.onandor.notemanager.NMScreens.SETTINGS_SCREEN
 import com.onandor.notemanager.NMScreens.SIGN_IN_REGISTER_SCREEN
 import com.onandor.notemanager.NMScreens.TRASH_SCREEN
+import com.onandor.notemanager.NMScreens.USER_DETAILS_SCREEN
 
 private object NMScreens {
     const val NOTES_SCREEN = "notes"
@@ -18,6 +19,7 @@ private object NMScreens {
     const val SETTINGS_SCREEN = "settings"
     const val ONBOARDING_SCREEN = "onboarding"
     const val SIGN_IN_REGISTER_SCREEN = "signInRegister"
+    const val USER_DETAILS_SCREEN = "userDetails"
 }
 
 object NMDestinationsArgs {
@@ -32,6 +34,7 @@ object NMDestinations {
     const val SETTINGS_ROUTE = SETTINGS_SCREEN
     const val ONBOARDING_ROUTE = ONBOARDING_SCREEN
     const val SIGN_IN_REGISTER_ROUTE = SIGN_IN_REGISTER_SCREEN
+    const val USER_DETAILS_ROUTE = USER_DETAILS_SCREEN
 }
 
 class NMNavigationActions(private val navController: NavHostController) {
@@ -74,6 +77,12 @@ class NMNavigationActions(private val navController: NavHostController) {
 
     fun navigateToSignInRegister() {
         navController.navigate(NMDestinations.SIGN_IN_REGISTER_ROUTE) {
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateToUserDetails() {
+        navController.navigate(NMDestinations.USER_DETAILS_ROUTE) {
             launchSingleTop = true
         }
     }
