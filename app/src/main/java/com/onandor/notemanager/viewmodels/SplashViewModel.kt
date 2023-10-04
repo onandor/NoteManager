@@ -3,7 +3,8 @@ package com.onandor.notemanager.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.NMDestinations
-import com.onandor.notemanager.data.local.datastore.ISettingsDataStore
+import com.onandor.notemanager.data.local.datastore.ISettings
+import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,7 @@ data class SplashUiState(
 
 @HiltViewModel
 class SplashViewModel @Inject constructor(
-    private val settingsDataStore: ISettingsDataStore
+    private val settings: ISettings
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<SplashUiState> = MutableStateFlow(SplashUiState())
@@ -29,22 +30,20 @@ class SplashViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            settingsDataStore.getFirstLaunch().cancellable().collect { firstLaunch ->
-                var startDestination = ""
-                if (firstLaunch) {
-                    startDestination = NMDestinations.ONBOARDING_ROUTE
-                    settingsDataStore.saveInstallationId(UUID.randomUUID())
-                }
-                else {
-                    startDestination = NMDestinations.NOTES_ROUTE
-                }
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        startDestination = startDestination
-                    )
-                }
-                cancel()
+            val firstLaunch = settings.getBoolean(SettingsKeys.FIRST_LAUNCH, true)
+            var startDestination = ""
+            if (firstLaunch) {
+                startDestination = NMDestinations.ONBOARDING_ROUTE
+                settings.save(SettingsKeys.INSTALLATION_ID, UUID.randomUUID().toString())
+            }
+            else {
+                startDestination = NMDestinations.NOTES_ROUTE
+            }
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    startDestination = startDestination
+                )
             }
         }
     }

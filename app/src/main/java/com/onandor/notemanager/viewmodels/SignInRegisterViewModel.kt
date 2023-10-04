@@ -5,18 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.R
-import com.onandor.notemanager.data.local.datastore.AuthStoreKeys
-import com.onandor.notemanager.data.local.datastore.IAuthDataStore
-import com.onandor.notemanager.data.local.datastore.ISettingsDataStore
+import com.onandor.notemanager.data.local.datastore.ISettings
+import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.remote.models.AuthUser
 import com.onandor.notemanager.data.remote.sources.IAuthDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import java.util.UUID
 import javax.inject.Inject
 
 data class SignInRegisterForm(
@@ -39,8 +37,7 @@ data class SignInRegisterUiState(
 
 @HiltViewModel
 class SignInRegisterViewModel @Inject constructor(
-    private val settings: ISettingsDataStore,
-    private val authStore: IAuthDataStore,
+    private val settings: ISettings,
     private val authDataSource: IAuthDataSource
 ) : ViewModel() {
 
@@ -101,12 +98,12 @@ class SignInRegisterViewModel @Inject constructor(
             val authUser = AuthUser(
                 email = _uiState.value.form.email,
                 password = _uiState.value.form.password,
-                deviceId = runBlocking { settings.getInstallationId() }.first()
+                deviceId = UUID.fromString(settings.getString(SettingsKeys.INSTALLATION_ID))
             )
             authDataSource.login(authUser)
                 .onSuccess { tokenPair ->
-                    authStore.save(AuthStoreKeys.ACCESS_TOKEN, tokenPair.accessToken)
-                    authStore.save(AuthStoreKeys.REFRESH_TOKEN, tokenPair.refreshToken)
+                    settings.save(SettingsKeys.ACCESS_TOKEN, tokenPair.accessToken)
+                    settings.save(SettingsKeys.REFRESH_TOKEN, tokenPair.refreshToken)
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -127,8 +124,8 @@ class SignInRegisterViewModel @Inject constructor(
             )
             authDataSource.register(authUser)
                 .onSuccess { userDetails ->
-                    authStore.save(AuthStoreKeys.USER_ID, userDetails.id)
-                    authStore.save(AuthStoreKeys.USER_EMAIL, userDetails.email)
+                    settings.save(SettingsKeys.USER_ID, userDetails.id)
+                    settings.save(SettingsKeys.USER_EMAIL, userDetails.email)
                     _uiState.update {
                         it.copy(
                             snackbarMessageResource = R.string.sign_in_register_registration_ok,

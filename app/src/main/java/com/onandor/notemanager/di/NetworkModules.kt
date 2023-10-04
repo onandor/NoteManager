@@ -1,8 +1,8 @@
 package com.onandor.notemanager.di
 
-import com.onandor.notemanager.data.local.datastore.AuthStoreKeys
 import com.onandor.notemanager.data.remote.models.TokenPair
-import com.onandor.notemanager.data.local.datastore.IAuthDataStore
+import com.onandor.notemanager.data.local.datastore.ISettings
+import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.remote.services.AuthApiService
 import com.onandor.notemanager.data.remote.services.IAuthApiService
 import com.onandor.notemanager.data.remote.sources.AuthDataSource
@@ -37,7 +37,7 @@ object HttpClientModule {
 
     @Singleton
     @Provides
-    fun provideHttpClient(authDataStore: IAuthDataStore): HttpClient {
+    fun provideHttpClient(settings: ISettings): HttpClient {
         return HttpClient(OkHttp) {
             expectSuccess = true
             defaultRequest {
@@ -53,12 +53,12 @@ object HttpClientModule {
             Auth {
                 bearer {
                     loadTokens {
-                        val accessToken = authDataStore.getString(AuthStoreKeys.ACCESS_TOKEN)
-                        val refreshToken = authDataStore.getString(AuthStoreKeys.REFRESH_TOKEN)
+                        val accessToken = settings.getString(SettingsKeys.ACCESS_TOKEN)
+                        val refreshToken = settings.getString(SettingsKeys.REFRESH_TOKEN)
                         BearerTokens(accessToken, refreshToken)
                     }
                     refreshTokens {
-                        val refreshToken = authDataStore.getString(AuthStoreKeys.REFRESH_TOKEN)
+                        val refreshToken = settings.getString(SettingsKeys.REFRESH_TOKEN)
                         val response = client.get {
                             markAsRefreshTokenRequest()
                             url("auth/refresh")
@@ -66,8 +66,8 @@ object HttpClientModule {
                         }
                         val tokenPair = response.body<TokenPair>()
 
-                        authDataStore.save(AuthStoreKeys.ACCESS_TOKEN, tokenPair.accessToken)
-                        authDataStore.save(AuthStoreKeys.REFRESH_TOKEN, tokenPair.refreshToken)
+                        settings.save(SettingsKeys.ACCESS_TOKEN, tokenPair.accessToken)
+                        settings.save(SettingsKeys.REFRESH_TOKEN, tokenPair.refreshToken)
                         BearerTokens(tokenPair.accessToken, tokenPair.refreshToken)
                     }
                     sendWithoutRequest { request ->

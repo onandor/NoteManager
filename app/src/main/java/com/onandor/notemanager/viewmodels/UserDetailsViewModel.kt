@@ -1,7 +1,7 @@
 package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
-import com.onandor.notemanager.data.local.datastore.ISettingsDataStore
+import com.onandor.notemanager.data.local.datastore.ISettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +15,7 @@ data class UserDetailsUiState(
 
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(
-    private val settings: ISettingsDataStore
+    private val settings: ISettings
 ) : ViewModel() {
 
     val _uiState: MutableStateFlow<UserDetailsUiState> = MutableStateFlow(UserDetailsUiState())
