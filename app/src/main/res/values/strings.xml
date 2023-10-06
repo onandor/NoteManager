@@ -55,15 +55,21 @@
     <string name="user_details_not_signed_in_title">You are not signed in</string>
     <string name="user_details_not_signed_in_description">Sign in to an account to back up your notes and synchronize them across multiple devices.</string>
     <string name="user_details_signed_in_as">You are signed in as</string>
-    <string name="user_details_you_have_notes_1">You have</string>
-    <string name="user_details_you_have_notes_2">notes.</string>
+    <string name="user_details_button_change_password">Change password</string>
     <string name="user_details_button_sign_out">Sign out</string>
     <string name="user_details_button_delete_account">Delete account</string>
     <string name="user_details_button_sign_in_register">Sign in/Register</string>
     <string name="user_details_snackbar_user_deleted">Account successfully deleted</string>
+    <string name="user_details_snackbar_password_changed">Password successfully changed</string>
     <string name="dialog_delete_user_description">By deleting your account, all your data stored on the server will be deleted, but your locally saved notes will remain on your device.</string>
     <string name="dialog_delete_user_enter_password">Enter your password to continue:</string>
     <string name="dialog_delete_user_hint_password">Password</string>
     <string name="dialog_delete_user_button_cancel">Cancel</string>
     <string name="dialog_delete_user_button_confirm">Confirm</string>
+    <string name="dialog_change_password_title">Change password</string>
+    <string name="dialog_change_password_hint_old_password">Old password</string>
+    <string name="dialog_change_password_hint_new_password">New password</string>
+    <string name="dialog_change_password_hint_new_password_confirmation">New password again</string>
+    <string name="dialog_change_password_button_cancel">Cancel</string>
+    <string name="dialog_change_password_button_confirm">Confirm</string>
 </resources>

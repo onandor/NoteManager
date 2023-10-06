@@ -66,4 +66,17 @@ class AuthDataSource @Inject constructor(
             Err(ServerUnreachable)
         }
     }
+
+    override suspend fun changePassword(
+        oldPassword: String,
+        newPassword: String
+    ): Result<Unit, ApiError> {
+        return try {
+            Ok(authApiService.changePassword(oldPassword, newPassword))
+        } catch (e: ClientRequestException) {
+            Err(InvalidPassword)
+        } catch (e: ConnectTimeoutException) {
+            Err(ServerUnreachable)
+        }
+    }
 }

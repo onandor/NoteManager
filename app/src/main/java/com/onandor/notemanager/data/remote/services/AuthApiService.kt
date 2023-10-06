@@ -36,4 +36,10 @@ class AuthApiService @Inject constructor(
             setBody(password)
         }
     }
+
+    override suspend fun changePassword(oldPassword: String, newPassword: String) {
+        httpClient.post("auth/changePassword") {
+            setBody(hashMapOf("oldPassword" to oldPassword, "newPassword" to newPassword))
+        }
+    }
 }

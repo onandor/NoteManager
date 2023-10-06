@@ -13,4 +13,6 @@ interface IAuthApiService {
     suspend fun logout(authUser: AuthUser)
 
     suspend fun deleteUser(password: String)
+
+    suspend fun changePassword(oldPassword: String, newPassword: String)
 }

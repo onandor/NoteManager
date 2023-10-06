@@ -15,4 +15,6 @@ interface IAuthDataSource {
     suspend fun logout(authUser: AuthUser): Result<Unit, ApiError>
 
     suspend fun deleteUser(password: String): Result<Unit, ApiError>
+
+    suspend fun changePassword(oldPassword: String, newPassword: String): Result<Unit, ApiError>
 }

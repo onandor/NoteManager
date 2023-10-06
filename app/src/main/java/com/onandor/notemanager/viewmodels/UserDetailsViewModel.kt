@@ -15,18 +15,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+
+data class UserDetailsForm(
+    val oldPassword: String = "",
+    val newPassword: String = "",
+    val newPasswordConfirmation: String = ""
+)
 
 data class UserDetailsUiState(
     val loadingRequest: Boolean = false,
     val loggedIn: Boolean = false,
     val email: String = "",
-    val deleteUserDialogOpen: Boolean = false,
-    val passwordConfirmation: String = "",
+    val openDialog: UserDetailsDialogType = UserDetailsDialogType.NONE,
+    val userDetailsForm: UserDetailsForm = UserDetailsForm(),
     val snackbarMessageResource: Int? = null
 )
+
+enum class UserDetailsDialogType {
+    NONE,
+    DELETE_USER,
+    CHANGE_PASSWORD
+}
 
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(
@@ -37,19 +50,24 @@ class UserDetailsViewModel @Inject constructor(
     private val userId = settings.observeInt(SettingsKeys.USER_ID)
     private val email = settings.observeString(SettingsKeys.USER_EMAIL)
     private val loadingRequest = MutableStateFlow(false)
-    private val deleteUserDialogOpen = MutableStateFlow(false)
-    private val passwordConfirmation = MutableStateFlow("")
+    private val openDialog = MutableStateFlow(UserDetailsDialogType.NONE)
+    private val userDetailsForm = MutableStateFlow(UserDetailsForm())
     private val snackbarMessageResource: MutableStateFlow<Int?> = MutableStateFlow(null)
 
     val uiState: StateFlow<UserDetailsUiState> = combine(
-        userId, email, loadingRequest, passwordConfirmation, deleteUserDialogOpen, snackbarMessageResource
-    ) { userId, email, loadingRequest, passwordConfirmation, deleteUserDialogOpen, snackbarMessageResource ->
+        userId,
+        email,
+        loadingRequest,
+        userDetailsForm,
+        openDialog,
+        snackbarMessageResource
+    ) { userId, email, loadingRequest, userDetailsForm, openDialog, snackbarMessageResource ->
         UserDetailsUiState(
             loadingRequest = loadingRequest,
             loggedIn = userId > 0,
             email = email,
-            deleteUserDialogOpen = deleteUserDialogOpen,
-            passwordConfirmation = passwordConfirmation,
+            openDialog = openDialog,
+            userDetailsForm = userDetailsForm,
             snackbarMessageResource = snackbarMessageResource
         )
     }
@@ -76,24 +94,44 @@ class UserDetailsViewModel @Inject constructor(
         }
     }
 
-    fun updatePasswordConfirmation(_passwordConfirmation: String) {
-        passwordConfirmation.value = _passwordConfirmation
+    fun updateOldPassword(oldPassword: String) {
+        userDetailsForm.update {
+            it.copy(oldPassword = oldPassword)
+        }
     }
 
-    fun openDeleteUserDialog() {
-        deleteUserDialogOpen.value = true
+    fun updateNewPassword(newPassword: String) {
+        userDetailsForm.update {
+            it.copy(newPassword = newPassword)
+        }
     }
 
-    fun dismissDeleteUserDialog() {
-        deleteUserDialogOpen.value = false
-        passwordConfirmation.value = ""
+    fun updateNewPasswordConfirmation(newPasswordConfirmation: String) {
+        userDetailsForm.update {
+            it.copy(newPasswordConfirmation = newPasswordConfirmation)
+        }
+    }
+
+    fun openDialog(dialogType: UserDetailsDialogType) {
+        openDialog.value = dialogType
+    }
+
+    fun dismissDialog() {
+        openDialog.value = UserDetailsDialogType.NONE
+        userDetailsForm.update {
+            it.copy(
+                oldPassword = "",
+                newPassword = "",
+                newPasswordConfirmation = ""
+            )
+        }
     }
 
     fun deleteUser() {
-        deleteUserDialogOpen.value = false
+        openDialog.value = UserDetailsDialogType.NONE
         viewModelScope.launch {
             loadingRequest.value = true
-            authDataSource.deleteUser(passwordConfirmation.value)
+            authDataSource.deleteUser(userDetailsForm.value.oldPassword)
                 .onSuccess {
                     settings.remove(SettingsKeys.USER_ID)
                     settings.remove(SettingsKeys.USER_EMAIL)
@@ -104,12 +142,33 @@ class UserDetailsViewModel @Inject constructor(
                 .onFailure { error ->
                     snackbarMessageResource.value = error.messageResource
                 }
-            passwordConfirmation.value = ""
+            updateOldPassword("")
             loadingRequest.value = false
         }
     }
 
     fun snackbarShown() {
         snackbarMessageResource.value = null
+    }
+
+    fun changePassword() {
+        openDialog.value = UserDetailsDialogType.NONE
+        viewModelScope.launch {
+            loadingRequest.value = true
+            authDataSource.changePassword(
+                userDetailsForm.value.oldPassword,
+                userDetailsForm.value.newPassword
+            )
+                .onSuccess {
+                    snackbarMessageResource.value = R.string.user_details_snackbar_password_changed
+                }
+                .onFailure { error ->
+                    snackbarMessageResource.value = error.messageResource
+                }
+            updateOldPassword("")
+            updateNewPassword("")
+            updateNewPasswordConfirmation("")
+            loadingRequest.value = false
+        }
     }
 }
