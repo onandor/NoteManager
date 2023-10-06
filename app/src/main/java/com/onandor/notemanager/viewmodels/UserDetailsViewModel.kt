@@ -20,11 +20,9 @@ import java.util.UUID
 import javax.inject.Inject
 
 data class UserDetailsUiState(
-    val loadingScreen: Boolean = true,
     val loadingRequest: Boolean = false,
     val loggedIn: Boolean = false,
-    val email: String = "",
-    val noteCount: Int = 0
+    val email: String = ""
 )
 
 @HiltViewModel
@@ -41,11 +39,9 @@ class UserDetailsViewModel @Inject constructor(
         userId, email, loadingRequest
     ) { userId, email, loadingRequest ->
         UserDetailsUiState(
-            loadingScreen = false,
             loadingRequest = loadingRequest,
             loggedIn = userId > 0,
-            email = email,
-            noteCount = 0
+            email = email
         )
     }
         .stateIn(

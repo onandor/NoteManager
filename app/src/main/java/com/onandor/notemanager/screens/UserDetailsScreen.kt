@@ -53,7 +53,6 @@ fun UserDetailsScreen(
                 SignedInInComponent(
                     loading = uiState.loadingRequest,
                     email = uiState.email,
-                    noteCount = uiState.noteCount,
                     onSignOut = viewModel::logOut,
                     onDeleteAccount = viewModel::deleteUser
                 )
@@ -71,7 +70,6 @@ fun UserDetailsScreen(
 fun SignedInInComponent(
     loading: Boolean,
     email: String,
-    noteCount: Int,
     onSignOut: () -> Unit,
     onDeleteAccount: () -> Unit
 ) {
@@ -87,7 +85,9 @@ fun SignedInInComponent(
         ) {
             Text(stringResource(id = R.string.user_details_signed_in_as))
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
@@ -95,12 +95,6 @@ fun SignedInInComponent(
                     fontSize = MaterialTheme.typography.titleLarge.fontSize
                 )
             }
-            Text(
-                modifier = Modifier.padding(bottom = 10.dp),
-                text = stringResource(id = R.string.user_details_you_have_notes_1)
-                        + " $noteCount "
-                        + stringResource(id = R.string.user_details_you_have_notes_2)
-            )
             Row (
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -194,7 +188,6 @@ fun SignedInComponentPreview() {
     SignedInInComponent(
         loading = false,
         email = "test@email.com",
-        noteCount = 10,
         onSignOut = { },
         onDeleteAccount = { }
     )
