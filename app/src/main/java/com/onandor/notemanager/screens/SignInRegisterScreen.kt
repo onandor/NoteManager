@@ -138,14 +138,12 @@ fun SignInForm(
     ) {
         Column {
             Text(
-                modifier = Modifier.padding(bottom = 10.dp),
                 text = stringResource(id = R.string.sign_in_register_title_sign_in),
                 fontSize = MaterialTheme.typography.headlineLarge.fontSize
             )
+            Spacer(modifier = Modifier.height(10.dp))
             TextField(
-                modifier = Modifier
-                    .padding(bottom = 5.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 value = email,
                 onValueChange = onEmailChanged,
                 placeholder = {
@@ -154,16 +152,16 @@ fun SignInForm(
                 singleLine = true,
                 isError = !emailValid
             )
+            Spacer(modifier = Modifier.height(5.dp))
             AnimatedVisibility(visible = !emailValid) {
                 Text(
                     text = stringResource(id = R.string.sign_in_register_error_invalid_email),
                     color = MaterialTheme.colorScheme.error
                 )
             }
+            Spacer(modifier = Modifier.height(5.dp))
             TextField(
-                modifier = Modifier
-                    .padding(top = 5.dp, bottom = 5.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 value = password,
                 onValueChange = onPasswordChanged,
                 placeholder = {
@@ -173,18 +171,17 @@ fun SignInForm(
                 isError = !passwordValid,
                 visualTransformation = PasswordVisualTransformation()
             )
+            Spacer(modifier = Modifier.height(5.dp))
             AnimatedVisibility(visible = !passwordValid) {
                 Text(
-                    modifier = Modifier.padding(bottom = 5.dp),
                     text = stringResource(id = R.string.sign_in_register_error_invalid_password),
                     color = MaterialTheme.colorScheme.error
                 )
+                Spacer(modifier = Modifier.height(5.dp))
             }
         }
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 5.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -196,6 +193,7 @@ fun SignInForm(
                 Text(text = stringResource(id = R.string.sign_in_register_button_register))
             }
         }
+        Spacer(modifier = Modifier.height(5.dp))
         Button(
             modifier = Modifier.height(50.dp),
             onClick = onSignIn,
@@ -241,14 +239,12 @@ fun RegisterForm(
     ) {
         Column {
             Text(
-                modifier = Modifier.padding(bottom = 10.dp),
                 text = stringResource(id = R.string.sign_in_register_title_register),
                 fontSize = MaterialTheme.typography.headlineLarge.fontSize
             )
+            Spacer(modifier = Modifier.height(10.dp))
             TextField(
-                modifier = Modifier
-                    .padding(bottom = 5.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 value = email,
                 onValueChange = onEmailChanged,
                 placeholder = {
@@ -257,16 +253,16 @@ fun RegisterForm(
                 singleLine = true,
                 isError = !emailValid
             )
+            Spacer(modifier = Modifier.height(5.dp))
             AnimatedVisibility(visible = !emailValid) {
                 Text(
                     text = stringResource(id = R.string.sign_in_register_error_invalid_email),
                     color = MaterialTheme.colorScheme.error
                 )
             }
+            Spacer(modifier = Modifier.height(5.dp))
             TextField(
-                modifier = Modifier
-                    .padding(top = 5.dp, bottom = 5.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 value = password,
                 onValueChange = onPasswordChanged,
                 placeholder = {
@@ -276,16 +272,16 @@ fun RegisterForm(
                 isError = !passwordValid,
                 visualTransformation = PasswordVisualTransformation()
             )
+            Spacer(modifier = Modifier.height(5.dp))
             AnimatedVisibility(visible = !passwordValid) {
                 Text(
                     text = stringResource(id = R.string.sign_in_register_error_invalid_password),
                     color = MaterialTheme.colorScheme.error
                 )
             }
+            Spacer(modifier = Modifier.height(5.dp))
             TextField(
-                modifier = Modifier
-                    .padding(top = 5.dp, bottom = 5.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 value = passwordConfirmation,
                 onValueChange = onPasswordConfirmationChanged,
                 placeholder = {
@@ -295,18 +291,17 @@ fun RegisterForm(
                 isError = !passwordConfirmationValid,
                 visualTransformation = PasswordVisualTransformation()
             )
+            Spacer(modifier = Modifier.height(5.dp))
             AnimatedVisibility(visible = !passwordConfirmationValid) {
                 Text(
-                    modifier = Modifier.padding(bottom = 5.dp),
                     text = stringResource(id = R.string.sign_in_register_error_invalid_password_confirmation),
                     color = MaterialTheme.colorScheme.error
                 )
+                Spacer(modifier = Modifier.height(5.dp))
             }
         }
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 5.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -318,6 +313,7 @@ fun RegisterForm(
                 Text(text = stringResource(id = R.string.sign_in_register_button_sign_in))
             }
         }
+        Spacer(modifier = Modifier.height(5.dp))
         Button(
             modifier = Modifier.height(50.dp),
             onClick = onRegister,

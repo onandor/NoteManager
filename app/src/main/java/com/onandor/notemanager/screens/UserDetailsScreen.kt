@@ -124,9 +124,7 @@ fun SignedInInComponent(
         ) {
             Text(stringResource(id = R.string.user_details_signed_in_as))
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
@@ -134,6 +132,7 @@ fun SignedInInComponent(
                     fontSize = MaterialTheme.typography.titleLarge.fontSize
                 )
             }
+            Spacer(modifier = Modifier.height(10.dp))
             Row (
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
@@ -149,7 +148,7 @@ fun SignedInInComponent(
                     )
                 }
                 Button(
-                    modifier = Modifier.padding(start = 10.dp, end = 10.dp),
+                    modifier = Modifier.padding(end = 10.dp),
                     onClick = onDeleteAccount,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
@@ -184,14 +183,14 @@ fun SignedOutComponent(
                 .padding(all = 10.dp)
         ) {
             Text(
-                modifier = Modifier.padding(bottom = 10.dp),
                 text = stringResource(R.string.user_details_not_signed_in_title),
                 fontSize = MaterialTheme.typography.titleLarge.fontSize
             )
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
-                modifier = Modifier.padding(bottom = 10.dp),
                 text = stringResource(id = R.string.user_details_not_signed_in_description)
             )
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
