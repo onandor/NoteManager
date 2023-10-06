@@ -98,6 +98,9 @@ fun UserDetailsScreen(
                 oldPassword = uiState.userDetailsForm.oldPassword,
                 newPassword = uiState.userDetailsForm.newPassword,
                 newPasswordConfirmation = uiState.userDetailsForm.newPasswordConfirmation,
+                oldPasswordValid = uiState.userDetailsForm.oldPasswordValid,
+                newPasswordValid = uiState.userDetailsForm.newPasswordValid,
+                newPasswordConfirmationValid = uiState.userDetailsForm.newPasswordConfirmationValid,
                 onOldPasswordChanged = viewModel::updateOldPassword,
                 onNewPasswordChanged = viewModel::updateNewPassword,
                 onNewPasswordConfirmationChanged = viewModel::updateNewPasswordConfirmation,
@@ -314,6 +317,9 @@ fun ChangePasswordDialog(
     oldPassword: String,
     newPassword: String,
     newPasswordConfirmation: String,
+    oldPasswordValid: Boolean,
+    newPasswordValid: Boolean,
+    newPasswordConfirmationValid: Boolean,
     onOldPasswordChanged: (String) -> Unit,
     onNewPasswordChanged: (String) -> Unit,
     onNewPasswordConfirmationChanged: (String) -> Unit,
@@ -347,7 +353,14 @@ fun ChangePasswordDialog(
                     },
                     visualTransformation = PasswordVisualTransformation()
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(5.dp))
+                AnimatedVisibility(visible = !oldPasswordValid) {
+                    Text(
+                        text = stringResource(id = R.string.dialog_change_password_error_invalid_password),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                Spacer(modifier = Modifier.height(5.dp))
                 OutlinedTextField(
                    value = newPassword,
                    onValueChange = onNewPasswordChanged,
@@ -356,7 +369,14 @@ fun ChangePasswordDialog(
                    },
                    visualTransformation = PasswordVisualTransformation()
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(5.dp))
+                AnimatedVisibility(visible = !newPasswordValid) {
+                    Text(
+                        text = stringResource(id = R.string.dialog_change_password_error_invalid_password),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                Spacer(modifier = Modifier.height(5.dp))
                 OutlinedTextField(
                    value = newPasswordConfirmation,
                    onValueChange = onNewPasswordConfirmationChanged,
@@ -365,7 +385,14 @@ fun ChangePasswordDialog(
                    },
                    visualTransformation = PasswordVisualTransformation()
                 )
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(5.dp))
+                AnimatedVisibility(visible = !newPasswordConfirmationValid) {
+                    Text(
+                        text = stringResource(id = R.string.dialog_change_password_error_invalid_password_confirmation),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                Spacer(modifier = Modifier.height(5.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
@@ -420,6 +447,9 @@ fun ChangePasswordDialogPreview() {
         oldPassword = "",
         newPassword = "",
         newPasswordConfirmation = "",
+        oldPasswordValid = true,
+        newPasswordValid = true,
+        newPasswordConfirmationValid = true,
         onOldPasswordChanged = { },
         onNewPasswordChanged = { },
         onNewPasswordConfirmationChanged = { },

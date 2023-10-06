@@ -72,4 +72,6 @@
     <string name="dialog_change_password_hint_new_password_confirmation">New password again</string>
     <string name="dialog_change_password_button_cancel">Cancel</string>
     <string name="dialog_change_password_button_confirm">Confirm</string>
+    <string name="dialog_change_password_error_invalid_password">Invalid password</string>
+    <string name="dialog_change_password_error_invalid_password_confirmation">Passwords don\'t match</string>
 </resources>

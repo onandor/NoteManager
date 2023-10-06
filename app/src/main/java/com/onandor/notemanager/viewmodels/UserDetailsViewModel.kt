@@ -23,7 +23,10 @@ import javax.inject.Inject
 data class UserDetailsForm(
     val oldPassword: String = "",
     val newPassword: String = "",
-    val newPasswordConfirmation: String = ""
+    val newPasswordConfirmation: String = "",
+    val oldPasswordValid: Boolean = true,
+    val newPasswordValid: Boolean = true,
+    val newPasswordConfirmationValid: Boolean = true
 )
 
 data class UserDetailsUiState(
@@ -96,19 +99,32 @@ class UserDetailsViewModel @Inject constructor(
 
     fun updateOldPassword(oldPassword: String) {
         userDetailsForm.update {
-            it.copy(oldPassword = oldPassword)
+            it.copy(
+                oldPassword = oldPassword,
+                oldPasswordValid = oldPassword.isNotBlank()
+            )
         }
     }
 
     fun updateNewPassword(newPassword: String) {
+        val valid = newPassword.isNotBlank() && userDetailsForm.value.oldPassword != newPassword
+        val confirmationValid = newPassword == userDetailsForm.value.newPasswordConfirmation
         userDetailsForm.update {
-            it.copy(newPassword = newPassword)
+            it.copy(
+                newPassword = newPassword,
+                newPasswordValid = valid,
+                newPasswordConfirmationValid = confirmationValid
+            )
         }
     }
 
     fun updateNewPasswordConfirmation(newPasswordConfirmation: String) {
+        val valid = userDetailsForm.value.newPassword == newPasswordConfirmation
         userDetailsForm.update {
-            it.copy(newPasswordConfirmation = newPasswordConfirmation)
+            it.copy(
+                newPasswordConfirmation = newPasswordConfirmation,
+                newPasswordConfirmationValid = valid
+            )
         }
     }
 
@@ -122,7 +138,10 @@ class UserDetailsViewModel @Inject constructor(
             it.copy(
                 oldPassword = "",
                 newPassword = "",
-                newPasswordConfirmation = ""
+                newPasswordConfirmation = "",
+                oldPasswordValid = true,
+                newPasswordValid = true,
+                newPasswordConfirmationValid = true
             )
         }
     }
@@ -152,6 +171,23 @@ class UserDetailsViewModel @Inject constructor(
     }
 
     fun changePassword() {
+        updateOldPassword(userDetailsForm.value.oldPassword)
+        updateNewPassword(userDetailsForm.value.newPassword)
+        updateNewPasswordConfirmation(userDetailsForm.value.newPasswordConfirmation)
+        println(userDetailsForm.value.oldPasswordValid.toString() + ", "
+                + userDetailsForm.value.newPasswordValid.toString() + ", "
+                + userDetailsForm.value.newPasswordConfirmationValid.toString())
+        println(userDetailsForm.value.oldPassword + ", " + userDetailsForm.value.newPassword
+                + ", " + userDetailsForm.value.newPasswordConfirmation)
+        if (!userDetailsForm.value.oldPasswordValid || !userDetailsForm.value.newPasswordValid
+            || !userDetailsForm.value.newPasswordConfirmationValid) {
+            return
+        }
+        if (userDetailsForm.value.oldPassword == userDetailsForm.value.newPassword) {
+            println("old password cant match new one")
+            return
+        }
+
         openDialog.value = UserDetailsDialogType.NONE
         viewModelScope.launch {
             loadingRequest.value = true
@@ -165,9 +201,7 @@ class UserDetailsViewModel @Inject constructor(
                 .onFailure { error ->
                     snackbarMessageResource.value = error.messageResource
                 }
-            updateOldPassword("")
-            updateNewPassword("")
-            updateNewPasswordConfirmation("")
+            dismissDialog()
             loadingRequest.value = false
         }
     }
