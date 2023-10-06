@@ -182,7 +182,9 @@ fun SignInForm(
             }
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 5.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -204,7 +206,6 @@ fun SignInForm(
                 CircularProgressIndicator(
                     modifier = Modifier
                         .width(25.dp)
-                        .width(50.dp)
                         .aspectRatio(1f),
                     color = MaterialTheme.colorScheme.surface,
                     trackColor = MaterialTheme.colorScheme.primary
@@ -303,7 +304,9 @@ fun RegisterForm(
             }
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 5.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -325,7 +328,6 @@ fun RegisterForm(
                 CircularProgressIndicator(
                     modifier = Modifier
                         .width(25.dp)
-                        .width(50.dp)
                         .aspectRatio(1f),
                     color = MaterialTheme.colorScheme.surface,
                     trackColor = MaterialTheme.colorScheme.primary
