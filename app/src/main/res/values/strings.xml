@@ -43,6 +43,10 @@
     <string name="sign_in_register_need_an_account">Need an account?</string>
     <string name="sign_in_register_have_an_account">Have an account?</string>
     <string name="sign_in_register_registration_ok">Registration successful, you can sign in now</string>
+    <string name="sign_in_register_error_invalid_email">Invalid email</string>
+    <string name="sign_in_register_error_invalid_password">Password cannot be blank</string>
+    <string name="sign_in_register_error_invalid_password_confirmation">Passwords don\'t match</string>
+    <string name="sign_in_register_error_invalid_credentials">Please enter valid credentials</string>
     <string name="apierror_invalid_creds">Invalid username or password</string>
     <string name="apierror_email_taken">The provided email is already taken</string>
     <string name="apierror_server_error">There has been an error on the server, please try again later</string>

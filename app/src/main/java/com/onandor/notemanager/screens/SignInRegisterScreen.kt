@@ -1,12 +1,13 @@
 package com.onandor.notemanager.screens
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,6 +26,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +43,7 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.viewmodels.SignInRegisterFormType
 import com.onandor.notemanager.viewmodels.SignInRegisterViewModel
 import kotlinx.coroutines.launch
+import java.time.format.TextStyle
 
 @Composable
 fun SignInRegisterScreen(
@@ -66,6 +69,8 @@ fun SignInRegisterScreen(
                         modifier = Modifier.padding(innerPadding),
                         email = uiState.form.email,
                         password = uiState.form.password,
+                        emailValid = uiState.form.emailValid,
+                        passwordValid = uiState.form.passwordValid,
                         loading = uiState.loading,
                         onEmailChanged = viewModel::updateEmail,
                         onPasswordChanged = viewModel::updatePassword,
@@ -79,6 +84,9 @@ fun SignInRegisterScreen(
                         email = uiState.form.email,
                         password = uiState.form.password,
                         passwordConfirmation = uiState.form.passwordConfirmation,
+                        emailValid = uiState.form.emailValid,
+                        passwordValid = uiState.form.passwordValid,
+                        passwordConfirmationValid = uiState.form.passwordConfirmationValid,
                         loading = uiState.loading,
                         onEmailChanged = viewModel::updateEmail,
                         onPasswordChanged = viewModel::updatePassword,
@@ -116,6 +124,8 @@ fun SignInForm(
     email: String,
     password: String,
     loading: Boolean,
+    emailValid: Boolean,
+    passwordValid: Boolean,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onChangeFormType: (SignInRegisterFormType) -> Unit,
@@ -133,26 +143,41 @@ fun SignInForm(
             )
             TextField(
                 modifier = Modifier
-                    .padding(bottom = 10.dp)
+                    .padding(bottom = 5.dp)
                     .fillMaxWidth(),
                 value = email,
                 onValueChange = onEmailChanged,
                 placeholder = {
                     Text(text = stringResource(id = R.string.sign_in_register_hint_email))
                 },
-                singleLine = true
+                singleLine = true,
+                isError = !emailValid
             )
+            AnimatedVisibility(visible = !emailValid) {
+                Text(
+                    text = stringResource(id = R.string.sign_in_register_error_invalid_email),
+                    color = Color(150, 0, 0)
+                )
+            }
             TextField(
                 modifier = Modifier
-                    .padding(bottom = 5.dp)
+                    .padding(top = 5.dp, bottom = 5.dp)
                     .fillMaxWidth(),
                 value = password,
                 onValueChange = onPasswordChanged,
                 placeholder = {
                     Text(text = stringResource(id = R.string.sign_in_register_hint_password))
                 },
-                singleLine = true
+                singleLine = true,
+                isError = !passwordValid
             )
+            AnimatedVisibility(visible = !passwordValid) {
+                Text(
+                    modifier = Modifier.padding(bottom = 5.dp),
+                    text = stringResource(id = R.string.sign_in_register_error_invalid_password),
+                    color = Color(150, 0, 0)
+                )
+            }
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -197,6 +222,9 @@ fun RegisterForm(
     email: String,
     password: String,
     passwordConfirmation: String,
+    emailValid: Boolean,
+    passwordValid: Boolean,
+    passwordConfirmationValid: Boolean,
     loading: Boolean,
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
@@ -216,37 +244,59 @@ fun RegisterForm(
             )
             TextField(
                 modifier = Modifier
-                    .padding(bottom = 10.dp)
+                    .padding(bottom = 5.dp)
                     .fillMaxWidth(),
                 value = email,
                 onValueChange = onEmailChanged,
                 placeholder = {
                     Text(text = stringResource(id = R.string.sign_in_register_hint_email))
                 },
-                singleLine = true
+                singleLine = true,
+                isError = !emailValid
             )
+            AnimatedVisibility(visible = !emailValid) {
+                Text(
+                    text = stringResource(id = R.string.sign_in_register_error_invalid_email),
+                    color = Color(150, 0, 0)
+                )
+            }
             TextField(
                 modifier = Modifier
-                    .padding(bottom = 10.dp)
+                    .padding(top = 5.dp, bottom = 5.dp)
                     .fillMaxWidth(),
                 value = password,
                 onValueChange = onPasswordChanged,
                 placeholder = {
                     Text(text = stringResource(id = R.string.sign_in_register_hint_password))
                 },
-                singleLine = true
+                singleLine = true,
+                isError = !passwordValid
             )
+            AnimatedVisibility(visible = !passwordValid) {
+                Text(
+                    text = stringResource(id = R.string.sign_in_register_error_invalid_password),
+                    color = Color(150, 0, 0)
+                )
+            }
             TextField(
                 modifier = Modifier
-                    .padding(bottom = 5.dp)
+                    .padding(top = 5.dp, bottom = 5.dp)
                     .fillMaxWidth(),
                 value = passwordConfirmation,
                 onValueChange = onPasswordConfirmationChanged,
                 placeholder = {
                     Text(text = stringResource(id = R.string.sign_in_register_hint_password_again))
                 },
-                singleLine = true
+                singleLine = true,
+                isError = !passwordConfirmationValid
             )
+            AnimatedVisibility(visible = !passwordConfirmationValid) {
+                Text(
+                    modifier = Modifier.padding(bottom = 5.dp),
+                    text = stringResource(id = R.string.sign_in_register_error_invalid_password_confirmation),
+                    color = Color(150, 0, 0)
+                )
+            }
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -311,6 +361,8 @@ fun SignInFormPreview() {
         email = "",
         password = "",
         loading = false,
+        emailValid = true,
+        passwordValid = true,
         onEmailChanged = { },
         onPasswordChanged = { },
         onChangeFormType = { },
@@ -326,6 +378,9 @@ fun RegisterFormPreview() {
         email = "",
         password = "",
         passwordConfirmation = "",
+        emailValid = true,
+        passwordValid = true,
+        passwordConfirmationValid = true,
         loading = false,
         onEmailChanged = { },
         onPasswordChanged = { },

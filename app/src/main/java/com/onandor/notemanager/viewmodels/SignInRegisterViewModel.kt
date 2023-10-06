@@ -20,7 +20,10 @@ import javax.inject.Inject
 data class SignInRegisterForm(
     val email: String = "",
     val password: String = "",
-    val passwordConfirmation: String = ""
+    val passwordConfirmation: String = "",
+    val emailValid: Boolean = true,
+    val passwordValid: Boolean = true,
+    val passwordConfirmationValid: Boolean = true
 )
 
 enum class SignInRegisterFormType {
@@ -50,7 +53,10 @@ class SignInRegisterViewModel @Inject constructor(
         val form = _uiState.value.form.copy(
             email = "",
             password = "",
-            passwordConfirmation = ""
+            passwordConfirmation = "",
+            emailValid = true,
+            passwordValid = true,
+            passwordConfirmationValid = true
         )
         _uiState.update {
             it.copy(
@@ -67,22 +73,29 @@ class SignInRegisterViewModel @Inject constructor(
     }
 
     fun updateEmail(email: String) {
+        val emailRegex = "^[A-Za-z\\d+_.-]+@[A-Za-z\\d.-]+\$".toRegex()
         val form = _uiState.value.form.copy(
-            email = email
+            email = email,
+            emailValid = email.matches(emailRegex)
         )
         updateForm(form)
     }
 
     fun updatePassword(password: String) {
+        val confirmationValid = password == _uiState.value.form.passwordConfirmation
         val form = _uiState.value.form.copy(
-            password = password
+            password = password,
+            passwordValid = password.isNotBlank(),
+            passwordConfirmationValid = confirmationValid
         )
         updateForm(form)
     }
 
     fun updatePasswordConfirmation(passwordConfirmation: String) {
+        val valid = _uiState.value.form.password == passwordConfirmation
         val form = _uiState.value.form.copy(
-            passwordConfirmation = passwordConfirmation
+            passwordConfirmation = passwordConfirmation,
+            passwordConfirmationValid = valid
         )
         updateForm(form)
     }
@@ -100,6 +113,15 @@ class SignInRegisterViewModel @Inject constructor(
     }
 
     fun signIn() {
+        updateEmail(_uiState.value.form.email)
+        updatePassword(_uiState.value.form.password)
+        if (!_uiState.value.form.emailValid || !_uiState.value.form.passwordValid) {
+            _uiState.update {
+                it.copy(snackbarMessageResource = R.string.sign_in_register_error_invalid_credentials)
+            }
+            return
+        }
+
         viewModelScope.launch {
             updateLoading(true)
             val authUser = AuthUser(
@@ -127,6 +149,17 @@ class SignInRegisterViewModel @Inject constructor(
     }
 
     fun register() {
+        updateEmail(_uiState.value.form.email)
+        updatePassword(_uiState.value.form.password)
+        updatePasswordConfirmation(_uiState.value.form.passwordConfirmation)
+        if (!_uiState.value.form.emailValid || !_uiState.value.form.passwordValid
+            || !_uiState.value.form.passwordConfirmationValid) {
+            _uiState.update {
+                it.copy(snackbarMessageResource = R.string.sign_in_register_error_invalid_credentials)
+            }
+            return
+        }
+
         viewModelScope.launch {
             updateLoading(true)
             val authUser = AuthUser(
