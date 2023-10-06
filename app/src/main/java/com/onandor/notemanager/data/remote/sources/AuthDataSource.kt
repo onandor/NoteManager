@@ -8,9 +8,11 @@ import com.onandor.notemanager.data.remote.models.AuthUser
 import com.onandor.notemanager.data.remote.models.EmailTaken
 import com.onandor.notemanager.data.remote.models.InvalidCredentials
 import com.onandor.notemanager.data.remote.models.ServerError
+import com.onandor.notemanager.data.remote.models.ServerUnreachable
 import com.onandor.notemanager.data.remote.models.TokenPair
 import com.onandor.notemanager.data.remote.models.UserDetails
 import com.onandor.notemanager.data.remote.services.IAuthApiService
+import io.ktor.client.network.sockets.ConnectTimeoutException
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import javax.inject.Inject
@@ -26,6 +28,8 @@ class AuthDataSource @Inject constructor(
             Err(EmailTaken)
         } catch (e: ServerResponseException) {
             Err(ServerError)
+        } catch (e: ConnectTimeoutException) {
+            Err(ServerUnreachable)
         }
     }
 
@@ -36,6 +40,8 @@ class AuthDataSource @Inject constructor(
             Err(InvalidCredentials)
         } catch (e: ServerResponseException) {
             Err(ServerError)
+        } catch (e: ConnectTimeoutException) {
+            Err(ServerUnreachable)
         }
     }
 }

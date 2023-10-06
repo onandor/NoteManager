@@ -47,7 +47,8 @@
     <string name="sign_in_register_error_invalid_password">Password cannot be blank</string>
     <string name="sign_in_register_error_invalid_password_confirmation">Passwords don\'t match</string>
     <string name="sign_in_register_error_invalid_credentials">Please enter valid credentials</string>
-    <string name="apierror_invalid_creds">Invalid username or password</string>
-    <string name="apierror_email_taken">The provided email is already taken</string>
-    <string name="apierror_server_error">There has been an error on the server, please try again later</string>
+    <string name="apierror_invalid_creds">Invalid username or password.</string>
+    <string name="apierror_email_taken">The provided email is already taken.</string>
+    <string name="apierror_server_error">There has been an error on the server, please try again later.</string>
+    <string name="apierror_server_unreachable">The server cannot be reached. Please check your internet connection and try again.</string>
 </resources>
