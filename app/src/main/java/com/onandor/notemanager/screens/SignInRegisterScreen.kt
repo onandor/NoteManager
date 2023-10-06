@@ -204,8 +204,8 @@ fun SignInForm(
                         .width(25.dp)
                         .width(50.dp)
                         .aspectRatio(1f),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    trackColor = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.surface,
+                    trackColor = MaterialTheme.colorScheme.primary
                 )
             }
             else {
@@ -323,8 +323,8 @@ fun RegisterForm(
                         .width(25.dp)
                         .width(50.dp)
                         .aspectRatio(1f),
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    trackColor = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.surface,
+                    trackColor = MaterialTheme.colorScheme.primary
                 )
             }
             else {
