@@ -114,6 +114,7 @@ fun SignedInInComponent(
 ) {
     Surface(
         modifier = Modifier
+            .padding(start = 10.dp, end = 10.dp)
             .clip(RoundedCornerShape(16.dp)),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
@@ -174,6 +175,7 @@ fun SignedOutComponent(
 ) {
     Surface(
         modifier = Modifier
+            .padding(start = 10.dp, end = 10.dp)
             .clip(RoundedCornerShape(16.dp)),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
@@ -187,9 +189,7 @@ fun SignedOutComponent(
                 fontSize = MaterialTheme.typography.titleLarge.fontSize
             )
             Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = stringResource(id = R.string.user_details_not_signed_in_description)
-            )
+            Text(stringResource(id = R.string.user_details_not_signed_in_description))
             Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier
@@ -248,13 +248,9 @@ fun DeleteUserDialog(
                     contentDescription = "Warning"
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = stringResource(id = R.string.dialog_delete_user_description)
-                )
+                Text(stringResource(id = R.string.dialog_delete_user_description))
                 Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(id = R.string.dialog_delete_user_enter_password))
                 }
                 Spacer(modifier = Modifier.height(10.dp))
