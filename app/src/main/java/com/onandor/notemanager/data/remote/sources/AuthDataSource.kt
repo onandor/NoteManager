@@ -5,6 +5,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.onandor.notemanager.data.remote.models.ApiError
 import com.onandor.notemanager.data.remote.models.AuthUser
+import com.onandor.notemanager.data.remote.models.DisposableError
 import com.onandor.notemanager.data.remote.models.EmailTaken
 import com.onandor.notemanager.data.remote.models.InvalidCredentials
 import com.onandor.notemanager.data.remote.models.ServerError
@@ -42,6 +43,16 @@ class AuthDataSource @Inject constructor(
             Err(ServerError)
         } catch (e: ConnectTimeoutException) {
             Err(ServerUnreachable)
+        }
+    }
+
+    override suspend fun logout(authUser: AuthUser): Result<Unit, ApiError> {
+        return try {
+            Ok(authApiService.logout(authUser))
+        } catch (e: ClientRequestException) {
+            Err(DisposableError)
+        } catch (e: ConnectTimeoutException) {
+            Err(DisposableError)
         }
     }
 }

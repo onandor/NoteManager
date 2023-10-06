@@ -9,4 +9,6 @@ interface IAuthApiService {
     suspend fun register(authUser: AuthUser): UserDetails
 
     suspend fun login(authUser: AuthUser): TokenPair
+
+    suspend fun logout(authUser: AuthUser)
 }

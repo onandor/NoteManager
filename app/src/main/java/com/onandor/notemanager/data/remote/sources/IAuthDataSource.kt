@@ -11,4 +11,6 @@ interface IAuthDataSource {
     suspend fun register(authUser: AuthUser): Result<UserDetails, ApiError>
 
     suspend fun login(authUser: AuthUser): Result<TokenPair, ApiError>
+
+    suspend fun logout(authUser: AuthUser): Result<Unit, ApiError>
 }

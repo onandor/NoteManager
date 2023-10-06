@@ -24,4 +24,10 @@ class AuthApiService @Inject constructor(
             setBody(authUser)
         }.body()
     }
+
+    override suspend fun logout(authUser: AuthUser) {
+        httpClient.post("auth/logout") {
+            setBody(authUser)
+        }
+    }
 }

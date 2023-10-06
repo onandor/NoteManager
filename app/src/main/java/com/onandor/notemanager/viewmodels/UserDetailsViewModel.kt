@@ -4,12 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
+import com.onandor.notemanager.data.remote.models.AuthUser
+import com.onandor.notemanager.data.remote.sources.IAuthDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 data class UserDetailsUiState(
@@ -20,7 +23,8 @@ data class UserDetailsUiState(
 
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(
-    private val settings: ISettings
+    private val settings: ISettings,
+    private val authDataSource: IAuthDataSource
 ) : ViewModel() {
 
     private val userId = settings.observeInt(SettingsKeys.USER_ID)
@@ -43,6 +47,12 @@ class UserDetailsViewModel @Inject constructor(
 
     fun logOut() {
         viewModelScope.launch {
+            val authUser = AuthUser(
+                email = "",
+                password = "",
+                deviceId = UUID.fromString(settings.getString(SettingsKeys.INSTALLATION_ID))
+            )
+            authDataSource.logout(authUser)
             settings.remove(SettingsKeys.USER_ID)
             settings.remove(SettingsKeys.USER_EMAIL)
             settings.remove(SettingsKeys.ACCESS_TOKEN)
