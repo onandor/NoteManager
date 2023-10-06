@@ -120,11 +120,15 @@ fun SignedInInComponent(
                     onClick = onDeleteAccount,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.error
-                    )
+                    ),
+                    enabled = !loading
                 ) {
                     Text(stringResource(id = R.string.user_details_button_delete_account))
                 }
-                Button(onClick = onSignOut) {
+                Button(
+                    onClick = onSignOut,
+                    enabled = !loading
+                ) {
                     Text(stringResource(id = R.string.user_details_button_sign_out))
                 }
             }
