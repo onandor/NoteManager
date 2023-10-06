@@ -157,7 +157,7 @@ fun SignInForm(
             AnimatedVisibility(visible = !emailValid) {
                 Text(
                     text = stringResource(id = R.string.sign_in_register_error_invalid_email),
-                    color = Color(150, 0, 0)
+                    color = MaterialTheme.colorScheme.error
                 )
             }
             TextField(
@@ -177,7 +177,7 @@ fun SignInForm(
                 Text(
                     modifier = Modifier.padding(bottom = 5.dp),
                     text = stringResource(id = R.string.sign_in_register_error_invalid_password),
-                    color = Color(150, 0, 0)
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
@@ -259,7 +259,7 @@ fun RegisterForm(
             AnimatedVisibility(visible = !emailValid) {
                 Text(
                     text = stringResource(id = R.string.sign_in_register_error_invalid_email),
-                    color = Color(150, 0, 0)
+                    color = MaterialTheme.colorScheme.error
                 )
             }
             TextField(
@@ -278,7 +278,7 @@ fun RegisterForm(
             AnimatedVisibility(visible = !passwordValid) {
                 Text(
                     text = stringResource(id = R.string.sign_in_register_error_invalid_password),
-                    color = Color(150, 0, 0)
+                    color = MaterialTheme.colorScheme.error
                 )
             }
             TextField(
@@ -298,7 +298,7 @@ fun RegisterForm(
                 Text(
                     modifier = Modifier.padding(bottom = 5.dp),
                     text = stringResource(id = R.string.sign_in_register_error_invalid_password_confirmation),
-                    color = Color(150, 0, 0)
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         }
