@@ -11,4 +11,6 @@ interface IAuthApiService {
     suspend fun login(authUser: AuthUser): TokenPair
 
     suspend fun logout(authUser: AuthUser)
+
+    suspend fun deleteUser(password: String)
 }

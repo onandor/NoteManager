@@ -30,4 +30,10 @@ class AuthApiService @Inject constructor(
             setBody(authUser)
         }
     }
+
+    override suspend fun deleteUser(password: String) {
+        httpClient.post("auth/delete") {
+            setBody(password)
+        }
+    }
 }

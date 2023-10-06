@@ -5,6 +5,7 @@ import com.onandor.notemanager.R
 sealed class ApiError(val messageResource: Int)
 
 object InvalidCredentials : ApiError(R.string.apierror_invalid_creds)
+object InvalidPassword : ApiError(R.string.apierror_invalid_password)
 object EmailTaken : ApiError(R.string.apierror_email_taken)
 object ServerError : ApiError(R.string.apierror_server_error)
 object ServerUnreachable : ApiError(R.string.apierror_server_unreachable)

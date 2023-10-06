@@ -47,10 +47,11 @@
     <string name="sign_in_register_error_invalid_password">Password cannot be blank</string>
     <string name="sign_in_register_error_invalid_password_confirmation">Passwords don\'t match</string>
     <string name="sign_in_register_error_invalid_credentials">Please enter valid credentials</string>
-    <string name="apierror_invalid_creds">Invalid username or password.</string>
-    <string name="apierror_email_taken">The provided email is already taken.</string>
-    <string name="apierror_server_error">There has been an error on the server, please try again later.</string>
-    <string name="apierror_server_unreachable">The server cannot be reached. Please check your internet connection and try again.</string>
+    <string name="apierror_invalid_creds">Invalid username or password</string>
+    <string name="apierror_invalid_password">Invalid password</string>
+    <string name="apierror_email_taken">The provided email is already taken</string>
+    <string name="apierror_server_error">There has been an error on the server, please try again later</string>
+    <string name="apierror_server_unreachable">The server cannot be reached. Please check your internet connection and try again</string>
     <string name="user_details_not_signed_in_title">You are not signed in</string>
     <string name="user_details_not_signed_in_description">Sign in to an account to back up your notes and synchronize them across multiple devices.</string>
     <string name="user_details_signed_in_as">You are signed in as</string>
@@ -59,4 +60,10 @@
     <string name="user_details_button_sign_out">Sign out</string>
     <string name="user_details_button_delete_account">Delete account</string>
     <string name="user_details_button_sign_in_register">Sign in/Register</string>
+    <string name="user_details_snackbar_user_deleted">Account successfully deleted</string>
+    <string name="dialog_delete_user_description">By deleting your account, all your data stored on the server will be deleted, but your locally saved notes will remain on your device.</string>
+    <string name="dialog_delete_user_enter_password">Enter your password to continue:</string>
+    <string name="dialog_delete_user_hint_password">Password</string>
+    <string name="dialog_delete_user_button_cancel">Cancel</string>
+    <string name="dialog_delete_user_button_confirm">Confirm</string>
 </resources>

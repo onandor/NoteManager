@@ -8,6 +8,7 @@ import com.onandor.notemanager.data.remote.models.AuthUser
 import com.onandor.notemanager.data.remote.models.DisposableError
 import com.onandor.notemanager.data.remote.models.EmailTaken
 import com.onandor.notemanager.data.remote.models.InvalidCredentials
+import com.onandor.notemanager.data.remote.models.InvalidPassword
 import com.onandor.notemanager.data.remote.models.ServerError
 import com.onandor.notemanager.data.remote.models.ServerUnreachable
 import com.onandor.notemanager.data.remote.models.TokenPair
@@ -53,6 +54,16 @@ class AuthDataSource @Inject constructor(
             Err(DisposableError)
         } catch (e: ConnectTimeoutException) {
             Err(DisposableError)
+        }
+    }
+
+    override suspend fun deleteUser(password: String): Result<Unit, ApiError> {
+        return try {
+            Ok(authApiService.deleteUser(password))
+        } catch (e: ClientRequestException) {
+            Err(InvalidPassword)
+        } catch (e: ConnectTimeoutException) {
+            Err(ServerUnreachable)
         }
     }
 }
