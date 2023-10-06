@@ -35,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -169,7 +170,8 @@ fun SignInForm(
                     Text(text = stringResource(id = R.string.sign_in_register_hint_password))
                 },
                 singleLine = true,
-                isError = !passwordValid
+                isError = !passwordValid,
+                visualTransformation = PasswordVisualTransformation()
             )
             AnimatedVisibility(visible = !passwordValid) {
                 Text(
@@ -270,7 +272,8 @@ fun RegisterForm(
                     Text(text = stringResource(id = R.string.sign_in_register_hint_password))
                 },
                 singleLine = true,
-                isError = !passwordValid
+                isError = !passwordValid,
+                visualTransformation = PasswordVisualTransformation()
             )
             AnimatedVisibility(visible = !passwordValid) {
                 Text(
@@ -288,7 +291,8 @@ fun RegisterForm(
                     Text(text = stringResource(id = R.string.sign_in_register_hint_password_again))
                 },
                 singleLine = true,
-                isError = !passwordConfirmationValid
+                isError = !passwordConfirmationValid,
+                visualTransformation = PasswordVisualTransformation()
             )
             AnimatedVisibility(visible = !passwordConfirmationValid) {
                 Text(
