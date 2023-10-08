@@ -3,10 +3,13 @@ package com.onandor.notemanager.di
 import com.onandor.notemanager.data.remote.models.TokenPair
 import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
+import com.onandor.notemanager.data.remote.models.InvalidRefreshTokenException
 import com.onandor.notemanager.data.remote.services.AuthApiService
 import com.onandor.notemanager.data.remote.services.IAuthApiService
 import com.onandor.notemanager.data.remote.sources.AuthDataSource
 import com.onandor.notemanager.data.remote.sources.IAuthDataSource
+import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.navigation.NavActions
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -16,6 +19,7 @@ import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
@@ -37,7 +41,7 @@ object HttpClientModule {
 
     @Singleton
     @Provides
-    fun provideHttpClient(settings: ISettings): HttpClient {
+    fun provideHttpClient(settings: ISettings, navManager: INavigationManager): HttpClient {
         return HttpClient(OkHttp) {
             expectSuccess = true
             defaultRequest {
@@ -59,12 +63,21 @@ object HttpClientModule {
                     }
                     refreshTokens {
                         val refreshToken = settings.getString(SettingsKeys.REFRESH_TOKEN)
-                        val response = client.get {
-                            markAsRefreshTokenRequest()
-                            url("auth/refresh")
-                            parameter("refreshToken", refreshToken)
+                        lateinit var tokenPair: TokenPair
+                        try {
+                            client.get {
+                                markAsRefreshTokenRequest()
+                                url("auth/refresh")
+                                parameter("refreshToken", refreshToken)
+                            }.body<TokenPair>()
+                        } catch (e: ClientRequestException) {
+                            settings.remove(SettingsKeys.USER_ID)
+                            settings.remove(SettingsKeys.USER_EMAIL)
+                            settings.remove(SettingsKeys.ACCESS_TOKEN)
+                            settings.remove(SettingsKeys.REFRESH_TOKEN)
+                            navManager.navigateTo(NavActions.signedOut())
+                            throw InvalidRefreshTokenException()
                         }
-                        val tokenPair = response.body<TokenPair>()
 
                         settings.save(SettingsKeys.ACCESS_TOKEN, tokenPair.accessToken)
                         settings.save(SettingsKeys.REFRESH_TOKEN, tokenPair.refreshToken)

@@ -52,6 +52,7 @@
     <string name="apierror_email_taken">The provided email is already taken</string>
     <string name="apierror_server_error">There has been an error on the server, please try again later</string>
     <string name="apierror_server_unreachable">The server cannot be reached. Please check your internet connection and try again</string>
+    <string name="apierror_logged_out">You have been signed out</string>
     <string name="user_details_not_signed_in_title">You are not signed in</string>
     <string name="user_details_not_signed_in_description">Sign in to an account to back up your notes and synchronize them across multiple devices.</string>
     <string name="user_details_signed_in_as">You are signed in as</string>
@@ -74,4 +75,11 @@
     <string name="dialog_change_password_button_confirm">Confirm</string>
     <string name="dialog_change_password_error_invalid_password">Invalid password</string>
     <string name="dialog_change_password_error_invalid_password_confirmation">Passwords don\'t match</string>
+    <string name="invalid_rt_title">You have been signed out</string>
+    <string name="invalid_rt_description">This happens if you don\'t use the app for more than 3 months, but also if an attacker uses your secure tokens to make requests to the server in your name. To be safe, all your tokens have been revoked.</string>
+    <string name="invalid_rt_button_sign_in">Sign in</string>
+    <string name="invalid_rt_button_dismiss">Dismiss</string>
+    <string name="invalid_rt_button_learn_more">Learn more</string>
+    <string name="invalid_rt_learn_more_1">Access tokens are created and stored when you sign in to your account and are used to communicate with the server in a secure way which doesn\'t require the validation of your credentials every time the app makes a request to the server. Access tokens have an expiration date, after which a new one can be automatically requested by the app using a refresh token. Refresh tokens are tied to a single device and can be revoked by the server if it detects suspicious requests coming from your user.</string>
+    <string name="invalid_rt_learn_more_2">All this means is that if you suspect that your account has been compromised, it doesn\'t necessarily mean that your credentials (email, password) have been stolen, rather that a malicious party has gained access to your tokens which are securely stored on your device. The exact ways this may happen can vary, but it is recommended that you check your device for viruses.</string>
 </resources>

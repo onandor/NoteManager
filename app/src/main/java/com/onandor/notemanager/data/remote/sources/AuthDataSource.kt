@@ -9,6 +9,8 @@ import com.onandor.notemanager.data.remote.models.DisposableError
 import com.onandor.notemanager.data.remote.models.EmailTaken
 import com.onandor.notemanager.data.remote.models.InvalidCredentials
 import com.onandor.notemanager.data.remote.models.InvalidPassword
+import com.onandor.notemanager.data.remote.models.InvalidRefreshTokenException
+import com.onandor.notemanager.data.remote.models.LoggedOutError
 import com.onandor.notemanager.data.remote.models.ServerError
 import com.onandor.notemanager.data.remote.models.ServerUnreachable
 import com.onandor.notemanager.data.remote.models.TokenPair
@@ -54,6 +56,8 @@ class AuthDataSource @Inject constructor(
             Err(DisposableError)
         } catch (e: ConnectTimeoutException) {
             Err(DisposableError)
+        } catch (e: InvalidRefreshTokenException) {
+            Err(LoggedOutError)
         }
     }
 
@@ -64,6 +68,8 @@ class AuthDataSource @Inject constructor(
             Err(InvalidPassword)
         } catch (e: ConnectTimeoutException) {
             Err(ServerUnreachable)
+        } catch (e: InvalidRefreshTokenException) {
+            Err(LoggedOutError)
         }
     }
 
@@ -77,6 +83,8 @@ class AuthDataSource @Inject constructor(
             Err(InvalidPassword)
         } catch (e: ConnectTimeoutException) {
             Err(ServerUnreachable)
+        } catch (e: InvalidRefreshTokenException) {
+            Err(LoggedOutError)
         }
     }
 }

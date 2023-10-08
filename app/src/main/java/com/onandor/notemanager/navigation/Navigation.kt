@@ -7,6 +7,7 @@ import com.onandor.notemanager.navigation.Screens.ARCHIVE_SCREEN
 import com.onandor.notemanager.navigation.Screens.NOTES_SCREEN
 import com.onandor.notemanager.navigation.Screens.ONBOARDING_SCREEN
 import com.onandor.notemanager.navigation.Screens.SETTINGS_SCREEN
+import com.onandor.notemanager.navigation.Screens.SIGNED_OUT_SCREEN
 import com.onandor.notemanager.navigation.Screens.SIGN_IN_REGISTER_SCREEN
 import com.onandor.notemanager.navigation.Screens.TRASH_SCREEN
 import com.onandor.notemanager.navigation.Screens.USER_DETAILS_SCREEN
@@ -20,6 +21,7 @@ private object Screens {
     const val ONBOARDING_SCREEN = "onboarding"
     const val SIGN_IN_REGISTER_SCREEN = "signInRegister"
     const val USER_DETAILS_SCREEN = "userDetails"
+    const val SIGNED_OUT_SCREEN = "signedOut"
 }
 
 object NavDestinations {
@@ -31,6 +33,7 @@ object NavDestinations {
     const val ONBOARDING = ONBOARDING_SCREEN
     const val SIGN_IN_REGISTER = SIGN_IN_REGISTER_SCREEN
     const val USER_DETAILS = USER_DETAILS_SCREEN
+    const val SIGNED_OUT = SIGNED_OUT_SCREEN
 }
 
 object NavDestinationArgs {
@@ -96,5 +99,9 @@ object NavActions {
 
     fun onboarding() = object : NavAction {
         override val destination: String = NavDestinations.ONBOARDING
+    }
+
+    fun signedOut() = object : NavAction {
+        override val destination: String = NavDestinations.SIGNED_OUT
     }
 }
