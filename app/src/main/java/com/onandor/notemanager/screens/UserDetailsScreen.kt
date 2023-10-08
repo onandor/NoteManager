@@ -296,11 +296,12 @@ fun DeleteUserDialog(
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismissRequest) {
                         Text(stringResource(id = R.string.dialog_delete_user_button_cancel))
                     }
+                    Spacer(modifier = Modifier.width(10.dp))
                     Button(
                         onClick = onConfirmation,
                         colors = ButtonDefaults.buttonColors(
@@ -398,11 +399,12 @@ fun ChangePasswordDialog(
                 Spacer(modifier = Modifier.height(5.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismissRequest) {
                         Text(stringResource(id = R.string.dialog_change_password_button_cancel))
                     }
+                    Spacer(modifier = Modifier.width(10.dp))
                     Button(onClick = onConfirmation) {
                         Text(stringResource(id = R.string.dialog_change_password_button_confirm))
                     }
