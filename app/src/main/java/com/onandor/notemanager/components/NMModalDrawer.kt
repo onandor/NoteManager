@@ -13,7 +13,6 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.runtime.Composable
-import com.onandor.notemanager.NMNavigationActions
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
@@ -24,15 +23,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.onandor.notemanager.NMDestinations
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.onandor.notemanager.R
+import com.onandor.notemanager.navigation.NavDestinations
+import com.onandor.notemanager.viewmodels.DrawerViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
 fun AppModalDrawer(
+    viewModel: DrawerViewModel = hiltViewModel(),
     drawerState: DrawerState,
-    navActions: NMNavigationActions,
     currentRoute: String,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     content: @Composable () -> Unit
@@ -41,9 +42,13 @@ fun AppModalDrawer(
         drawerState = drawerState,
         drawerContent = {
             AppDrawer(
-                navActions = navActions,
                 currentRoute = currentRoute,
-                closeDrawer = { coroutineScope.launch { drawerState.close() } }
+                closeDrawer = { coroutineScope.launch { drawerState.close() } },
+                onNavigateToNotes = viewModel::navigateToNotes,
+                onNavigateToArchive = viewModel::navigateToArchive,
+                onNavigateToTrash = viewModel::navigateToTrash,
+                onNavigateToSettings = viewModel::navigateToSettings,
+                onNavigateToUserDetails = viewModel::navigateToUserDetails
             )
         }
     ) {
@@ -54,8 +59,13 @@ fun AppModalDrawer(
 @Composable
 fun AppDrawer(
     currentRoute: String,
-    navActions: NMNavigationActions,
-    closeDrawer: () -> Unit
+    closeDrawer: () -> Unit,
+    onNavigateToNotes: () -> Unit,
+    onNavigateToArchive: () -> Unit,
+    onNavigateToTrash: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToUserDetails: () -> Unit
+
 ) {
     ModalDrawerSheet {
         Spacer(modifier = Modifier.height(20.dp))
@@ -68,13 +78,13 @@ fun AppDrawer(
         NavigationDrawerItem(
             icon = { Icon(Icons.Filled.List, contentDescription = stringResource(id = R.string.drawer_notes)) },
             label = { Text(stringResource(id = R.string.drawer_notes)) },
-            selected = currentRoute == NMDestinations.NOTES_ROUTE,
+            selected = currentRoute == NavDestinations.NOTES,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
                 .height(50.dp)
                 .width(250.dp),
             onClick = {
-                navActions.navigateToNotes()
+                onNavigateToNotes()
                 closeDrawer()
             }
         )
@@ -82,39 +92,39 @@ fun AppDrawer(
             icon = { Icon(painterResource(id = R.drawable.ic_menu_archive_list),
                 contentDescription = stringResource(id = R.string.drawer_archive)) },
             label = { Text(stringResource(id = R.string.drawer_archive)) },
-            selected = currentRoute == NMDestinations.ARCHIVE_ROUTE,
+            selected = currentRoute == NavDestinations.ARCHIVE,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
                 .height(50.dp)
                 .width(250.dp),
             onClick = {
-                navActions.navigateToArchive()
+                onNavigateToArchive()
                 closeDrawer()
             }
         )
         NavigationDrawerItem(
             icon = { Icon(Icons.Filled.Delete, contentDescription = stringResource(id = R.string.drawer_trash)) },
             label = { Text(stringResource(id = R.string.drawer_trash)) },
-            selected = currentRoute == NMDestinations.TRASH_ROUTE,
+            selected = currentRoute == NavDestinations.TRASH,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
                 .height(50.dp)
                 .width(250.dp),
             onClick = {
-                navActions.navigateToTrash()
+                onNavigateToTrash()
                 closeDrawer()
             }
         )
         NavigationDrawerItem(
             icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(id = R.string.drawer_settings)) },
             label = { Text(stringResource(id = R.string.drawer_settings)) },
-            selected = currentRoute == NMDestinations.SETTINGS_ROUTE,
+            selected = currentRoute == NavDestinations.SETTINGS,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
                 .height(50.dp)
                 .width(250.dp),
             onClick = {
-                navActions.navigateToSettings()
+                onNavigateToSettings()
                 closeDrawer()
             }
         )
@@ -122,13 +132,14 @@ fun AppDrawer(
         NavigationDrawerItem(
             icon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(id = R.string.drawer_account)) },
             label = { Text(stringResource(id = R.string.drawer_account)) },
-            selected = currentRoute == NMDestinations.USER_DETAILS_ROUTE,
+            selected = currentRoute == NavDestinations.USER_DETAILS,
             modifier = Modifier
-                .padding(NavigationDrawerItemDefaults.ItemPadding).padding(bottom = 10.dp)
+                .padding(NavigationDrawerItemDefaults.ItemPadding)
+                .padding(bottom = 10.dp)
                 .height(50.dp)
                 .width(250.dp),
             onClick = {
-                navActions.navigateToUserDetails()
+                onNavigateToUserDetails()
                 closeDrawer()
             }
         )

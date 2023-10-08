@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
+import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.navigation.NavActions
 import com.onandor.notemanager.utils.AddEditResult
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AddEditResults
@@ -26,7 +28,8 @@ data class ArchiveUiState(
 @HiltViewModel
 class ArchiveViewModel @Inject constructor(
     private val noteRepository: INoteRepository,
-    private val addEditResultState: AddEditResultState
+    private val addEditResultState: AddEditResultState,
+    private val navManager: INavigationManager
 ) : ViewModel() {
 
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.ARCHIVE)
@@ -58,5 +61,9 @@ class ArchiveViewModel @Inject constructor(
 
     fun addEditResultSnackbarShown() {
         addEditResultState.clear()
+    }
+
+    fun noteClick(note: Note) {
+        navManager.navigateTo(NavActions.addEditNote(note.id))
     }
 }

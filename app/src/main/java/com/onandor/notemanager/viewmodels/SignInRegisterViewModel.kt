@@ -9,6 +9,8 @@ import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.remote.models.AuthUser
 import com.onandor.notemanager.data.remote.sources.IAuthDataSource
+import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.navigation.NavActions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,14 +37,14 @@ data class SignInRegisterUiState(
     val loading: Boolean = false,
     val formType: SignInRegisterFormType = SignInRegisterFormType.SIGN_IN,
     val form: SignInRegisterForm = SignInRegisterForm("", "", ""),
-    val snackbarMessageResource: Int? = null,
-    val signInSuccessful: Boolean = false
+    val snackbarMessageResource: Int? = null
 )
 
 @HiltViewModel
 class SignInRegisterViewModel @Inject constructor(
     private val settings: ISettings,
-    private val authDataSource: IAuthDataSource
+    private val authDataSource: IAuthDataSource,
+    private val navManager: INavigationManager
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<SignInRegisterUiState>
@@ -106,12 +108,6 @@ class SignInRegisterViewModel @Inject constructor(
         }
     }
 
-    fun signInSignaled() {
-        _uiState.update {
-            it.copy(signInSuccessful = false)
-        }
-    }
-
     fun signIn() {
         updateEmail(_uiState.value.form.email)
         updatePassword(_uiState.value.form.password)
@@ -135,9 +131,7 @@ class SignInRegisterViewModel @Inject constructor(
                     settings.save(SettingsKeys.USER_ID, tokenPair.userId)
                     settings.save(SettingsKeys.ACCESS_TOKEN, tokenPair.accessToken)
                     settings.save(SettingsKeys.REFRESH_TOKEN, tokenPair.refreshToken)
-                    _uiState.update {
-                        it.copy(signInSuccessful = true)
-                    }
+                    navManager.navigateTo(NavActions.notes())
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -189,5 +183,9 @@ class SignInRegisterViewModel @Inject constructor(
         _uiState.update {
             it.copy(loading = loading)
         }
+    }
+
+    fun navigateBack() {
+        navManager.navigateBack()
     }
 }

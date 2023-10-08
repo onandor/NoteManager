@@ -1,5 +1,6 @@
 package com.onandor.notemanager.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.graphics.Color
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -48,15 +49,13 @@ import java.time.format.TextStyle
 
 @Composable
 fun SignInRegisterScreen(
-    viewModel: SignInRegisterViewModel = hiltViewModel(),
-    goBack: () -> Unit,
-    onSignInSuccessful: () -> Unit
+    viewModel: SignInRegisterViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     Scaffold(
-        topBar = { SignInRegisterTopAppBar(goBack) },
+        topBar = { SignInRegisterTopAppBar(viewModel::navigateBack) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Crossfade(
@@ -109,13 +108,10 @@ fun SignInRegisterScreen(
                 viewModel.snackbarShown()
             }
         }
+    }
 
-        LaunchedEffect(uiState.signInSuccessful) {
-            if (uiState.signInSuccessful) {
-                viewModel.signInSignaled()
-                onSignInSuccessful()
-            }
-        }
+    BackHandler {
+        viewModel.navigateBack()
     }
 }
 
@@ -338,7 +334,7 @@ fun RegisterForm(
 }
 
 @Composable
-fun SignInRegisterTopAppBar(goBack: () -> Unit) {
+fun SignInRegisterTopAppBar(navigateBack: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -348,7 +344,7 @@ fun SignInRegisterTopAppBar(goBack: () -> Unit) {
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = goBack) {
+            IconButton(onClick = navigateBack) {
                 Icon(Icons.Filled.ArrowBack, stringResource(id = R.string.sign_in_register_go_back))
             }
         }

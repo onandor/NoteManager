@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.data.NoteRepository
+import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.navigation.NavActions
 import com.onandor.notemanager.utils.AddEditResult
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AddEditResults
@@ -27,7 +29,8 @@ data class TrashUiState(
 @HiltViewModel
 class TrashViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
-    private val addEditResultState: AddEditResultState
+    private val addEditResultState: AddEditResultState,
+    private val navManager: INavigationManager
 ) : ViewModel() {
 
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.TRASH)
@@ -65,5 +68,9 @@ class TrashViewModel @Inject constructor(
     }
     fun addEditResultSnackbarShown() {
         addEditResultState.clear()
+    }
+
+    fun noteClick(note: Note) {
+        navManager.navigateTo(NavActions.addEditNote(note.id))
     }
 }

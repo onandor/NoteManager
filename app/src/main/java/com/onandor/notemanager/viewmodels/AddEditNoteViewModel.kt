@@ -3,10 +3,10 @@ package com.onandor.notemanager.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.onandor.notemanager.NMDestinationsArgs
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.NoteLocation
-import com.onandor.notemanager.utils.AddEditResult
+import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.navigation.NavDestinationArgs
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AddEditResults
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,10 +29,11 @@ data class AddEditNoteUiState(
 class AddEditNoteViewModel @Inject constructor(
     private val noteRepository: INoteRepository,
     private val addEditResultState: AddEditResultState,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val navManager: INavigationManager
 ) : ViewModel() {
 
-    private var noteId: String = savedStateHandle[NMDestinationsArgs.NOTE_ID_ARG] ?: ""
+    private var noteId: String = savedStateHandle[NavDestinationArgs.NOTE_ID_ARG] ?: ""
     private var modified: Boolean = false
 
     private val _uiState = MutableStateFlow(AddEditNoteUiState())
@@ -189,5 +190,9 @@ class AddEditNoteViewModel @Inject constructor(
             noteRepository.deleteNote(noteId)
         }
         addEditResultState.set(AddEditResults.DELETED)
+    }
+
+    fun navigateBack() {
+        navManager.navigateBack()
     }
 }

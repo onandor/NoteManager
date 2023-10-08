@@ -1,6 +1,6 @@
 package com.onandor.notemanager.screens
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,17 +21,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.onandor.notemanager.NMNavigationActions
 import com.onandor.notemanager.R
 import com.onandor.notemanager.viewmodels.SettingsViewModel
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = hiltViewModel(),
-    goBack: () -> Unit
+    viewModel: SettingsViewModel = hiltViewModel()
 ) {
     Scaffold(
-        topBar = { SettingsTopBar(goBack = goBack)}
+        topBar = { SettingsTopBar(navigateBack = viewModel::navigateBack)}
     ) { innerPadding ->
         Column {
             Text(text = "Settings", modifier = Modifier.padding(innerPadding))
@@ -40,17 +38,21 @@ fun SettingsScreen(
             }
         }
     }
+
+    BackHandler {
+        viewModel.navigateBack()
+    }
 }
 
 @Composable
-fun SettingsTopBar(goBack: () -> Unit) {
+fun SettingsTopBar(navigateBack: () -> Unit) {
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { goBack() }) {
+            IconButton(onClick = { navigateBack() }) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
             }
             Text(stringResource(R.string.settings), fontSize = 20.sp)

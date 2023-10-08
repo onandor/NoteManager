@@ -38,7 +38,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun TrashScreen(
     openDrawer: () -> Unit,
-    onNoteClick: (Note) -> Unit,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -56,7 +55,7 @@ fun TrashScreen(
 
         NoteList(
             notes = uiState.notes,
-            onNoteClick = onNoteClick,
+            onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
             emptyContent = { TrashEmptyContent() }
         )

@@ -28,9 +28,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun NotesScreen(
-    onAddTask: () -> Unit,
     openDrawer: () -> Unit,
-    onNoteClick: (Note) -> Unit,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -38,7 +36,7 @@ fun NotesScreen(
     Scaffold (
         topBar = { TopBar(openDrawer) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onAddTask() }) {
+            FloatingActionButton(onClick = viewModel::addNote) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.notes_new_note))
             }
         },
@@ -48,7 +46,7 @@ fun NotesScreen(
 
         NoteList(
             notes = uiState.notes,
-            onNoteClick = onNoteClick,
+            onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
             emptyContent = { NotesEmptyContent() }
         )

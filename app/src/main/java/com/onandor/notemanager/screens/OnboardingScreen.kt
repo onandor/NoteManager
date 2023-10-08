@@ -23,18 +23,16 @@ import com.onandor.notemanager.viewmodels.OnboardingViewModel
 
 @Composable
 fun OnboardingScreen(
-    viewModel: OnboardingViewModel = hiltViewModel(),
-    onSkip: () -> Unit,
-    onSignIn: () -> Unit
+    viewModel: OnboardingViewModel = hiltViewModel()
 ) {
     OnboardingContent(
         onSkip = {
             viewModel.completeFirstLaunch()
-            onSkip()
+            viewModel.skip()
         },
         onSignIn = {
             viewModel.completeFirstLaunch()
-            onSignIn()
+            viewModel.signIn()
         }
     )
 }

@@ -24,7 +24,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ArchiveScreen(
     openDrawer: () -> Unit,
-    onNoteClick: (Note) -> Unit,
     viewModel: ArchiveViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -37,7 +36,7 @@ fun ArchiveScreen(
 
         NoteList(
             notes = uiState.notes,
-            onNoteClick = onNoteClick,
+            onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
             emptyContent = { ArchiveEmptyContent() }
         )

@@ -1,15 +1,19 @@
 package com.onandor.notemanager
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -18,6 +22,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.onandor.notemanager.components.AppModalDrawer
+import com.onandor.notemanager.navigation.NavDestinations
+import com.onandor.notemanager.viewmodels.NavigationViewModel
 import com.onandor.notemanager.screens.AddEditNoteScreen
 import com.onandor.notemanager.screens.ArchiveScreen
 import com.onandor.notemanager.screens.NotesScreen
@@ -34,14 +40,19 @@ fun NoteManagerNavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-    startDestination: String = NMDestinations.NOTES_ROUTE,
+    startDestination: String = NavDestinations.NOTES,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
-    navActions: NMNavigationActions = remember(navController) {
-        NMNavigationActions(navController)
-    }
+    viewModel: NavigationViewModel = hiltViewModel()
 ) {
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: startDestination
+    val navManagerState by viewModel.navigationManager.navActions.collectAsState()
+
+    LaunchedEffect(navManagerState) {
+        navManagerState?.let {
+            navController.navigate(it.destination, it.navOptions)
+        }
+    }
 
     Scaffold { innerPadding ->
         NavHost(
@@ -49,76 +60,58 @@ fun NoteManagerNavGraph(
             startDestination = startDestination,
             modifier = modifier.padding(innerPadding)
         ) {
-            composable(NMDestinations.NOTES_ROUTE) {
+            composable(NavDestinations.NOTES) {
                 AppModalDrawer(
                     drawerState = drawerState,
-                    navActions = navActions,
                     currentRoute = currentRoute,
                 ) {
                     NotesScreen(
-                        onAddTask = { navActions.navigateToAddEditNote(null) },
-                        openDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onNoteClick = { note -> navActions.navigateToAddEditNote(note.id) }
+                        openDrawer = { coroutineScope.launch { drawerState.open() } }
                     )
                 }
             }
             composable(
-                NMDestinations.ADD_EDIT_NOTE_ROUTE,
+                NavDestinations.ADD_EDIT_NOTE,
                 arguments = listOf(
-                    navArgument(NMDestinationsArgs.NOTE_ID_ARG) {
+                    navArgument("noteId") {
                         type = NavType.StringType
                         nullable = true
                     }
                 )
             ) {
-                AddEditNoteScreen(
-                    goBack = { navActions.navigateUp() }
-                )
+                AddEditNoteScreen()
             }
-            composable(NMDestinations.ARCHIVE_ROUTE) {
+            composable(NavDestinations.ARCHIVE) {
                 AppModalDrawer(
                     drawerState = drawerState,
-                    navActions = navActions,
                     currentRoute = currentRoute,
                 ) {
                     ArchiveScreen(
-                        openDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onNoteClick = { note -> navActions.navigateToAddEditNote(note.id) }
+                        openDrawer = { coroutineScope.launch { drawerState.open() } }
                     )
                 }
             }
-            composable(NMDestinations.TRASH_ROUTE) {
+            composable(NavDestinations.TRASH) {
                 AppModalDrawer(
                     drawerState = drawerState,
-                    navActions = navActions,
                     currentRoute = currentRoute,
                 ) {
                     TrashScreen(
-                        openDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onNoteClick = { note -> navActions.navigateToAddEditNote(note.id) }
+                        openDrawer = { coroutineScope.launch { drawerState.open() } }
                     )
                 }
             }
-            composable(NMDestinations.SETTINGS_ROUTE) {
-                SettingsScreen(goBack = { navActions.navigateUp() } )
+            composable(NavDestinations.SETTINGS) {
+                SettingsScreen()
             }
-            composable(NMDestinations.ONBOARDING_ROUTE) {
-                OnboardingScreen(
-                    onSkip =  { navActions.navigateToNotes() },
-                    onSignIn = { navActions.navigateToSignInRegister() }
-                )
+            composable(NavDestinations.ONBOARDING) {
+                OnboardingScreen()
             }
-            composable(NMDestinations.SIGN_IN_REGISTER_ROUTE) {
-                SignInRegisterScreen(
-                    goBack = { navActions.navigateUp() },
-                    onSignInSuccessful = { navActions.navigateToNotes() }
-                )
+            composable(NavDestinations.SIGN_IN_REGISTER) {
+                SignInRegisterScreen()
             }
-            composable(NMDestinations.USER_DETAILS_ROUTE) {
-                UserDetailsScreen(
-                    goBack = { navActions.navigateUp() },
-                    onSignIn = { navActions.navigateToSignInRegister() }
-                )
+            composable(NavDestinations.USER_DETAILS) {
+                UserDetailsScreen()
             }
         }
     }

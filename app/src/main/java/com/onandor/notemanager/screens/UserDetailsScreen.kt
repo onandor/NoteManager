@@ -1,5 +1,6 @@
 package com.onandor.notemanager.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,15 +54,13 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun UserDetailsScreen(
-    goBack: () -> Unit,
-    onSignIn: () -> Unit,
     viewModel: UserDetailsViewModel = hiltViewModel()
 ) {
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        topBar = { UserDetailsTopBar(goBack) },
+        topBar = { UserDetailsTopBar(viewModel::navigateBack) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -80,7 +79,7 @@ fun UserDetailsScreen(
             }
             else {
                 SignedOutComponent(
-                    onSignIn = onSignIn
+                    onSignIn = viewModel::signIn
                 )
             }
         }
@@ -117,6 +116,10 @@ fun UserDetailsScreen(
                 viewModel.snackbarShown()
             }
         }
+    }
+
+    BackHandler {
+        viewModel.navigateBack()
     }
 }
 
@@ -234,14 +237,14 @@ fun SignedOutComponent(
 }
 
 @Composable
-fun UserDetailsTopBar(goBack: () -> Unit) {
+fun UserDetailsTopBar(navigateBack: () -> Unit) {
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { goBack() }) {
+            IconButton(onClick = { navigateBack() }) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
             }
             Text(stringResource(R.string.account), fontSize = 20.sp)

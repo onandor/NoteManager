@@ -9,6 +9,8 @@ import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.remote.models.AuthUser
 import com.onandor.notemanager.data.remote.sources.IAuthDataSource
+import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.navigation.NavActions
 import com.onandor.notemanager.utils.combine
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +49,8 @@ enum class UserDetailsDialogType {
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(
     private val settings: ISettings,
-    private val authDataSource: IAuthDataSource
+    private val authDataSource: IAuthDataSource,
+    private val navManager: INavigationManager
 ) : ViewModel() {
 
     private val userId = settings.observeInt(SettingsKeys.USER_ID)
@@ -174,11 +177,6 @@ class UserDetailsViewModel @Inject constructor(
         updateOldPassword(userDetailsForm.value.oldPassword)
         updateNewPassword(userDetailsForm.value.newPassword)
         updateNewPasswordConfirmation(userDetailsForm.value.newPasswordConfirmation)
-        println(userDetailsForm.value.oldPasswordValid.toString() + ", "
-                + userDetailsForm.value.newPasswordValid.toString() + ", "
-                + userDetailsForm.value.newPasswordConfirmationValid.toString())
-        println(userDetailsForm.value.oldPassword + ", " + userDetailsForm.value.newPassword
-                + ", " + userDetailsForm.value.newPasswordConfirmation)
         if (!userDetailsForm.value.oldPasswordValid || !userDetailsForm.value.newPasswordValid
             || !userDetailsForm.value.newPasswordConfirmationValid) {
             return
@@ -204,5 +202,13 @@ class UserDetailsViewModel @Inject constructor(
             dismissDialog()
             loadingRequest.value = false
         }
+    }
+
+    fun signIn() {
+        navManager.navigateTo(NavActions.signInRegister())
+    }
+
+    fun navigateBack() {
+        navManager.navigateBack()
     }
 }
