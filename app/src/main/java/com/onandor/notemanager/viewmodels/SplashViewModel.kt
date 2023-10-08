@@ -17,7 +17,7 @@ import javax.inject.Inject
 
 data class SplashUiState(
     val isLoading: Boolean = true,
-    val startDestination: String = NavDestinations.NOTES
+    val startDestination: String = NavDestinations.ONBOARDING
 )
 
 @HiltViewModel
@@ -32,7 +32,7 @@ class SplashViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val firstLaunch = settings.getBoolean(SettingsKeys.FIRST_LAUNCH, true)
-            var startDestination = ""
+            lateinit var startDestination: String
             if (firstLaunch) {
                 startDestination = NavDestinations.ONBOARDING
                 settings.save(SettingsKeys.INSTALLATION_ID, UUID.randomUUID().toString())
@@ -41,15 +41,15 @@ class SplashViewModel @Inject constructor(
                 startDestination = NavDestinations.NOTES
             }
             _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    startDestination = startDestination
-                )
+                it.copy(startDestination = startDestination)
             }
             if (startDestination == NavDestinations.ONBOARDING)
                 navManager.navigateTo(NavActions.onboarding())
             else
                 navManager.navigateTo(NavActions.notes())
+            _uiState.update {
+                it.copy(isLoading = false)
+            }
         }
     }
 }

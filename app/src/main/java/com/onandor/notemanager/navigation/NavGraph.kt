@@ -38,7 +38,7 @@ fun NavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-    startDestination: String = NavDestinations.NOTES,
+    startDestination: String = NavDestinations.ONBOARDING,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     viewModel: NavigationViewModel = hiltViewModel()
 ) {
@@ -71,7 +71,7 @@ fun NavGraph(
             composable(
                 NavDestinations.ADD_EDIT_NOTE,
                 arguments = listOf(
-                    navArgument("noteId") {
+                    navArgument(NavDestinationArgs.NOTE_ID_ARG) {
                         type = NavType.StringType
                         nullable = true
                     }
