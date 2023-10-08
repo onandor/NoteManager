@@ -1,6 +1,5 @@
-package com.onandor.notemanager
+package com.onandor.notemanager.navigation
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -10,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,7 +20,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.onandor.notemanager.components.AppModalDrawer
-import com.onandor.notemanager.navigation.NavDestinations
 import com.onandor.notemanager.viewmodels.NavigationViewModel
 import com.onandor.notemanager.screens.AddEditNoteScreen
 import com.onandor.notemanager.screens.ArchiveScreen
@@ -30,13 +27,14 @@ import com.onandor.notemanager.screens.NotesScreen
 import com.onandor.notemanager.screens.OnboardingScreen
 import com.onandor.notemanager.screens.SettingsScreen
 import com.onandor.notemanager.screens.SignInRegisterScreen
+import com.onandor.notemanager.screens.SignedOutScreen
 import com.onandor.notemanager.screens.TrashScreen
 import com.onandor.notemanager.screens.UserDetailsScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun NoteManagerNavGraph(
+fun NavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
@@ -112,6 +110,9 @@ fun NoteManagerNavGraph(
             }
             composable(NavDestinations.USER_DETAILS) {
                 UserDetailsScreen()
+            }
+            composable(NavDestinations.SIGNED_OUT) {
+                SignedOutScreen()
             }
         }
     }

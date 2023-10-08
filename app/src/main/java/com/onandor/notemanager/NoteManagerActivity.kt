@@ -8,6 +8,7 @@ import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.onandor.notemanager.navigation.NavGraph
 import com.onandor.notemanager.ui.theme.NoteManagerTheme
 import com.onandor.notemanager.viewmodels.SplashViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,7 +33,7 @@ class NoteManagerActivity : ComponentActivity() {
         setContent {
             NoteManagerTheme {
                 val uiState by splashViewModel.uiState.collectAsStateWithLifecycle()
-                NoteManagerNavGraph(startDestination = uiState.startDestination)
+                NavGraph(startDestination = uiState.startDestination)
             }
         }
     }
