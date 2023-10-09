@@ -75,11 +75,13 @@
     <string name="dialog_change_password_button_confirm">Confirm</string>
     <string name="dialog_change_password_error_invalid_password">Invalid password</string>
     <string name="dialog_change_password_error_invalid_password_confirmation">Passwords don\'t match</string>
-    <string name="invalid_rt_title">You have been signed out</string>
-    <string name="invalid_rt_description">This happens if you don\'t use the app for more than 3 months, but also if an attacker uses your secure tokens to make requests to the server in your name. To be safe, all your tokens have been revoked.</string>
-    <string name="invalid_rt_button_sign_in">Sign in</string>
-    <string name="invalid_rt_button_dismiss">Dismiss</string>
-    <string name="invalid_rt_button_learn_more">Learn more</string>
-    <string name="invalid_rt_learn_more_1">Access tokens are created and stored when you sign in to your account and are used to communicate with the server in a secure way which doesn\'t require the validation of your credentials every time the app makes a request to the server. Access tokens have an expiration date, after which a new one can be automatically requested by the app using a refresh token. Refresh tokens are tied to a single device and can be revoked by the server if it detects suspicious requests coming from your user.</string>
-    <string name="invalid_rt_learn_more_2">All this means is that if you suspect that your account has been compromised, it doesn\'t necessarily mean that your credentials (email, password) have been stolen, rather that a malicious party has gained access to your tokens which are securely stored on your device. The exact ways this may happen can vary, but it is recommended that you check your device for viruses.</string>
+    <string name="signed_out_title">You have been signed out</string>
+    <string name="signed_out_desc_reasons">This can happen because of multiple reasons:</string>
+    <string name="signed_out_desc_reasons_list">\u2022 You didn\'t use the app for more than 3 months\n\u2022 You (or somebody) changed your password on another device\n\u2022 An attacker used your secure tokens to make requests to the server in your name</string>
+    <string name="signed_out_desc_recommendation">If you suspect that your account has been hijacked, it is recommended that you change your password immediately. To be safe, all your tokens have been revoked for this device.</string>
+    <string name="signed_out_button_sign_in">Sign in</string>
+    <string name="signed_out_button_dismiss">Dismiss</string>
+    <string name="signed_out_button_learn_more">Learn more</string>
+    <string name="signed_out_learn_more_1">Access tokens are created and stored when you sign in to your account and are used to communicate with the server in a secure way which doesn\'t require the validation of your credentials every time the app makes a request to the server. Access tokens have an expiration date, after which a new one can be automatically requested by the app using a refresh token. Refresh tokens are tied to a single device and can be revoked by the server if it detects suspicious requests coming from your user.</string>
+    <string name="signed_out_learn_more_2">All this means is that if you suspect that your account has been compromised, it doesn\'t necessarily mean that your credentials (email, password) have been stolen, rather that a malicious party has gained access to your tokens which are securely stored on your device. The exact ways this may happen can vary, but it is recommended that you check your device for viruses.</string>
 </resources>

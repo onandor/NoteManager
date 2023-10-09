@@ -58,11 +58,11 @@ fun SignedOutContent(
     ) {
         Spacer(modifier = Modifier.height(50.dp))
         Text(
-            text = stringResource(id = R.string.invalid_rt_title),
+            text = stringResource(id = R.string.signed_out_title),
             fontSize = MaterialTheme.typography.titleLarge.fontSize
         )
         Spacer(modifier = Modifier.height(10.dp))
-        Text(stringResource(id = R.string.invalid_rt_description))
+        ReasonsContent()
         Spacer(modifier = Modifier.height(10.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -70,16 +70,16 @@ fun SignedOutContent(
         ) {
             AnimatedVisibility(visible = !showLearnMore) {
                 TextButton(onClick = onShowLearnMore) {
-                    Text(stringResource(id = R.string.invalid_rt_button_learn_more))
+                    Text(stringResource(id = R.string.signed_out_button_learn_more))
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = onDismiss) {
-                Text(stringResource(id = R.string.invalid_rt_button_dismiss))
+                Text(stringResource(id = R.string.signed_out_button_dismiss))
             }
             Spacer(modifier = Modifier.width(10.dp))
             Button(onClick = onSignIn) {
-                Text(stringResource(id = R.string.invalid_rt_button_sign_in))
+                Text(stringResource(id = R.string.signed_out_button_sign_in))
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -87,6 +87,15 @@ fun SignedOutContent(
             LearnMoreContent()
         }
     }
+}
+
+@Composable
+fun ReasonsContent() {
+    Text(stringResource(id = R.string.signed_out_desc_reasons))
+    Spacer(modifier = Modifier.height(5.dp))
+    Text(stringResource(id = R.string.signed_out_desc_reasons_list), modifier = Modifier.padding(start = 10.dp))
+    Spacer(modifier = Modifier.height(5.dp))
+    Text(stringResource(id = R.string.signed_out_desc_recommendation))
 }
 
 @Composable
@@ -100,9 +109,9 @@ fun LearnMoreContent() {
                 .fillMaxWidth()
                 .padding(all = 12.dp)
         ) {
-            Text(stringResource(id = R.string.invalid_rt_learn_more_1))
+            Text(stringResource(id = R.string.signed_out_learn_more_1))
             Spacer(modifier = Modifier.height(10.dp))
-            Text(stringResource(id = R.string.invalid_rt_learn_more_2))
+            Text(stringResource(id = R.string.signed_out_learn_more_2))
         }
     }
 }
