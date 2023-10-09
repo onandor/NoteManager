@@ -22,7 +22,7 @@ interface LabelDao {
     @Query("SELECT * FROM labels WHERE id = :labelId")
     suspend fun getById(labelId: UUID): LocalLabel?
 
-    @Query("SELECT * FROM labels WHERE name = :labelTitle")
+    @Query("SELECT * FROM labels WHERE title = :labelTitle")
     suspend fun getByTitle(labelTitle: String): LocalLabel?
 
     @Upsert

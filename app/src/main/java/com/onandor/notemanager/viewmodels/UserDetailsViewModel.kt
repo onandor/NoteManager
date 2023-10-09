@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.R
+import com.onandor.notemanager.data.ILabelRepository
+import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.remote.models.AuthUser
@@ -50,7 +52,9 @@ enum class UserDetailsDialogType {
 class UserDetailsViewModel @Inject constructor(
     private val settings: ISettings,
     private val authDataSource: IAuthDataSource,
-    private val navManager: INavigationManager
+    private val navManager: INavigationManager,
+    private val noteRepository: INoteRepository,
+    private val labelRepository: ILabelRepository
 ) : ViewModel() {
 
     private val userId = settings.observeInt(SettingsKeys.USER_ID)
@@ -96,6 +100,9 @@ class UserDetailsViewModel @Inject constructor(
             settings.remove(SettingsKeys.USER_EMAIL)
             settings.remove(SettingsKeys.ACCESS_TOKEN)
             settings.remove(SettingsKeys.REFRESH_TOKEN)
+
+            noteRepository.deleteAllLocal()
+            labelRepository.deleteAllLocal()
             loadingRequest.value = false
         }
     }

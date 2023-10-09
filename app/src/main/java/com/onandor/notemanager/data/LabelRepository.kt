@@ -1,16 +1,11 @@
-package com.onandor.notemanager.data.remote
+package com.onandor.notemanager.data
 
-import com.onandor.notemanager.data.ILabelRepository
-import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.local.db.LabelDao
-import com.onandor.notemanager.data.toExternal
-import com.onandor.notemanager.data.toLocal
 import com.onandor.notemanager.di.ApplicationScope
 import com.onandor.notemanager.di.DefaultDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -69,7 +64,7 @@ class LabelRepository @Inject constructor(
         localDataSource.deleteById(labelId)
     }
 
-    override suspend fun deleteAll() {
+    override suspend fun deleteAllLocal() {
         localDataSource.deleteAll()
     }
 

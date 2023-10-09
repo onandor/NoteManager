@@ -19,5 +19,5 @@ interface ILabelRepository {
 
     suspend fun deleteLabel(labelId: UUID)
 
-    suspend fun deleteAll()
+    suspend fun deleteAllLocal()
 }

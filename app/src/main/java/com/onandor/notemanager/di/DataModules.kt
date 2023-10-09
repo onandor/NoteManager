@@ -11,6 +11,7 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
+import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.NoteRepository
 import com.onandor.notemanager.data.local.datastore.ISettings
@@ -18,11 +19,11 @@ import com.onandor.notemanager.data.local.datastore.Settings
 import com.onandor.notemanager.data.local.db.LabelDao
 import com.onandor.notemanager.data.local.db.NMDatabase
 import com.onandor.notemanager.data.local.db.NoteDao
+import com.onandor.notemanager.data.LabelRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewModelComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.osipxd.security.crypto.createEncrypted
@@ -36,6 +37,10 @@ abstract class RepositoryModule {
     @Singleton
     @Binds
     abstract fun bindNoteRepository(repository: NoteRepository): INoteRepository
+
+    @Singleton
+    @Binds
+    abstract fun bindLabelRepository(repository: LabelRepository): ILabelRepository
 }
 
 @Module
@@ -49,7 +54,9 @@ object DatabaseModule {
             context.applicationContext,
             NMDatabase::class.java,
             name = "NoteManager.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides

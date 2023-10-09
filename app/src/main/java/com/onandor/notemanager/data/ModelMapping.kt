@@ -20,6 +20,7 @@ fun LocalLabel.toExternal() = Label(
 
 fun LabelList.toExternal() = labelList.map(LocalLabel::toExternal)
 
+@JvmName("toExternalLabelList")
 fun List<LocalLabel>.toExternal() = map(LocalLabel::toExternal)
 
 fun Note.toLocal() = LocalNote(
@@ -44,4 +45,5 @@ fun LocalNote.toExternal() = Note(
     modificationDate = modificationDate
 )
 
+@JvmName("toExternalNoteList")
 fun List<LocalNote>.toExternal() = map(LocalNote::toExternal)
