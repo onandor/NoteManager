@@ -45,4 +45,6 @@ interface INoteRepository {
     suspend fun deleteNote(noteId: String)
 
     suspend fun emptyTrash()
+
+    suspend fun deleteAllLocal()
 }

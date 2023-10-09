@@ -19,8 +19,9 @@ class NoteRepository @Inject constructor(
     @DefaultDispatcher private val dispatcher: CoroutineDispatcher,
     @ApplicationScope private val scope: CoroutineScope
 ) : INoteRepository {
+
     override fun getNoteStream(noteId: String): Flow<Note?> {
-        return localDataSource.observeById(noteId).map { it.toExternal() }
+        return localDataSource.observeById(noteId).map { it?.toExternal() }
     }
 
     override fun getNotesStream(location: NoteLocation): Flow<List<Note>> {
@@ -61,7 +62,6 @@ class NoteRepository @Inject constructor(
             creationDate = creationDate,
             modificationDate = modificationDate
         )
-
         localDataSource.upsert(note.toLocal())
         return noteId
     }
@@ -81,7 +81,6 @@ class NoteRepository @Inject constructor(
             location = location,
             modificationDate = modificationDate
         ) ?: throw Exception("Note (id $noteId) not found in local database")
-
         localDataSource.upsert(note.toLocal())
     }
 
@@ -120,5 +119,9 @@ class NoteRepository @Inject constructor(
 
     override suspend fun emptyTrash() {
         localDataSource.deleteByLocation(NoteLocation.TRASH)
+    }
+
+    override suspend fun deleteAllLocal() {
+        localDataSource.deleteAll()
     }
 }

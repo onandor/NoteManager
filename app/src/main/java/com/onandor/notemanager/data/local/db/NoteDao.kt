@@ -19,7 +19,7 @@ interface NoteDao {
     fun observeAllByLocation(noteLocation: NoteLocation): Flow<List<LocalNote>>
 
     @Query("SELECT * FROM notes WHERE id = :noteId")
-    fun observeById(noteId: String): Flow<LocalNote>
+    fun observeById(noteId: String): Flow<LocalNote?>
 
     @Query("SELECT * FROM notes")
     suspend fun getAll(): List<LocalNote>
@@ -56,4 +56,7 @@ interface NoteDao {
 
     @Query("DELETE FROM notes WHERE location = :location")
     suspend fun deleteByLocation(location: NoteLocation)
+
+    @Query("DELETE FROM notes")
+    suspend fun deleteAll()
 }
