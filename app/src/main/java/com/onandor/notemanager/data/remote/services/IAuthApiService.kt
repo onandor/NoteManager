@@ -14,5 +14,9 @@ interface IAuthApiService {
 
     suspend fun deleteUser(password: String)
 
-    suspend fun changePassword(oldPassword: String, newPassword: String)
+    suspend fun changePassword(
+        installationId: String,
+        oldPassword: String,
+        newPassword: String
+    ): HashMap<String, String>
 }

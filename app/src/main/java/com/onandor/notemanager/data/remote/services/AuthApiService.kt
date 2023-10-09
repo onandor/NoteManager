@@ -7,6 +7,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import javax.inject.Inject
 
 class AuthApiService @Inject constructor(
@@ -37,9 +38,19 @@ class AuthApiService @Inject constructor(
         }
     }
 
-    override suspend fun changePassword(oldPassword: String, newPassword: String) {
-        httpClient.post("auth/changePassword") {
-            setBody(hashMapOf("oldPassword" to oldPassword, "newPassword" to newPassword))
-        }
+    override suspend fun changePassword(
+        installationId: String,
+        oldPassword: String,
+        newPassword: String
+    ): HashMap<String, String> {
+        return httpClient.post("auth/changePassword") {
+            setBody(
+                hashMapOf(
+                    "deviceId" to installationId,
+                    "oldPassword" to oldPassword,
+                    "newPassword" to newPassword
+                )
+            )
+        }.body()
     }
 }

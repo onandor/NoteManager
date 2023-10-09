@@ -181,19 +181,17 @@ class UserDetailsViewModel @Inject constructor(
             || !userDetailsForm.value.newPasswordConfirmationValid) {
             return
         }
-        if (userDetailsForm.value.oldPassword == userDetailsForm.value.newPassword) {
-            println("old password cant match new one")
-            return
-        }
 
         openDialog.value = UserDetailsDialogType.NONE
         viewModelScope.launch {
             loadingRequest.value = true
             authDataSource.changePassword(
+                settings.getString(SettingsKeys.INSTALLATION_ID),
                 userDetailsForm.value.oldPassword,
                 userDetailsForm.value.newPassword
             )
-                .onSuccess {
+                .onSuccess { refreshToken ->
+                    settings.save(SettingsKeys.REFRESH_TOKEN, refreshToken)
                     snackbarMessageResource.value = R.string.user_details_snackbar_password_changed
                 }
                 .onFailure { error ->

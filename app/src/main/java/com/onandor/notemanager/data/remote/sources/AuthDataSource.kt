@@ -74,11 +74,13 @@ class AuthDataSource @Inject constructor(
     }
 
     override suspend fun changePassword(
+        installationId: String,
         oldPassword: String,
         newPassword: String
-    ): Result<Unit, ApiError> {
+    ): Result<String, ApiError> {
         return try {
-            Ok(authApiService.changePassword(oldPassword, newPassword))
+            Ok(authApiService.changePassword(installationId, oldPassword, newPassword)
+                .getValue("refreshToken"))
         } catch (e: ClientRequestException) {
             Err(InvalidPassword)
         } catch (e: ConnectTimeoutException) {
