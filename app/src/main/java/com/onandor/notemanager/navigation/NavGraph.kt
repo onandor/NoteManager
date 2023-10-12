@@ -38,7 +38,7 @@ fun NavGraph(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-    startDestination: String = NavDestinations.ONBOARDING,
+    startDestination: String = NavDestinations.NOTES,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
     viewModel: NavigationViewModel = hiltViewModel()
 ) {

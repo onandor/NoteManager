@@ -33,7 +33,9 @@ class NoteManagerActivity : ComponentActivity() {
         setContent {
             NoteManagerTheme {
                 val uiState by splashViewModel.uiState.collectAsStateWithLifecycle()
-                NavGraph(startDestination = uiState.startDestination)
+                if (!uiState.isLoading) {
+                    NavGraph(startDestination = uiState.startDestination)
+                }
             }
         }
     }

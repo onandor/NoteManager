@@ -25,4 +25,9 @@ class NavigationManager : INavigationManager {
     override fun navigateBack() {
         _navActions.update { backStack.pop() }
     }
+
+    override fun setInitialBackStackAction(navAction: NavAction) {
+        if (backStack.empty())
+            backStack.push(navAction)
+    }
 }

@@ -7,4 +7,5 @@ interface INavigationManager {
     val navActions: StateFlow<NavAction?>
     fun navigateTo(navAction: NavAction?)
     fun navigateBack()
+    fun setInitialBackStackAction(navAction: NavAction)
 }
