@@ -5,6 +5,7 @@
     <string name="drawer_trash">Trash</string>
     <string name="drawer_settings">Settings</string>
     <string name="drawer_account">Account</string>
+    <string name="drawer_labels">Labels</string>
     <string name="topbar_search_notes">Search notes</string>
     <string name="topbar_drawer">Drawer</string>
     <string name="topbar_change_view">Change view</string>
@@ -15,6 +16,7 @@
     <string name="trash">Trash</string>
     <string name="settings">Settings</string>
     <string name="account">Account</string>
+    <string name="labels">Labels</string>
     <string name="settings_go_back">Go back</string>
     <string name="note_manager">Note Manager</string>
     <string name="addeditnote_archive_note">Archive note</string>
@@ -84,4 +86,7 @@
     <string name="signed_out_button_learn_more">Learn more</string>
     <string name="signed_out_learn_more_1">Access tokens are created and stored when you sign in to your account and are used to communicate with the server in a secure way which doesn\'t require the validation of your credentials every time the app makes a request to the server. Access tokens have an expiration date, after which a new one can be automatically requested by the app using a refresh token. Refresh tokens are tied to a single device and can be revoked by the server if it detects suspicious requests coming from your user.</string>
     <string name="signed_out_learn_more_2">All this means is that if you suspect that your account has been compromised, it doesn\'t necessarily mean that your credentials (email, password) have been stolen, rather that a malicious party has gained access to your tokens which are securely stored on your device. The exact ways this may happen can vary, but it is recommended that you check your device for viruses.</string>
+    <string name="edit_labels_loading_error">Error while loading labels</string>
+    <string name="edit_labels_no_labels">You don\'t have any labels</string>
+    <string name="edit_labels_go_back">Go back</string>
 </resources>

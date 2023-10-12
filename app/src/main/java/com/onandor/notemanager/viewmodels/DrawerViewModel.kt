@@ -30,4 +30,8 @@ class DrawerViewModel @Inject constructor(
     fun navigateToUserDetails() {
         navManager.navigateTo(NavActions.userDetails())
     }
+
+    fun navigateToEditLabels() {
+        navManager.navigateTo(NavActions.editLabels())
+    }
 }

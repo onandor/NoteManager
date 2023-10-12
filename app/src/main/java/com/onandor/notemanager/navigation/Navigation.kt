@@ -4,6 +4,7 @@ import androidx.navigation.NavOptions
 import com.onandor.notemanager.navigation.NavDestinationArgs.NOTE_ID_ARG
 import com.onandor.notemanager.navigation.Screens.ADD_EDIT_NOTE_SCREEN
 import com.onandor.notemanager.navigation.Screens.ARCHIVE_SCREEN
+import com.onandor.notemanager.navigation.Screens.EDIT_LABELS_SCREEN
 import com.onandor.notemanager.navigation.Screens.NOTES_SCREEN
 import com.onandor.notemanager.navigation.Screens.ONBOARDING_SCREEN
 import com.onandor.notemanager.navigation.Screens.SETTINGS_SCREEN
@@ -22,6 +23,7 @@ private object Screens {
     const val SIGN_IN_REGISTER_SCREEN = "signInRegister"
     const val USER_DETAILS_SCREEN = "userDetails"
     const val SIGNED_OUT_SCREEN = "signedOut"
+    const val EDIT_LABELS_SCREEN = "editLabels"
 }
 
 object NavDestinations {
@@ -34,6 +36,7 @@ object NavDestinations {
     const val SIGN_IN_REGISTER = SIGN_IN_REGISTER_SCREEN
     const val USER_DETAILS = USER_DETAILS_SCREEN
     const val SIGNED_OUT = SIGNED_OUT_SCREEN
+    const val EDIT_LABELS = EDIT_LABELS_SCREEN
 }
 
 object NavDestinationArgs {
@@ -103,5 +106,9 @@ object NavActions {
 
     fun signedOut() = object : NavAction {
         override val destination: String = NavDestinations.SIGNED_OUT
+    }
+
+    fun editLabels() = object : NavAction {
+        override val destination: String = NavDestinations.EDIT_LABELS
     }
 }

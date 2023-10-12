@@ -23,6 +23,7 @@ import com.onandor.notemanager.components.AppModalDrawer
 import com.onandor.notemanager.viewmodels.NavigationViewModel
 import com.onandor.notemanager.screens.AddEditNoteScreen
 import com.onandor.notemanager.screens.ArchiveScreen
+import com.onandor.notemanager.screens.EditLabelsScreen
 import com.onandor.notemanager.screens.NotesScreen
 import com.onandor.notemanager.screens.OnboardingScreen
 import com.onandor.notemanager.screens.SettingsScreen
@@ -113,6 +114,9 @@ fun NavGraph(
             }
             composable(NavDestinations.SIGNED_OUT) {
                 SignedOutScreen()
+            }
+            composable(NavDestinations.EDIT_LABELS) {
+                EditLabelsScreen()
             }
         }
     }

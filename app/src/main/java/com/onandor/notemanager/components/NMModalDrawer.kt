@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -48,7 +50,8 @@ fun AppModalDrawer(
                 onNavigateToArchive = viewModel::navigateToArchive,
                 onNavigateToTrash = viewModel::navigateToTrash,
                 onNavigateToSettings = viewModel::navigateToSettings,
-                onNavigateToUserDetails = viewModel::navigateToUserDetails
+                onNavigateToUserDetails = viewModel::navigateToUserDetails,
+                onNavigateToEditLabels = viewModel::navigateToEditLabels
             )
         }
     ) {
@@ -64,8 +67,8 @@ fun AppDrawer(
     onNavigateToArchive: () -> Unit,
     onNavigateToTrash: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToUserDetails: () -> Unit
-
+    onNavigateToUserDetails: () -> Unit,
+    onNavigateToEditLabels: () -> Unit
 ) {
     ModalDrawerSheet {
         Spacer(modifier = Modifier.height(20.dp))
@@ -116,15 +119,15 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(id = R.string.drawer_settings)) },
-            label = { Text(stringResource(id = R.string.drawer_settings)) },
-            selected = currentRoute == NavDestinations.SETTINGS,
+            icon = { Icon(Icons.Filled.Star, contentDescription = stringResource(id = R.string.drawer_labels)) },
+            label = { Text(stringResource(id = R.string.drawer_labels)) },
+            selected = currentRoute == NavDestinations.EDIT_LABELS,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
                 .height(50.dp)
                 .width(250.dp),
             onClick = {
-                onNavigateToSettings()
+                onNavigateToEditLabels()
                 closeDrawer()
             }
         )
@@ -135,11 +138,24 @@ fun AppDrawer(
             selected = currentRoute == NavDestinations.USER_DETAILS,
             modifier = Modifier
                 .padding(NavigationDrawerItemDefaults.ItemPadding)
-                .padding(bottom = 10.dp)
                 .height(50.dp)
                 .width(250.dp),
             onClick = {
                 onNavigateToUserDetails()
+                closeDrawer()
+            }
+        )
+        NavigationDrawerItem(
+            icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(id = R.string.drawer_settings)) },
+            label = { Text(stringResource(id = R.string.drawer_settings)) },
+            selected = currentRoute == NavDestinations.SETTINGS,
+            modifier = Modifier
+                .padding(NavigationDrawerItemDefaults.ItemPadding)
+                .padding(bottom = 10.dp)
+                .height(50.dp)
+                .width(250.dp),
+            onClick = {
+                onNavigateToSettings()
                 closeDrawer()
             }
         )
