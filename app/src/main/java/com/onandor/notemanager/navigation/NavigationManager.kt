@@ -13,12 +13,13 @@ class NavigationManager : INavigationManager {
         MutableStateFlow(null)
     }
 
-    private val backStack: Stack<NavAction?> = Stack()
+    private val backStack: Stack<NavAction> = Stack()
 
     override val navActions =_navActions.asStateFlow()
 
     override fun navigateTo(navAction: NavAction?) {
-        backStack.push(_navActions.value)
+        if (_navActions.value != null)
+            backStack.push(_navActions.value)
         _navActions.update { navAction }
     }
 
