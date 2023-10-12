@@ -20,7 +20,7 @@ class NoteRepository @Inject constructor(
     @ApplicationScope private val scope: CoroutineScope
 ) : INoteRepository {
 
-    override fun getNoteStream(noteId: String): Flow<Note?> {
+    override fun getNoteStream(noteId: UUID): Flow<Note?> {
         return localDataSource.observeById(noteId).map { it?.toExternal() }
     }
 
@@ -32,7 +32,7 @@ class NoteRepository @Inject constructor(
         }
     }
 
-    override suspend fun getNote(noteId: String): Note? {
+    override suspend fun getNote(noteId: UUID): Note? {
         return localDataSource.getById(noteId)?.toExternal()
     }
 
@@ -49,9 +49,9 @@ class NoteRepository @Inject constructor(
         location: NoteLocation,
         creationDate: LocalDateTime,
         modificationDate: LocalDateTime
-    ): String {
+    ): UUID {
         val noteId = withContext(dispatcher) {
-            UUID.randomUUID().toString()
+            UUID.randomUUID()
         }
         val note = Note(
             id = noteId,
@@ -67,7 +67,7 @@ class NoteRepository @Inject constructor(
     }
 
     override suspend fun updateNote(
-        noteId: String,
+        noteId: UUID,
         title: String,
         content: String,
         labels: List<Label>,
@@ -85,7 +85,7 @@ class NoteRepository @Inject constructor(
     }
 
     override suspend fun updateNoteTitleAndContent(
-        noteId: String,
+        noteId: UUID,
         title: String,
         content: String,
         modificationDate: LocalDateTime
@@ -99,21 +99,21 @@ class NoteRepository @Inject constructor(
         localDataSource.upsert(note.toLocal())
     }
 
-    override suspend fun updateNoteLabels(noteId: String, labels: List<Label>) {
+    override suspend fun updateNoteLabels(noteId: UUID, labels: List<Label>) {
         val note = getNote(noteId)?.copy(labels = labels)
             ?: throw Exception("Note (id $noteId) not found in local database")
 
         localDataSource.upsert(note.toLocal())
     }
 
-    override suspend fun updateNoteLocation(noteId: String, location: NoteLocation) {
+    override suspend fun updateNoteLocation(noteId: UUID, location: NoteLocation) {
         val note = getNote(noteId)?.copy(location = location)
             ?: throw Exception("Note (id $noteId) not found in local database")
 
         localDataSource.upsert(note.toLocal())
     }
 
-    override suspend fun deleteNote(noteId: String,) {
+    override suspend fun deleteNote(noteId: UUID) {
         localDataSource.deleteById(noteId)
     }
 

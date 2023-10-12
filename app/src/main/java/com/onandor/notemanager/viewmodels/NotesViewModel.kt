@@ -68,6 +68,6 @@ class NotesViewModel @Inject constructor(
     }
 
     fun noteClick(note: Note) {
-        navManager.navigateTo(NavActions.addEditNote(note.id))
+        navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
     }
 }

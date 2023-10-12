@@ -2,14 +2,15 @@ package com.onandor.notemanager.data
 
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
+import java.util.UUID
 
 interface INoteRepository {
 
-    fun getNoteStream(noteId: String): Flow<Note?>
+    fun getNoteStream(noteId: UUID): Flow<Note?>
 
     fun getNotesStream(location: NoteLocation): Flow<List<Note>>
 
-    suspend fun getNote(noteId: String): Note?
+    suspend fun getNote(noteId: UUID): Note?
 
     suspend fun getNotes(): List<Note>
 
@@ -20,10 +21,10 @@ interface INoteRepository {
         location: NoteLocation,
         creationDate: LocalDateTime,
         modificationDate: LocalDateTime
-    ): String
+    ): UUID
 
     suspend fun updateNote(
-        noteId: String,
+        noteId: UUID,
         title: String,
         content: String,
         labels: List<Label>,
@@ -32,17 +33,17 @@ interface INoteRepository {
     )
 
     suspend fun updateNoteTitleAndContent(
-        noteId: String,
+        noteId: UUID,
         title: String,
         content: String,
         modificationDate: LocalDateTime
     )
 
-    suspend fun updateNoteLabels(noteId: String, labels: List<Label>)
+    suspend fun updateNoteLabels(noteId: UUID, labels: List<Label>)
 
-    suspend fun updateNoteLocation(noteId: String, location: NoteLocation)
+    suspend fun updateNoteLocation(noteId: UUID, location: NoteLocation)
 
-    suspend fun deleteNote(noteId: String)
+    suspend fun deleteNote(noteId: UUID)
 
     suspend fun emptyTrash()
 

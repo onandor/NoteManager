@@ -20,6 +20,7 @@ import com.onandor.notemanager.data.local.db.LabelDao
 import com.onandor.notemanager.data.local.db.NMDatabase
 import com.onandor.notemanager.data.local.db.NoteDao
 import com.onandor.notemanager.data.LabelRepository
+import com.onandor.notemanager.data.local.db.NoteLabelDao
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -64,6 +65,9 @@ object DatabaseModule {
 
     @Provides
     fun provideLabelDao(database: NMDatabase): LabelDao = database.labelDao()
+
+    @Provides
+    fun provideNoteLabelDao(database: NMDatabase): NoteLabelDao = database.noteLabelDao()
 }
 
 @Qualifier

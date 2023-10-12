@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.lang.RuntimeException
 import java.time.LocalDateTime
+import java.util.UUID
 import javax.inject.Inject
 
 data class AddEditNoteUiState(
@@ -33,19 +34,20 @@ class AddEditNoteViewModel @Inject constructor(
     private val navManager: INavigationManager
 ) : ViewModel() {
 
-    private var noteId: String = savedStateHandle[NavDestinationArgs.NOTE_ID_ARG] ?: ""
+    private val _noteId: String = savedStateHandle[NavDestinationArgs.NOTE_ID_ARG] ?: ""
+    private val noteId: UUID? = if (_noteId.isNotEmpty()) UUID.fromString(_noteId) else null
     private var modified: Boolean = false
 
     private val _uiState = MutableStateFlow(AddEditNoteUiState())
     val uiState: StateFlow<AddEditNoteUiState> = _uiState.asStateFlow()
 
     init {
-        if (noteId.isNotEmpty()) {
+        if (noteId != null) {
             loadNote(noteId)
         }
     }
 
-    private fun loadNote(noteId: String) {
+    private fun loadNote(noteId: UUID) {
         viewModelScope.launch {
             noteRepository.getNote(noteId).let { note ->
                 if (note == null)
@@ -64,7 +66,7 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun saveNote() {
         if (_uiState.value.title.isEmpty() and _uiState.value.content.isEmpty()) {
-            if (noteId.isEmpty()) {
+            if (noteId == null) {
                 addEditResultState.set(AddEditResults.DISCARDED)
                 return
             }
@@ -79,7 +81,7 @@ class AddEditNoteViewModel @Inject constructor(
             return
 
         viewModelScope.launch {
-            if (noteId.isEmpty()) {
+            if (noteId == null) {
                 createNewNote()
             }
             else {
@@ -103,7 +105,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     private fun updateExistingNote() {
-        if (noteId.isEmpty()) {
+        if (noteId == null) {
             throw RuntimeException("AddEditNoteViewModel.updateExistingNote(): cannot update nonexistent note")
         }
         viewModelScope.launch {
@@ -152,7 +154,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun archiveNote() {
-        if (noteId.isEmpty()) {
+        if (noteId == null) {
             if (_uiState.value.title.isEmpty() and _uiState.value.content.isEmpty()) {
                 addEditResultState.set(AddEditResults.DISCARDED)
                 return
@@ -168,6 +170,9 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun unArchiveNote() {
+        if (noteId == null) {
+            throw RuntimeException("AddEditNoteViewModel.unArchiveNote(): cannot unarchive nonexistent note")
+        }
         viewModelScope.launch {
             noteRepository.updateNoteLocation(noteId, NoteLocation.NOTES)
         }
@@ -175,7 +180,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun trashNote() {
-        if (noteId.isEmpty()) {
+        if (noteId == null) {
             addEditResultState.set(AddEditResults.DISCARDED)
             return
         }
@@ -186,6 +191,9 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun deleteNote() {
+        if (noteId == null) {
+            throw RuntimeException("AddEditNoteViewModel.deleteNote(): cannot delete nonexistent note")
+        }
         viewModelScope.launch {
             noteRepository.deleteNote(noteId)
         }
