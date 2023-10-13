@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.DraggableAnchors
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -168,6 +169,7 @@ fun AddEditLabelComponent(
     colorSelection: List<Color>
 ) {
     val density = LocalDensity.current
+    val interactionSource = remember { MutableInteractionSource() }
     Box(modifier = Modifier.fillMaxSize()) {
         AnimatedVisibility(
             visible = visible,
@@ -178,7 +180,10 @@ fun AddEditLabelComponent(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Gray.copy(alpha = 0.5f))
-                    .clickable { onCloseDialog() }
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { onCloseDialog() }
             )
         }
         AnimatedVisibility(
