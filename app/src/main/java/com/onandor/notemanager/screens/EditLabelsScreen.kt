@@ -179,7 +179,7 @@ fun AddEditLabelComponent(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Gray.copy(alpha = 0.5f))
+                    .background(Color.Black.copy(alpha = 0.3f))
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
@@ -260,7 +260,7 @@ fun AddEditLabelCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(15.dp)
+                .padding(top = 15.dp, bottom = 15.dp)
         ) {
             val colorSelectionScrollState = rememberScrollState()
             val textFieldColors = TextFieldDefaults.colors(
@@ -277,7 +277,7 @@ fun AddEditLabelCard(
                 placeholder = {
                     Text(
                         text = stringResource(id = R.string.edit_labels_hint_title),
-                        fontSize = 24.sp
+                        fontSize = 20.sp
                     )
                 },
                 colors = textFieldColors,
@@ -285,6 +285,7 @@ fun AddEditLabelCard(
                 singleLine = true
             )
             Row(
+                modifier = Modifier.padding(start = 15.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -303,18 +304,22 @@ fun AddEditLabelCard(
                     .horizontalScroll(colorSelectionScrollState)
                     .fillMaxWidth()
             ) {
+                Spacer(modifier = Modifier.width(15.dp))
                 colorSelection.forEach { colorChoice ->
                     ColorChoice(
                         color = colorChoice,
                         selected = colorChoice == color,
                         onClicked = onColorChanged
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                 }
+                Spacer(modifier = Modifier.width(5.dp))
             }
             Spacer(modifier = Modifier.height(10.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 15.dp),
                 horizontalArrangement = Arrangement.End
             ) {
                 Button(onClick = onSubmitChange) {
