@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.onandor.notemanager"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.onandor.notemanager"
@@ -65,6 +65,7 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.1.1")
     implementation("androidx.navigation:navigation-compose:2.6.0")
     implementation("androidx.compose.runtime:runtime-livedata:1.5.1")
+    implementation("androidx.compose.foundation:foundation:1.6.0-alpha07")
 
     // Serialization
     implementation("com.google.code.gson:gson:2.10.1")

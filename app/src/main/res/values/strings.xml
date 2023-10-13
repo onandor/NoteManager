@@ -89,4 +89,9 @@
     <string name="edit_labels_loading_error">Error while loading labels</string>
     <string name="edit_labels_no_labels">You don\'t have any labels</string>
     <string name="edit_labels_go_back">Go back</string>
+    <string name="edit_labels_hint_title">Title</string>
+    <string name="edit_labels_new_label">New label</string>
+    <string name="edit_labels_save">Save</string>
+    <string name="edit_labels_color">Color</string>
+    <string name="edit_labels_no_color">No color</string>
 </resources>
