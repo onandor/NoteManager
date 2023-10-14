@@ -6,8 +6,12 @@ import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.remote.models.InvalidRefreshTokenException
 import com.onandor.notemanager.data.remote.services.AuthApiService
 import com.onandor.notemanager.data.remote.services.IAuthApiService
+import com.onandor.notemanager.data.remote.services.INoteApiService
+import com.onandor.notemanager.data.remote.services.NoteApiService
 import com.onandor.notemanager.data.remote.sources.AuthDataSource
 import com.onandor.notemanager.data.remote.sources.IAuthDataSource
+import com.onandor.notemanager.data.remote.sources.INoteDataSource
+import com.onandor.notemanager.data.remote.sources.NoteDataSource
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavActions
 import dagger.Binds
@@ -95,16 +99,24 @@ object HttpClientModule {
 
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class ApiServiceModule {
+abstract class AuthNetworkModule {
 
     @Binds
     abstract fun bindAuthApiService(authApiService: AuthApiService): IAuthApiService
-}
-
-@Module
-@InstallIn(ViewModelComponent::class)
-abstract class DataSourceModule {
 
     @Binds
     abstract fun bindAuthDataSource(authDataSource: AuthDataSource): IAuthDataSource
+
+
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class NoteNetworkModule {
+
+    @Binds
+    abstract fun bindNoteApiService(noteApiService: NoteApiService): INoteApiService
+
+    @Binds
+    abstract fun bindNoteDataSource(noteDataSource: NoteDataSource): INoteDataSource
 }

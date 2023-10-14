@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.R
+import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.remote.models.AuthUser
@@ -44,7 +45,8 @@ data class SignInRegisterUiState(
 class SignInRegisterViewModel @Inject constructor(
     private val settings: ISettings,
     private val authDataSource: IAuthDataSource,
-    private val navManager: INavigationManager
+    private val navManager: INavigationManager,
+    private val noteRepository: INoteRepository
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<SignInRegisterUiState>
@@ -131,6 +133,7 @@ class SignInRegisterViewModel @Inject constructor(
                     settings.save(SettingsKeys.USER_ID, tokenPair.userId)
                     settings.save(SettingsKeys.ACCESS_TOKEN, tokenPair.accessToken)
                     settings.save(SettingsKeys.REFRESH_TOKEN, tokenPair.refreshToken)
+                    noteRepository.refreshNotes()
                     navManager.navigateTo(NavActions.notes())
                 }
                 .onFailure { error ->

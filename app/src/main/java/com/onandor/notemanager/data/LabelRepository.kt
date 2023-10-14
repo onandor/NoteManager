@@ -1,6 +1,8 @@
 package com.onandor.notemanager.data
 
 import com.onandor.notemanager.data.local.db.LabelDao
+import com.onandor.notemanager.data.mapping.toExternal
+import com.onandor.notemanager.data.mapping.toLocal
 import com.onandor.notemanager.di.ApplicationScope
 import com.onandor.notemanager.di.DefaultDispatcher
 import kotlinx.coroutines.CoroutineDispatcher

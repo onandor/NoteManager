@@ -1,5 +1,7 @@
-package com.onandor.notemanager.data
+package com.onandor.notemanager.data.mapping
 
+import com.onandor.notemanager.data.Label
+import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.local.models.LocalLabel
 import com.onandor.notemanager.data.local.models.LocalNote
 import com.onandor.notemanager.data.local.models.LocalNoteWithLabels
@@ -16,10 +18,10 @@ fun LocalLabel.toExternal() = Label(
     color = color
 )
 
-@JvmName("toExternalLabelList")
+@JvmName("localToExternalLabelList")
 fun List<LocalLabel>.toExternal() = map(LocalLabel::toExternal)
 
-@JvmName("toLocalLabelList")
+@JvmName("externalToLocalLabelList")
 fun List<Label>.toLocal() = map(Label::toLocal)
 
 fun Note.toLocal() = LocalNote(
@@ -36,10 +38,10 @@ fun Note.toLocalWithLabels() = LocalNoteWithLabels(
     labels = labels.toLocal()
 )
 
-@JvmName("toLocalNoteList")
+@JvmName("externalToLocalNoteList")
 fun List<Note>.toLocal() = map(Note::toLocal)
 
-@JvmName("toLocalNoteListWithLabels")
+@JvmName("externalToLocalNoteListWithLabels")
 fun List<Note>.toLocalWithLabels() = map(Note::toLocalWithLabels)
 
 fun LocalNote.toExternal() = Note(
@@ -54,8 +56,8 @@ fun LocalNote.toExternal() = Note(
 
 fun LocalNoteWithLabels.toExternal() = note.toExternal().copy(labels = labels.toExternal())
 
-@JvmName("toExternalNoteList")
+@JvmName("localToExternalNoteList")
 fun List<LocalNote>.toExternal() = map(LocalNote::toExternal)
 
-@JvmName("toExternalNoteListWithLabels")
+@JvmName("localToExternalNoteListWithLabels")
 fun List<LocalNoteWithLabels>.toExternal() = map(LocalNoteWithLabels::toExternal)

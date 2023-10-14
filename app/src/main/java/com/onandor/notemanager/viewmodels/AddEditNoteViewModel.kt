@@ -97,9 +97,7 @@ class AddEditNoteViewModel @Inject constructor(
                 title = _uiState.value.title,
                 content = _uiState.value.content,
                 labels = listOf(),
-                location = NoteLocation.NOTES,
-                creationDate = LocalDateTime.now(),
-                modificationDate = LocalDateTime.now()
+                location = NoteLocation.NOTES
             )
         }
     }
@@ -112,8 +110,7 @@ class AddEditNoteViewModel @Inject constructor(
             noteRepository.updateNoteTitleAndContent(
                 noteId = noteId,
                 title = _uiState.value.title,
-                content = _uiState.value.content,
-                modificationDate = LocalDateTime.now()
+                content = _uiState.value.content
             )
         }
     }
@@ -124,9 +121,7 @@ class AddEditNoteViewModel @Inject constructor(
                 title = _uiState.value.title,
                 content = _uiState.value.content,
                 labels = listOf(),
-                location = NoteLocation.NOTES,
-                creationDate = LocalDateTime.now(),
-                modificationDate = LocalDateTime.now()
+                location = NoteLocation.NOTES
             )
             noteRepository.updateNoteLocation(
                 noteId = noteId,

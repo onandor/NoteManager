@@ -18,9 +18,7 @@ interface INoteRepository {
         title: String,
         content: String,
         labels: List<Label>,
-        location: NoteLocation,
-        creationDate: LocalDateTime,
-        modificationDate: LocalDateTime
+        location: NoteLocation
     ): UUID
 
     suspend fun updateNote(
@@ -28,20 +26,20 @@ interface INoteRepository {
         title: String,
         content: String,
         labels: List<Label>,
-        location: NoteLocation,
-        modificationDate: LocalDateTime
+        location: NoteLocation
     )
 
     suspend fun updateNoteTitleAndContent(
         noteId: UUID,
         title: String,
-        content: String,
-        modificationDate: LocalDateTime
+        content: String
     )
 
     suspend fun updateNoteLabels(noteId: UUID, labels: List<Label>)
 
     suspend fun updateNoteLocation(noteId: UUID, location: NoteLocation)
+
+    suspend fun refreshNotes()
 
     suspend fun deleteNote(noteId: UUID)
 
