@@ -14,13 +14,13 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import javax.inject.Inject
 
-private const val AUTH_ROUTE = "auth/"
+private const val AUTH_ROUTE = "auth"
 private object AuthEndpoints {
-    const val REGISTER = "register"
-    const val LOGIN = "login"
-    const val LOGOUT = "logout"
-    const val DELETE = "delete"
-    const val CHANGE_PASSWORD = "changePassword"
+    const val REGISTER = "/register"
+    const val LOGIN = "/login"
+    const val LOGOUT = "/logout"
+    const val DELETE = "/delete"
+    const val CHANGE_PASSWORD = "/changePassword"
 }
 
 class AuthApiService @Inject constructor(
