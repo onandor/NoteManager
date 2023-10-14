@@ -5,20 +5,14 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.onandor.notemanager.data.remote.models.ApiError
 import com.onandor.notemanager.data.remote.models.AuthUser
-import com.onandor.notemanager.data.remote.models.DisposableError
 import com.onandor.notemanager.data.remote.models.EmailTaken
 import com.onandor.notemanager.data.remote.models.InvalidCredentials
 import com.onandor.notemanager.data.remote.models.InvalidPassword
-import com.onandor.notemanager.data.remote.models.InvalidRefreshTokenException
-import com.onandor.notemanager.data.remote.models.LoggedOutError
-import com.onandor.notemanager.data.remote.models.ServerError
-import com.onandor.notemanager.data.remote.models.ServerUnreachable
 import com.onandor.notemanager.data.remote.models.TokenPair
 import com.onandor.notemanager.data.remote.models.UserDetails
 import com.onandor.notemanager.data.remote.services.IAuthApiService
-import io.ktor.client.network.sockets.ConnectTimeoutException
+import com.onandor.notemanager.utils.getApiError
 import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.ServerResponseException
 import javax.inject.Inject
 
 class AuthDataSource @Inject constructor(
@@ -30,10 +24,8 @@ class AuthDataSource @Inject constructor(
             Ok(authApiService.register(authUser))
         } catch (e: ClientRequestException) {
             Err(EmailTaken)
-        } catch (e: ServerResponseException) {
-            Err(ServerError)
-        } catch (e: ConnectTimeoutException) {
-            Err(ServerUnreachable)
+        } catch (e: Exception) {
+            Err(e.getApiError())
         }
     }
 
@@ -42,22 +34,16 @@ class AuthDataSource @Inject constructor(
             Ok(authApiService.login(authUser))
         } catch (e: ClientRequestException) {
             Err(InvalidCredentials)
-        } catch (e: ServerResponseException) {
-            Err(ServerError)
-        } catch (e: ConnectTimeoutException) {
-            Err(ServerUnreachable)
+        } catch (e: Exception) {
+            Err(e.getApiError())
         }
     }
 
     override suspend fun logout(authUser: AuthUser): Result<Unit, ApiError> {
         return try {
             Ok(authApiService.logout(authUser))
-        } catch (e: ClientRequestException) {
-            Err(DisposableError)
-        } catch (e: ConnectTimeoutException) {
-            Err(DisposableError)
-        } catch (e: InvalidRefreshTokenException) {
-            Err(LoggedOutError)
+        } catch (e: Exception) {
+            Err(e.getApiError())
         }
     }
 
@@ -66,10 +52,8 @@ class AuthDataSource @Inject constructor(
             Ok(authApiService.deleteUser(password))
         } catch (e: ClientRequestException) {
             Err(InvalidPassword)
-        } catch (e: ConnectTimeoutException) {
-            Err(ServerUnreachable)
-        } catch (e: InvalidRefreshTokenException) {
-            Err(LoggedOutError)
+        } catch (e: Exception) {
+            Err(e.getApiError())
         }
     }
 
@@ -83,10 +67,8 @@ class AuthDataSource @Inject constructor(
                 .getValue("refreshToken"))
         } catch (e: ClientRequestException) {
             Err(InvalidPassword)
-        } catch (e: ConnectTimeoutException) {
-            Err(ServerUnreachable)
-        } catch (e: InvalidRefreshTokenException) {
-            Err(LoggedOutError)
+        } catch (e: Exception) {
+            Err(e.getApiError())
         }
     }
 }

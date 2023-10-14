@@ -6,10 +6,18 @@ class InvalidRefreshTokenException : Exception()
 
 sealed class ApiError(val messageResource: Int)
 
+object DefaultRequest : ApiError(R.string.apierror_default_request)
+object DefaultRedirect : ApiError(R.string.apierror_default_redirect)
+
+// Auth
 object InvalidCredentials : ApiError(R.string.apierror_invalid_creds)
 object InvalidPassword : ApiError(R.string.apierror_invalid_password)
 object EmailTaken : ApiError(R.string.apierror_email_taken)
+object LoggedOut: ApiError(R.string.apierror_logged_out)
+
+// Notes
+object NoteNotFound: ApiError(R.string.apierror_note_not_found)
+
+// Server
 object ServerError : ApiError(R.string.apierror_server_error)
 object ServerUnreachable : ApiError(R.string.apierror_server_unreachable)
-object DisposableError : ApiError(0)
-object LoggedOutError: ApiError(R.string.apierror_logged_out)

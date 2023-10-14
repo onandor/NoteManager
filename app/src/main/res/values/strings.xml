@@ -55,6 +55,9 @@
     <string name="apierror_server_error">There has been an error on the server, please try again later</string>
     <string name="apierror_server_unreachable">The server cannot be reached. Please check your internet connection and try again</string>
     <string name="apierror_logged_out">You have been signed out</string>
+    <string name="apierror_default_request">There was an error with the request</string>
+    <string name="apierror_default_redirect">A redirect was unhandled</string>
+    <string name="apierror_note_not_found">The note was not found on the server</string>
     <string name="user_details_not_signed_in_title">You are not signed in</string>
     <string name="user_details_not_signed_in_description">Sign in to an account to back up your notes and synchronize them across multiple devices.</string>
     <string name="user_details_signed_in_as">You are signed in as</string>
