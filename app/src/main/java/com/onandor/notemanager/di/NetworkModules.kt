@@ -74,7 +74,7 @@ object HttpClientModule {
                                 url("auth/refresh")
                                 parameter("refreshToken", refreshToken)
                             }.body<TokenPair>()
-                        } catch (e: ClientRequestException) {
+                        } catch (e: Exception) {
                             settings.remove(SettingsKeys.USER_ID)
                             settings.remove(SettingsKeys.USER_EMAIL)
                             settings.remove(SettingsKeys.ACCESS_TOKEN)
