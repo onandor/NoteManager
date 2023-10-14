@@ -1,5 +1,6 @@
 package com.onandor.notemanager.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -119,6 +120,14 @@ fun EditLabelsScreen(
                 visible = uiState.addEditLabelDialogOpen,
                 colorSelection = viewModel.colorSelection
             )
+        }
+    }
+    BackHandler {
+        if (uiState.addEditLabelDialogOpen) {
+            viewModel.hideAddEditLabelDialog()
+        }
+        else {
+            viewModel.navigateBack()
         }
     }
 }
