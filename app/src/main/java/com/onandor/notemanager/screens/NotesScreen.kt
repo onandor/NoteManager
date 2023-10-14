@@ -12,8 +12,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,13 +31,20 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun NotesScreen(
-    openDrawer: () -> Unit,
+    onOpenDrawer: () -> Unit,
+    onToggleNoteListShowNoteContent: () -> Unit,
+    noteListShowNoteContent: Boolean,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     Scaffold (
-        topBar = { TopBar(openDrawer) },
+        topBar = {
+            TopBar(
+                onOpenDrawer = onOpenDrawer,
+                onToggleNoteListShowNoteContent = onToggleNoteListShowNoteContent
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = viewModel::addNote) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.notes_new_note))
@@ -48,6 +58,7 @@ fun NotesScreen(
             notes = uiState.notes,
             onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
+            showNoteContent = noteListShowNoteContent,
             emptyContent = { NotesEmptyContent() }
         )
 

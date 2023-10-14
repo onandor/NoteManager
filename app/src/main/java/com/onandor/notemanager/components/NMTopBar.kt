@@ -15,6 +15,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,7 +28,10 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.theme.NoteManagerTheme
 
 @Composable
-fun TopBar(openDrawer: () -> Unit) {
+fun TopBar(
+    onOpenDrawer: () -> Unit,
+    onToggleNoteListShowNoteContent: () -> Unit
+) {
     Surface(
         shape = RoundedCornerShape(50),
         modifier = Modifier
@@ -36,11 +43,11 @@ fun TopBar(openDrawer: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            IconButton(onClick = { openDrawer() }) {
+            IconButton(onClick = onOpenDrawer) {
                 Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.topbar_drawer))
             }
             Text(stringResource(R.string.topbar_search_notes))
-            IconButton(onClick = { /*TODO*/ }) {
+            IconButton(onClick = onToggleNoteListShowNoteContent) {
                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.topbar_change_view))
             }
         }
@@ -52,6 +59,6 @@ fun TopBar(openDrawer: () -> Unit) {
 @Composable
 fun TopBarPreview() {
     NoteManagerTheme {
-        TopBar(openDrawer = { })
+        TopBar(onOpenDrawer = { }, onToggleNoteListShowNoteContent = { })
     }
 }

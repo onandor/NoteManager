@@ -9,7 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -54,6 +57,7 @@ fun NavGraph(
     }
 
     Scaffold { innerPadding ->
+        var showNoteContent by rememberSaveable { mutableStateOf(true) }
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -65,7 +69,9 @@ fun NavGraph(
                     currentRoute = currentRoute,
                 ) {
                     NotesScreen(
-                        openDrawer = { coroutineScope.launch { drawerState.open() } }
+                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
+                        onToggleNoteListShowNoteContent = { showNoteContent = !showNoteContent },
+                        noteListShowNoteContent = showNoteContent
                     )
                 }
             }
@@ -86,7 +92,9 @@ fun NavGraph(
                     currentRoute = currentRoute,
                 ) {
                     ArchiveScreen(
-                        openDrawer = { coroutineScope.launch { drawerState.open() } }
+                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
+                        onToggleNoteListShowNoteContent = { showNoteContent = !showNoteContent },
+                        noteListShowNoteContent = showNoteContent
                     )
                 }
             }
@@ -96,7 +104,7 @@ fun NavGraph(
                     currentRoute = currentRoute,
                 ) {
                     TrashScreen(
-                        openDrawer = { coroutineScope.launch { drawerState.open() } }
+                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } }
                     )
                 }
             }
