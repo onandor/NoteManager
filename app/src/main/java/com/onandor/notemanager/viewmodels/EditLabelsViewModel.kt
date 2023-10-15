@@ -56,11 +56,11 @@ private fun Color?.toHexString(): String {
     if (this == null)
         return ""
 
-    var red: String = (this.component1().toInt() * 255).toString(16)
+    var red: String = (this.component1() * 255).toInt().toString(16)
     red = if (red.length < 2) "0$red" else red
-    var green: String = (this.component2().toInt() * 255).toString(16)
+    var green: String = (this.component2() * 255).toInt().toString(16)
     green = if (green.length < 2) "0$green" else green
-    var blue: String = (this.component3().toInt() * 255).toString(16)
+    var blue: String = (this.component3() * 255).toInt().toString(16)
     blue = if (blue.length < 2) "0$blue" else blue
     return "#$red$green$blue"
 }

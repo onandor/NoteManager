@@ -26,7 +26,7 @@ class LabelRepository @Inject constructor(
     override fun getLabelsStream(): Flow<List<Label>> {
         return localDataSource.observeAll().map { labels ->
             withContext(dispatcher) {
-                labels.toExternal()
+                labels.toExternal().sortedBy { it.title }
             }
         }
     }
@@ -37,7 +37,7 @@ class LabelRepository @Inject constructor(
 
     override suspend fun getLabels(): List<Label> {
         return withContext(dispatcher) {
-            localDataSource.getAll().toExternal()
+            localDataSource.getAll().toExternal().sortedBy { it.title }
         }
     }
 
