@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
@@ -39,7 +40,7 @@ private enum class DragAnchors {
 @Composable
 fun DraggableBottomDialog(
     modifier: Modifier = Modifier,
-    height: Int = 300,
+    height: Dp = 300.dp,
     visible: Boolean,
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
@@ -66,13 +67,14 @@ fun DraggableBottomDialog(
             modifier = Modifier.align(Alignment.BottomCenter),
             visible = visible,
             enter = slideInVertically {
-                with(density) { height.dp.roundToPx() }
+                with(density) { height.roundToPx() }
             },
             exit = slideOutVertically {
-                with(density) { height.dp.roundToPx() }
+                with(density) { height.roundToPx() }
             }
         ) {
             DialogCard(
+                modifier = modifier,
                 height = height,
                 density = density,
                 onDismiss = onDismiss,
@@ -85,7 +87,8 @@ fun DraggableBottomDialog(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DialogCard(
-    height: Int,
+    modifier: Modifier,
+    height: Dp,
     density: Density,
     onDismiss: () -> Unit,
     content: @Composable () -> Unit
@@ -100,7 +103,7 @@ private fun DialogCard(
             updateAnchors(
                 DraggableAnchors {
                     DragAnchors.Open at 0f
-                    DragAnchors.Closed at with(density) { height.dp.toPx() }
+                    DragAnchors.Closed at with(density) { height.toPx() }
                 }
             )
         }
@@ -109,9 +112,9 @@ private fun DialogCard(
         onDismiss()
     }
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(height.dp)
+            .height(height)
             .offset {
                 IntOffset(
                     0,

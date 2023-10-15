@@ -22,6 +22,7 @@
     <string name="addeditnote_archive_note">Archive note</string>
     <string name="addeditnote_delete_note">Delete note</string>
     <string name="addeditnote_add_labels">Add labels</string>
+    <string name="addeditnote_labels_loading_error">Error while loading labels</string>
     <string name="archive_note_list_empty">Your archive is empty</string>
     <string name="addeditresult_saved">Note saved</string>
     <string name="addeditresult_archived">Note archived</string>

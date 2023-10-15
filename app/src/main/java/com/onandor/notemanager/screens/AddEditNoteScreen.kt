@@ -1,8 +1,11 @@
 package com.onandor.notemanager.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,12 +28,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.components.DraggableBottomDialog
+import com.onandor.notemanager.components.LabelComponent
+import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.viewmodels.AddEditNoteUiState
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
@@ -56,11 +63,24 @@ fun AddEditNoteScreen(
             onContentChanged = viewModel::updateContent,
             Modifier.padding(innerPadding)
         )
+        EditLabelsDialog(
+            labels = uiState.labels,
+            remainingLabels = uiState.remainingLabels,
+            onAddLabel = viewModel::addLabel,
+            onRemoveLabel = viewModel::removeLabel,
+            onCloseDialog = viewModel::hideEditLabelsDialog,
+            visible = uiState.editLabelsDialogOpen
+        )
     }
 
     BackHandler {
-        viewModel.saveNote()
-        viewModel.navigateBack()
+        if (uiState.editLabelsDialogOpen) {
+            viewModel.hideEditLabelsDialog()
+        }
+        else {
+            viewModel.saveNote()
+            viewModel.navigateBack()
+        }
     }
 }
 
@@ -104,19 +124,66 @@ fun AddEditNoteTitleAndContent(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun EditLabelsDialog(
+    labels: List<Label>,
+    remainingLabels: List<Label>,
+    onAddLabel: (Label) -> Unit,
+    onRemoveLabel: (Label) -> Unit,
+    onCloseDialog: () -> Unit,
+    visible: Boolean
+) {
+    DraggableBottomDialog(
+        visible = visible,
+        onDismiss = onCloseDialog,
+        height = 260.dp,
+    ) {
+        val scrollState = rememberScrollState()
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(all = 15.dp)
+                .verticalScroll(scrollState)
+        ) {
+
+            Text("Added")
+            FlowRow {
+                labels.forEach { label ->
+                    LabelComponent(
+                        label = label,
+                        clickable = true,
+                        onClick = onRemoveLabel
+                    )
+                }
+            }
+            Text("Not added")
+            FlowRow {
+                remainingLabels.forEach { label ->
+                    LabelComponent(
+                        label = label,
+                        clickable = true,
+                        onClick = onAddLabel
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun AddEditNoteTopAppBar(
     viewModel: AddEditNoteViewModel,
     uiState: AddEditNoteUiState
 ) {
-    when(uiState.noteLocation) {
+    when(uiState.location) {
         NoteLocation.NOTES -> {
             AddEditNoteTopAppBar_Notes(
                 onSaveNote = viewModel::saveNote,
                 navigateBack = viewModel::navigateBack,
                 onArchiveNote = viewModel::archiveNote,
                 onTrashNote = viewModel::trashNote,
-                onAddLabels = { }
+                onAddLabels = viewModel::showEditLabelsDialog
             )
         }
         NoteLocation.ARCHIVE -> {
@@ -125,7 +192,7 @@ fun AddEditNoteTopAppBar(
                 navigateBack = viewModel::navigateBack,
                 onUnArchiveNote = viewModel::unArchiveNote,
                 onTrashNote = viewModel::trashNote,
-                onAddLabels = { }
+                onAddLabels = viewModel::showEditLabelsDialog
             )
         }
         NoteLocation.TRASH -> {

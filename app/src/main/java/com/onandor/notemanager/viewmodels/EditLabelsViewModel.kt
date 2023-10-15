@@ -85,7 +85,7 @@ class EditLabelsViewModel @Inject constructor(
 
     private val _labelsAsync = labelRepository.getLabelsStream()
         .map { AsyncResult.Success(it) }
-        .catch<AsyncResult<List<Label>>> { emit(AsyncResult.Error("Error while loading labels.")) } // TODO: resource
+        .catch<AsyncResult<List<Label>>> { emit(AsyncResult.Error("Error while loading labels.")) }
 
     private val addEditLabelDialogOpen = MutableStateFlow(false)
     private val addEditLabelForm = MutableStateFlow(AddEditLabelForm())

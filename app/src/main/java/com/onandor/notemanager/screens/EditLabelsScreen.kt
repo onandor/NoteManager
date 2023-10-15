@@ -174,7 +174,7 @@ fun AddEditLabelDialog(
     DraggableBottomDialog(
         visible = visible,
         onDismiss = onCloseDialog,
-        height = 260
+        height = 260.dp
     ) {
         Column(
             modifier = Modifier
@@ -292,7 +292,7 @@ fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
 
 @Preview
 @Composable
-fun AddEditLabelCardPreview() {
+fun AddEditLabelDialogPreview() {
     AddEditLabelDialog(
         title = "",
         color = Color(200, 0, 0),
