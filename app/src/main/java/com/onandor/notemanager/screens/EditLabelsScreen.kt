@@ -1,22 +1,8 @@
 package com.onandor.notemanager.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.AnchoredDraggableState
-import androidx.compose.foundation.gestures.DraggableAnchors
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,7 +24,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,29 +43,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.components.DraggableBottomDialog
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.viewmodels.EditLabelsViewModel
 import java.util.UUID
-import kotlin.math.roundToInt
-
-enum class DragAnchors {
-    Open,
-    Closed
-}
-
-private const val dialogHeight: Int = 260
 
 @Composable
 fun EditLabelsScreen(
@@ -115,7 +90,7 @@ fun EditLabelsScreen(
                     onDeleteLabel = viewModel::deleteLabel
                 )
             }
-            AddEditLabelComponent(
+            AddEditLabelDialog(
                 title = uiState.addEditLabelForm.title,
                 color = uiState.addEditLabelForm.color,
                 onTitleChanged = viewModel::addEditLabelUpdateTitle,
@@ -168,7 +143,7 @@ fun LabelItem(
             Color(android.graphics.Color.parseColor(label.color))
 
         Spacer(modifier = Modifier.width(10.dp))
-        ColorChoice(color = color, size = 30.dp)
+        ColorChoice(color = color, size = 30.dp, onClicked = { onLabelClick(label) })
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             modifier = Modifier.weight(100f),
@@ -186,7 +161,7 @@ fun LabelItem(
 }
 
 @Composable
-fun AddEditLabelComponent(
+fun AddEditLabelDialog(
     title: String,
     color: Color?,
     onTitleChanged: (String) -> Unit,
@@ -196,94 +171,10 @@ fun AddEditLabelComponent(
     visible: Boolean,
     colorSelection: List<Color>
 ) {
-    val density = LocalDensity.current
-    val interactionSource = remember { MutableInteractionSource() }
-    Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) { onCloseDialog() }
-            )
-        }
-        AnimatedVisibility(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            visible = visible,
-            enter = slideInVertically {
-                with(density) { dialogHeight.dp.roundToPx() }
-            },
-            exit = slideOutVertically {
-                with(density) { dialogHeight.dp.roundToPx() }
-            }
-        ) {
-            AddEditLabelCard(
-                title = title,
-                color = color,
-                onTitleChanged = onTitleChanged,
-                onColorChanged = onColorChanged,
-                onSubmitChange = onSubmitChange,
-                onCloseDialog = onCloseDialog,
-                colorSelection = colorSelection
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun AddEditLabelCard(
-    title: String,
-    color: Color?,
-    onTitleChanged: (String) -> Unit,
-    onColorChanged: (Color?) -> Unit,
-    onSubmitChange: () -> Unit,
-    onCloseDialog: () -> Unit,
-    colorSelection: List<Color>
-) {
-    val density = LocalDensity.current
-    val anchorState = remember {
-        AnchoredDraggableState(
-            initialValue = DragAnchors.Open,
-            positionalThreshold = { totalDistance -> totalDistance * 0.5f },
-            velocityThreshold = { with(density) { 100.dp.toPx() } },
-            animationSpec = tween()
-        ).apply {
-            updateAnchors(
-                DraggableAnchors {
-                    DragAnchors.Open at 0f
-                    DragAnchors.Closed at with(density) { dialogHeight.dp.toPx() }
-                }
-            )
-        }
-    }
-
-    if (anchorState.currentValue == DragAnchors.Closed) {
-        onCloseDialog()
-    }
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dialogHeight.dp)
-            .offset {
-                IntOffset(
-                    0,
-                    anchorState
-                        .requireOffset()
-                        .roundToInt()
-                )
-            }
-            .anchoredDraggable(
-                orientation = Orientation.Vertical,
-                state = anchorState
-            )
+    DraggableBottomDialog(
+        visible = visible,
+        onDismiss = onCloseDialog,
+        height = 260
     ) {
         Column(
             modifier = Modifier
@@ -402,13 +293,14 @@ fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
 @Preview
 @Composable
 fun AddEditLabelCardPreview() {
-    AddEditLabelCard(
+    AddEditLabelDialog(
         title = "",
         color = Color(200, 0, 0),
         onTitleChanged = { },
         onColorChanged = { },
         onSubmitChange = { },
         onCloseDialog = { },
+        visible = true,
         colorSelection = listOf(
             Color.Transparent,
             Color(200, 0, 0),
