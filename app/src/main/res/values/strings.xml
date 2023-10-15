@@ -97,4 +97,5 @@
     <string name="edit_labels_save">Save</string>
     <string name="edit_labels_color">Color</string>
     <string name="edit_labels_no_color">No color</string>
+    <string name="edit_labels_hint_delete">Delete</string>
 </resources>

@@ -36,12 +36,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -60,7 +62,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +73,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.viewmodels.EditLabelsViewModel
+import java.util.UUID
 import kotlin.math.roundToInt
 
 enum class DragAnchors {
@@ -151,18 +156,32 @@ fun LabelItem(
     onLabelClick: (Label) -> Unit,
     onDeleteLabel: (Label) -> Unit
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onLabelClick(label) }
-            .border(width = 1.dp, color = Color.Black)
+            .clickable { onLabelClick(label) },
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label.id.toString())
-        Text(label.color)
-        Text(label.title)
-        Button(onClick = { onDeleteLabel(label) }) {
-            Text("Delete")
+        val color = if (label.color.isEmpty())
+            MaterialTheme.colorScheme.surfaceVariant
+        else
+            Color(android.graphics.Color.parseColor(label.color))
+
+        Spacer(modifier = Modifier.width(10.dp))
+        ColorChoice(color = color, size = 30.dp)
+        Spacer(modifier = Modifier.width(10.dp))
+        Text(
+            modifier = Modifier.weight(100f),
+            text = label.title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            fontSize = 18.sp
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(onClick = { onDeleteLabel(label) }) {
+            Icon(Icons.Filled.Delete, stringResource(R.string.edit_labels_hint_delete))
         }
+        Spacer(modifier = Modifier.width(5.dp))
     }
 }
 
@@ -318,7 +337,8 @@ fun AddEditLabelCard(
                     ColorChoice(
                         color = colorChoice,
                         selected = colorChoice == color,
-                        onClicked = onColorChanged
+                        onClicked = onColorChanged,
+                        size = 50.dp
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                 }
@@ -342,13 +362,14 @@ fun AddEditLabelCard(
 @Composable
 fun ColorChoice(
     color: Color,
-    selected: Boolean,
-    onClicked: (Color) -> Unit
+    selected: Boolean = false,
+    onClicked: (Color) -> Unit = { },
+    size: Dp
 ) {
     OutlinedButton(
         modifier = Modifier
-            .width(50.dp)
-            .height(50.dp),
+            .width(size)
+            .height(size),
         onClick = { onClicked(color) },
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(containerColor = color)
@@ -394,5 +415,16 @@ fun AddEditLabelCardPreview() {
             Color(0, 200, 0),
             Color(0, 0, 200)
         )
+    )
+}
+
+@Preview
+@Composable
+fun LabelItemPreview() {
+    val label = Label(UUID.randomUUID(), "Very long test label wow very very long this is the longest", "#005500")
+    LabelItem(
+        label = label,
+        onLabelClick = { },
+        onDeleteLabel = { }
     )
 }
