@@ -23,6 +23,9 @@
     <string name="addeditnote_delete_note">Delete note</string>
     <string name="addeditnote_add_labels">Add labels</string>
     <string name="addeditnote_labels_loading_error">Error while loading labels</string>
+    <string name="dialog_edit_note_labels_added">Added</string>
+    <string name="dialog_edit_note_labels_empty">Empty</string>
+    <string name="dialog_edit_note_labels_available">Available</string>
     <string name="archive_note_list_empty">Your archive is empty</string>
     <string name="addeditresult_saved">Note saved</string>
     <string name="addeditresult_archived">Note archived</string>

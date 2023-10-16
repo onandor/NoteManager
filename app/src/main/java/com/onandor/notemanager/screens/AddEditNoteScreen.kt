@@ -174,12 +174,15 @@ fun EditLabelsDialogContent(
             .verticalScroll(rememberScrollState())
     ) {
         Text(
-            text = "Added",
+            text = stringResource(id = R.string.dialog_edit_note_labels_added),
             fontSize = 23.sp
         )
         Spacer(modifier = Modifier.height(10.dp))
         if (labels.isEmpty()) {
-            Text("Empty", fontStyle = FontStyle.Italic)
+            Text(
+                text = stringResource(id = R.string.dialog_edit_note_labels_empty),
+                fontStyle = FontStyle.Italic
+            )
             Spacer(modifier = Modifier.height(20.dp))
         }
         else {
@@ -205,12 +208,15 @@ fun EditLabelsDialogContent(
         }
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-            text = "Available",
+            text = stringResource(id = R.string.dialog_edit_note_labels_available),
             fontSize = 23.sp
         )
         Spacer(modifier = Modifier.height(10.dp))
         if (remainingLabels.isEmpty()) {
-            Text("Empty", fontStyle = FontStyle.Italic)
+            Text(
+                text = stringResource(id = R.string.dialog_edit_note_labels_empty),
+                fontStyle = FontStyle.Italic
+            )
             Spacer(modifier = Modifier.height(20.dp))
         }
         else {
