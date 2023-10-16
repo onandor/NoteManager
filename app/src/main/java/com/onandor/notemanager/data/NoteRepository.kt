@@ -131,7 +131,7 @@ class NoteRepository @Inject constructor(
             ?: throw Exception("Note (id $noteId) not found in local database")
 
         val localLabels = labels.toLocal()
-        noteLabelDao.deleteByLabelIdIfNotInList(localLabels.map { label -> label.id })
+        noteLabelDao.deleteByNoteIdIfLabelIdNotInList(noteId, localLabels.map { label -> label.id })
         labels.forEach { label ->
             noteLabelDao.insertOrIgnore(noteId, label.id)
         }

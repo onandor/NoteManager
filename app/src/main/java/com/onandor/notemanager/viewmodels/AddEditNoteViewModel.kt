@@ -59,7 +59,6 @@ class AddEditNoteViewModel @Inject constructor(
         .catch<AsyncResult<List<Label>>> { emit(AsyncResult.Error("Error while loading labels.")) } // TODO: resource
 
     private val _uiState = MutableStateFlow(AddEditNoteUiState())
-    //val uiState: StateFlow<AddEditNoteUiState> = _uiState.asStateFlow()
     val uiState: StateFlow<AddEditNoteUiState> = combine(
         _uiState, _labelsAsync
     ) { uiState, labelsAsync ->

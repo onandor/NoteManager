@@ -19,8 +19,8 @@ interface NoteLabelDao {
     @Query("DELETE FROM note_labels WHERE note_id = :noteId AND label_id = :labelId")
     suspend fun deleteByNoteIdAndLabelId(noteId: UUID, labelId: UUID)
 
-    @Query("DELETE FROM note_labels WHERE label_id NOT IN (:labelIds)")
-    suspend fun deleteByLabelIdIfNotInList(labelIds: List<UUID>)
+    @Query("DELETE FROM note_labels WHERE label_id NOT IN (:labelIds) AND note_id = :noteId")
+    suspend fun deleteByNoteIdIfLabelIdNotInList(noteId: UUID, labelIds: List<UUID>)
 
     @Query("DELETE FROM note_labels")
     suspend fun deleteAll()
