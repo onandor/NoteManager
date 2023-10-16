@@ -57,7 +57,7 @@ fun TrashScreen(
             notes = uiState.notes,
             onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
-            showNoteContent = true,
+            collapsedView = false,
             emptyContent = { TrashEmptyContent() }
         )
 

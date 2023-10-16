@@ -32,8 +32,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun NotesScreen(
     onOpenDrawer: () -> Unit,
-    onToggleNoteListShowNoteContent: () -> Unit,
-    noteListShowNoteContent: Boolean,
+    onToggleCollapsedView: () -> Unit,
+    collapsedView: Boolean,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -42,7 +42,7 @@ fun NotesScreen(
         topBar = {
             TopBar(
                 onOpenDrawer = onOpenDrawer,
-                onToggleNoteListShowNoteContent = onToggleNoteListShowNoteContent
+                onToggleNoteListCollapsedView = onToggleCollapsedView
             )
         },
         floatingActionButton = {
@@ -58,7 +58,7 @@ fun NotesScreen(
             notes = uiState.notes,
             onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
-            showNoteContent = noteListShowNoteContent,
+            collapsedView = collapsedView,
             emptyContent = { NotesEmptyContent() }
         )
 

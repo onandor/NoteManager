@@ -36,7 +36,7 @@ fun NoteList(
     notes: List<Note>,
     onNoteClick: (Note) -> Unit,
     modifier: Modifier,
-    showNoteContent: Boolean,
+    collapsedView: Boolean,
     emptyContent: @Composable () -> Unit
 ) {
     Box(modifier = modifier.fillMaxSize()) {
@@ -46,7 +46,7 @@ fun NoteList(
         else {
             LazyColumn {
                 items(notes) { note ->
-                    NoteItem(note, showNoteContent, onNoteClick)
+                    NoteItem(note, collapsedView, onNoteClick)
                 }
             }
         }
@@ -56,7 +56,7 @@ fun NoteList(
 @Composable
 fun NoteItem(
     note: Note,
-    showNoteContent: Boolean,
+    collapsedView: Boolean,
     onNoteClick: (Note) -> Unit
 ) {
     Surface (
@@ -80,11 +80,11 @@ fun NoteItem(
                     text = note.title,
                     fontSize = 22.sp
                 )
-                if (showNoteContent) {
+                if (!collapsedView) {
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }
-            AnimatedVisibility(visible = !showNoteContent && note.title.isEmpty()) {
+            AnimatedVisibility(visible = collapsedView && note.title.isEmpty()) {
                 Text(
                     text = note.content,
                     lineHeight = 16.sp,
@@ -92,7 +92,7 @@ fun NoteItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            AnimatedVisibility(visible = showNoteContent) {
+            AnimatedVisibility(visible = !collapsedView) {
                 Text(
                     text = note.content,
                     lineHeight = 16.sp,
@@ -119,7 +119,7 @@ fun PreviewNoteItem() {
 
     NoteItem(
         note = note,
-        showNoteContent = true,
+        collapsedView = false,
         onNoteClick = { }
     )
 }

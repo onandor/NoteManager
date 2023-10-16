@@ -30,7 +30,7 @@ import com.onandor.notemanager.ui.theme.NoteManagerTheme
 @Composable
 fun TopBar(
     onOpenDrawer: () -> Unit,
-    onToggleNoteListShowNoteContent: () -> Unit
+    onToggleNoteListCollapsedView: () -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(50),
@@ -47,7 +47,7 @@ fun TopBar(
                 Icon(Icons.Filled.Menu, contentDescription = stringResource(R.string.topbar_drawer))
             }
             Text(stringResource(R.string.topbar_search_notes))
-            IconButton(onClick = onToggleNoteListShowNoteContent) {
+            IconButton(onClick = onToggleNoteListCollapsedView) {
                 Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.topbar_change_view))
             }
         }
@@ -59,6 +59,6 @@ fun TopBar(
 @Composable
 fun TopBarPreview() {
     NoteManagerTheme {
-        TopBar(onOpenDrawer = { }, onToggleNoteListShowNoteContent = { })
+        TopBar(onOpenDrawer = { }, onToggleNoteListCollapsedView = { })
     }
 }

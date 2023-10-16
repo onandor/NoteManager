@@ -60,7 +60,7 @@ fun NavGraph(
     }
 
     Scaffold { innerPadding ->
-        var showNoteContent by rememberSaveable { mutableStateOf(true) }
+        var noteListCollapsedView by rememberSaveable { mutableStateOf(false) }
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -73,8 +73,8 @@ fun NavGraph(
                 ) {
                     NotesScreen(
                         onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onToggleNoteListShowNoteContent = { showNoteContent = !showNoteContent },
-                        noteListShowNoteContent = showNoteContent
+                        onToggleCollapsedView = { noteListCollapsedView = !noteListCollapsedView },
+                        collapsedView = noteListCollapsedView
                     )
                 }
             }
@@ -96,8 +96,8 @@ fun NavGraph(
                 ) {
                     ArchiveScreen(
                         onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onToggleNoteListShowNoteContent = { showNoteContent = !showNoteContent },
-                        noteListShowNoteContent = showNoteContent
+                        onToggleCollapsedView = { noteListCollapsedView = !noteListCollapsedView },
+                        collapsedView = noteListCollapsedView
                     )
                 }
             }

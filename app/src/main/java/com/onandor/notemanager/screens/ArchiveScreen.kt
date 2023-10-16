@@ -24,8 +24,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ArchiveScreen(
     onOpenDrawer: () -> Unit,
-    onToggleNoteListShowNoteContent: () -> Unit,
-    noteListShowNoteContent: Boolean,
+    onToggleCollapsedView: () -> Unit,
+    collapsedView: Boolean,
     viewModel: ArchiveViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -34,7 +34,7 @@ fun ArchiveScreen(
         topBar = {
             TopBar(
                 onOpenDrawer = onOpenDrawer,
-                onToggleNoteListShowNoteContent = onToggleNoteListShowNoteContent
+                onToggleNoteListCollapsedView = onToggleCollapsedView
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -45,7 +45,7 @@ fun ArchiveScreen(
             notes = uiState.notes,
             onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
-            showNoteContent = noteListShowNoteContent,
+            collapsedView = collapsedView,
             emptyContent = { ArchiveEmptyContent() }
         )
 
