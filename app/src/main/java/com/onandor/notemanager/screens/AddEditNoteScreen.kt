@@ -1,7 +1,6 @@
 package com.onandor.notemanager.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -10,12 +9,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -24,53 +28,75 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
-import com.onandor.notemanager.components.DraggableBottomDialog
 import com.onandor.notemanager.components.LabelComponent
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.viewmodels.AddEditNoteUiState
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
 
-    Scaffold(
-        topBar = {
-            AddEditNoteTopAppBar(
-                viewModel = viewModel,
-                uiState = uiState
+    ModalBottomSheetLayout(
+        sheetContent = {
+            EditLabelsDialogContent(
+                labels = uiState.labels,
+                remainingLabels = uiState.remainingLabels,
+                onAddLabel = viewModel::addLabel,
+                onRemoveLabel = viewModel::removeLabel
             )
+        },
+        sheetState = sheetState
+    ) {
+        Scaffold(
+            topBar = {
+                AddEditNoteTopAppBar(
+                    viewModel = viewModel,
+                    uiState = uiState
+                )
+            }
+        ) { innerPadding ->
+            val coroutineScope = rememberCoroutineScope()
+
+            AddEditNoteTitleAndContent(
+                modifier = Modifier.padding(innerPadding),
+                title = uiState.title,
+                content = uiState.content,
+                onTitleChanged = viewModel::updateTitle,
+                onContentChanged = viewModel::updateContent,
+            )
+
+            LaunchedEffect(uiState.editLabelsDialogOpen) {
+                if (uiState.editLabelsDialogOpen) {
+                    coroutineScope.launch {
+                        sheetState.show()
+                    }
+                }
+            }
+            LaunchedEffect(sheetState.isVisible) {
+                if (!sheetState.isVisible) {
+                    viewModel.hideEditLabelsDialog()
+                }
+            }
         }
-    ) { innerPadding ->
-        AddEditNoteTitleAndContent(
-            title = uiState.title,
-            content = uiState.content,
-            onTitleChanged = viewModel::updateTitle,
-            onContentChanged = viewModel::updateContent,
-            Modifier.padding(innerPadding)
-        )
-        EditLabelsDialog(
-            labels = uiState.labels,
-            remainingLabels = uiState.remainingLabels,
-            onAddLabel = viewModel::addLabel,
-            onRemoveLabel = viewModel::removeLabel,
-            onCloseDialog = viewModel::hideEditLabelsDialog,
-            visible = uiState.editLabelsDialogOpen
-        )
     }
 
     BackHandler {
@@ -86,11 +112,11 @@ fun AddEditNoteScreen(
 
 @Composable
 fun AddEditNoteTitleAndContent(
+    modifier: Modifier,
     title: String,
     content: String,
     onTitleChanged: (String) -> Unit,
     onContentChanged: (String) -> Unit,
-    modifier: Modifier
 ) {
     Column (
         modifier = modifier
@@ -126,46 +152,36 @@ fun AddEditNoteTitleAndContent(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun EditLabelsDialog(
+fun EditLabelsDialogContent(
     labels: List<Label>,
     remainingLabels: List<Label>,
     onAddLabel: (Label) -> Unit,
-    onRemoveLabel: (Label) -> Unit,
-    onCloseDialog: () -> Unit,
-    visible: Boolean
+    onRemoveLabel: (Label) -> Unit
 ) {
-    DraggableBottomDialog(
-        visible = visible,
-        onDismiss = onCloseDialog,
-        height = 260.dp,
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(all = 15.dp)
+            .verticalScroll(rememberScrollState())
+            .systemBarsPadding()
     ) {
-        val scrollState = rememberScrollState()
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(all = 15.dp)
-                .verticalScroll(scrollState)
-        ) {
-
-            Text("Added")
-            FlowRow {
-                labels.forEach { label ->
-                    LabelComponent(
-                        label = label,
-                        clickable = true,
-                        onClick = onRemoveLabel
-                    )
-                }
+        Text("Added")
+        FlowRow {
+            labels.forEach { label ->
+                LabelComponent(
+                    label = label,
+                    clickable = true,
+                    onClick = onRemoveLabel
+                )
             }
-            Text("Not added")
-            FlowRow {
-                remainingLabels.forEach { label ->
-                    LabelComponent(
-                        label = label,
-                        clickable = true,
-                        onClick = onAddLabel
-                    )
-                }
+        }
+        FlowRow {
+            remainingLabels.forEach { label ->
+                LabelComponent(
+                    label = label,
+                    clickable = true,
+                    onClick = onAddLabel
+                )
             }
         }
     }
