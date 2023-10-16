@@ -36,6 +36,7 @@ import com.onandor.notemanager.screens.TrashScreen
 import com.onandor.notemanager.screens.UserDetailsScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.lang.IllegalArgumentException
 
 @Composable
 fun NavGraph(
@@ -52,7 +53,9 @@ fun NavGraph(
 
     LaunchedEffect(navManagerState) {
         navManagerState?.let {
-            navController.navigate(it.destination, it.navOptions)
+            try {
+                navController.navigate(it.destination, it.navOptions)
+            } catch (_: IllegalArgumentException) {}
         }
     }
 

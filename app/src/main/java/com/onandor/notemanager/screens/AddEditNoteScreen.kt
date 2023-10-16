@@ -45,6 +45,7 @@ import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.viewmodels.AddEditNoteUiState
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -54,6 +55,7 @@ fun AddEditNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
+    val coroutineScope = rememberCoroutineScope()
 
     ModalBottomSheetLayout(
         sheetContent = {
@@ -74,8 +76,6 @@ fun AddEditNoteScreen(
                 )
             }
         ) { innerPadding ->
-            val coroutineScope = rememberCoroutineScope()
-
             AddEditNoteTitleAndContent(
                 modifier = Modifier.padding(innerPadding),
                 title = uiState.title,
@@ -101,6 +101,9 @@ fun AddEditNoteScreen(
 
     BackHandler {
         if (uiState.editLabelsDialogOpen) {
+            coroutineScope.launch {
+                sheetState.hide()
+            }
             viewModel.hideEditLabelsDialog()
         }
         else {
