@@ -73,7 +73,11 @@ fun LabelComponent(
         Row(
             modifier = Modifier.padding(padding)
         ) {
-            Text(title, fontSize = fontSize)
+            Text(
+                text = title,
+                fontSize = fontSize,
+                lineHeight = fontSize
+            )
         }
     }
 }

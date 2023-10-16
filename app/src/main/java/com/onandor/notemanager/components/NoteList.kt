@@ -3,8 +3,11 @@ package com.onandor.notemanager.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -53,6 +57,7 @@ fun NoteList(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NoteItem(
     note: Note,
@@ -93,12 +98,30 @@ fun NoteItem(
                 )
             }
             AnimatedVisibility(visible = !collapsedView) {
-                Text(
-                    text = note.content,
-                    lineHeight = 16.sp,
-                    maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Column {
+                    Text(
+                        text = note.content,
+                        lineHeight = 16.sp,
+                        maxLines = 10,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (note.labels.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
+                            verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top)
+                        ) {
+                            note.labels.forEach { label ->
+                                LabelComponent(
+                                    label = label,
+                                    fontSize = 14.sp,
+                                    maxLength = 10,
+                                    padding = 5.dp
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -107,11 +130,16 @@ fun NoteItem(
 @Preview
 @Composable
 fun PreviewNoteItem() {
+    val label = Label(
+        id = UUID.randomUUID(),
+        title = "Test label",
+        color = "#FF0000"
+    )
     val note = Note(
         id = UUID.randomUUID(),
         title = "Test note",
         content = "This is a test note",
-        labels = emptyList(),
+        labels = listOf(label),
         location = NoteLocation.NOTES,
         creationDate = LocalDateTime.now(),
         modificationDate = LocalDateTime.now()
