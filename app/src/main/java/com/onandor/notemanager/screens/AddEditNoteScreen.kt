@@ -18,8 +18,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Icon
@@ -287,7 +287,7 @@ fun AddEditNoteTopAppBar_Notes(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = { onSaveNote(); navigateBack() }) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -331,7 +331,7 @@ fun AddEditNoteTopAppBar_Archive(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = { onSaveNote(); navigateBack() }) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -372,7 +372,7 @@ fun AddEditNoteTopAppBar_Trash(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = { navigateBack() }) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
             }
             IconButton(onClick = { onDeleteNote(); navigateBack() }) {
                 Icon(
