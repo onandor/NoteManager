@@ -9,10 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -60,7 +57,8 @@ fun NavGraph(
     }
 
     Scaffold { innerPadding ->
-        var noteListCollapsedView by rememberSaveable { mutableStateOf(false) }
+        val noteListCollapsedView = viewModel.noteListCollapsedView.collectAsState()
+
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -73,8 +71,8 @@ fun NavGraph(
                 ) {
                     NotesScreen(
                         onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onToggleCollapsedView = { noteListCollapsedView = !noteListCollapsedView },
-                        collapsedView = noteListCollapsedView
+                        onToggleCollapsedView = viewModel::toggleNoteListCollapsedView,
+                        collapsedView = noteListCollapsedView.value
                     )
                 }
             }
@@ -96,8 +94,8 @@ fun NavGraph(
                 ) {
                     ArchiveScreen(
                         onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onToggleCollapsedView = { noteListCollapsedView = !noteListCollapsedView },
-                        collapsedView = noteListCollapsedView
+                        onToggleCollapsedView = viewModel::toggleNoteListCollapsedView,
+                        collapsedView = noteListCollapsedView.value
                     )
                 }
             }

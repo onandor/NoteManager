@@ -27,6 +27,7 @@ object SettingsKeys {
     val USER_EMAIL = SettingsKey(true, stringPreferencesKey("user_email"))
     val FIRST_LAUNCH = SettingsKey(false, booleanPreferencesKey("first_launch"))
     val INSTALLATION_ID = SettingsKey(true, stringPreferencesKey("installation_id"))
+    val NOTE_LIST_COLLAPSED_VIEW = SettingsKey(false, booleanPreferencesKey("note_list_collapsed_view"))
 }
 
 class Settings @Inject constructor(
