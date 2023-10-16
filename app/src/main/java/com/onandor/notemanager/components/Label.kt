@@ -14,7 +14,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.onandor.notemanager.data.Label
 import java.util.UUID
 import kotlin.math.sqrt
@@ -29,11 +33,16 @@ private fun getBorderColor(color: Color, isLightColor: Boolean): Color {
 
 @Composable
 fun LabelComponent(
+    modifier: Modifier = Modifier,
     label: Label,
     clickable: Boolean = false,
     onClick: (Label) -> Unit = {},
-    maxLength: Int = 30
-) {
+    maxLength: Int = 30,
+    padding: Dp = 5.dp,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    borderWidth: Dp = 1.dp,
+    roundedCornerSize: Dp = 5.dp
+    ) {
     val color = if (label.color.isEmpty())
         MaterialTheme.colorScheme.surfaceVariant
     else
@@ -42,29 +51,29 @@ fun LabelComponent(
     val isLightColor = color.luminance() > sqrt(1.05 * 0.05) - 0.05
     val contentColor = if (isLightColor) Color.Black else Color.White
 
-    var modifier = Modifier
+    var _modifier = modifier
         .border(
-            width = 1.dp,
+            width = borderWidth,
             color = getBorderColor(color, isLightColor),
-            shape = RoundedCornerShape(10.dp)
+            shape = RoundedCornerShape(roundedCornerSize)
         )
-        .clip(RoundedCornerShape(10.dp))
+        .clip(RoundedCornerShape(roundedCornerSize))
     if (clickable)
-        modifier = modifier.clickable { onClick(label) }
+        _modifier = _modifier.clickable { onClick(label) }
 
     var title = label.title.take(maxLength)
     if (title.length < label.title.length)
         title += "..."
 
     Surface(
-        modifier = modifier,
+        modifier = _modifier,
         color = color,
         contentColor = contentColor
     ) {
         Row(
-            modifier = Modifier.padding(5.dp)
+            modifier = Modifier.padding(padding)
         ) {
-            Text(title)
+            Text(title, fontSize = fontSize)
         }
     }
 }

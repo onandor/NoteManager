@@ -1,16 +1,18 @@
 package com.onandor.notemanager.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,7 +39,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
@@ -45,7 +50,6 @@ import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.viewmodels.AddEditNoteUiState
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -66,7 +70,9 @@ fun AddEditNoteScreen(
                 onRemoveLabel = viewModel::removeLabel
             )
         },
-        sheetState = sheetState
+        sheetState = sheetState,
+        sheetShape = RoundedCornerShape(10.dp),
+        sheetBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Scaffold(
             topBar = {
@@ -164,27 +170,68 @@ fun EditLabelsDialogContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(all = 15.dp)
+            .padding(start = 15.dp, end = 15.dp, top = 20.dp, bottom = 20.dp)
             .verticalScroll(rememberScrollState())
-            .systemBarsPadding()
     ) {
-        Text("Added")
-        FlowRow {
-            labels.forEach { label ->
-                LabelComponent(
-                    label = label,
-                    clickable = true,
-                    onClick = onRemoveLabel
-                )
+        Text(
+            text = "Added",
+            fontSize = 23.sp
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        if (labels.isEmpty()) {
+            Text("Empty", fontStyle = FontStyle.Italic)
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+        else {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+                verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top),
+            ) {
+                labels.forEach { label ->
+                    LabelComponent(
+                        label = label,
+                        clickable = true,
+                        onClick = onRemoveLabel,
+                        padding = 10.dp,
+                        fontSize = 20.sp,
+                        borderWidth = 2.dp,
+                        roundedCornerSize = 10.dp
+                    )
+                }
             }
         }
-        FlowRow {
-            remainingLabels.forEach { label ->
-                LabelComponent(
-                    label = label,
-                    clickable = true,
-                    onClick = onAddLabel
-                )
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(
+            text = "Available",
+            fontSize = 23.sp
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        if (remainingLabels.isEmpty()) {
+            Text("Empty", fontStyle = FontStyle.Italic)
+            Spacer(modifier = Modifier.height(20.dp))
+        }
+        else {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
+                verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top)
+            ) {
+                remainingLabels.forEach { label ->
+                    LabelComponent(
+                        label = label,
+                        clickable = true,
+                        onClick = onAddLabel,
+                        padding = 10.dp,
+                        fontSize = 20.sp,
+                        borderWidth = 2.dp,
+                        roundedCornerSize = 10.dp
+                    )
+                }
             }
         }
     }
