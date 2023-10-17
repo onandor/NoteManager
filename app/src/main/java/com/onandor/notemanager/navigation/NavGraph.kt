@@ -1,9 +1,15 @@
 package com.onandor.notemanager.navigation
 
-import androidx.compose.foundation.layout.padding
+import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,6 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -47,6 +54,7 @@ fun NavGraph(
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: startDestination
     val navManagerState by viewModel.navigationManager.navActions.collectAsState()
+    val noteListCollapsedView = viewModel.noteListCollapsedView.collectAsState()
 
     LaunchedEffect(navManagerState) {
         navManagerState?.let {
@@ -56,24 +64,26 @@ fun NavGraph(
         }
     }
 
-    Scaffold { innerPadding ->
-        val noteListCollapsedView = viewModel.noteListCollapsedView.collectAsState()
-
+    Surface {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = modifier.padding(innerPadding)
+            modifier = modifier
+                .navigationBarsPadding()
+                .imePadding()
         ) {
             composable(NavDestinations.NOTES) {
                 AppModalDrawer(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
                 ) {
-                    NotesScreen(
-                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onToggleCollapsedView = viewModel::toggleNoteListCollapsedView,
-                        collapsedView = noteListCollapsedView.value
-                    )
+                    Box(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                        NotesScreen(
+                            onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
+                            onToggleCollapsedView = viewModel::toggleNoteListCollapsedView,
+                            collapsedView = noteListCollapsedView.value
+                        )
+                    }
                 }
             }
             composable(

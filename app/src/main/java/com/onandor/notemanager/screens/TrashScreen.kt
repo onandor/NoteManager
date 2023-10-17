@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
@@ -43,6 +44,7 @@ fun TrashScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     Scaffold (
+        modifier = Modifier.statusBarsPadding(),
         topBar = {
             TrashTopBar(
                 openDrawer = onOpenDrawer,

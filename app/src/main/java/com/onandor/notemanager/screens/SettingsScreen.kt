@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -29,7 +30,8 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     Scaffold(
-        topBar = { SettingsTopBar(navigateBack = viewModel::navigateBack)}
+        modifier = Modifier.statusBarsPadding(),
+        topBar = { SettingsTopBar(navigateBack = viewModel::navigateBack) }
     ) { innerPadding ->
         Column {
             Text(text = "Settings", modifier = Modifier.padding(innerPadding))

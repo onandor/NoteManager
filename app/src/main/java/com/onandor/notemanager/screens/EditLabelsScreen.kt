@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -65,6 +66,7 @@ fun EditLabelsScreen(
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
+        modifier = Modifier.statusBarsPadding(),
         topBar = { EditLabelsTopAppBar(viewModel::navigateBack) },
         floatingActionButton = {
             if (!uiState.addEditLabelDialogOpen) {
@@ -90,18 +92,20 @@ fun EditLabelsScreen(
                     onDeleteLabel = viewModel::deleteLabel
                 )
             }
-            AddEditLabelDialog(
-                title = uiState.addEditLabelForm.title,
-                color = uiState.addEditLabelForm.color,
-                onTitleChanged = viewModel::addEditLabelUpdateTitle,
-                onColorChanged = viewModel::addEditLabelUpdateColor,
-                onSubmitChange = viewModel::saveLabel,
-                onCloseDialog = viewModel::hideAddEditLabelDialog,
-                visible = uiState.addEditLabelDialogOpen,
-                colorSelection = viewModel.colorSelection
-            )
         }
     }
+
+    AddEditLabelDialog(
+        title = uiState.addEditLabelForm.title,
+        color = uiState.addEditLabelForm.color,
+        onTitleChanged = viewModel::addEditLabelUpdateTitle,
+        onColorChanged = viewModel::addEditLabelUpdateColor,
+        onSubmitChange = viewModel::saveLabel,
+        onCloseDialog = viewModel::hideAddEditLabelDialog,
+        visible = uiState.addEditLabelDialogOpen,
+        colorSelection = viewModel.colorSelection
+    )
+
     BackHandler {
         if (uiState.addEditLabelDialogOpen) {
             viewModel.hideAddEditLabelDialog()
