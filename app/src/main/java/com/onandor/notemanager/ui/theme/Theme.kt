@@ -57,6 +57,8 @@ fun NoteManagerTheme(
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = android.graphics.Color.TRANSPARENT
+            window.navigationBarColor = android.graphics.Color.TRANSPARENT
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             WindowCompat.setDecorFitsSystemWindows(window, false)
         }
