@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.onandor.notemanager.R
+import com.onandor.notemanager.ui.theme.ThemeType
 import com.onandor.notemanager.viewmodels.SettingsViewModel
 
 @Composable
@@ -37,6 +38,15 @@ fun SettingsScreen(
             Text(text = "Settings", modifier = Modifier.padding(innerPadding))
             Button(onClick = { viewModel.resetFirstLaunch() }) {
                 Text(text = "Reset first launch to true")
+            }
+            Button(onClick = { viewModel.saveThemeType(ThemeType.SYSTEM) }) {
+                Text(text = "Set system theme")
+            }
+            Button(onClick = { viewModel.saveThemeType(ThemeType.LIGHT) }) {
+                Text(text = "Set light theme")
+            }
+            Button(onClick = { viewModel.saveThemeType(ThemeType.DARK) }) {
+                Text(text = "Set dark theme")
             }
         }
     }

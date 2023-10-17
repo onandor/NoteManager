@@ -7,9 +7,11 @@ import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavActions
 import com.onandor.notemanager.navigation.NavDestinations
+import com.onandor.notemanager.ui.theme.ThemeType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -17,7 +19,8 @@ import javax.inject.Inject
 
 data class SplashUiState(
     val isLoading: Boolean = true,
-    val startDestination: String = NavDestinations.NOTES
+    val startDestination: String = NavDestinations.NOTES,
+    val themeType: ThemeType = ThemeType.SYSTEM
 )
 
 @HiltViewModel
@@ -48,6 +51,19 @@ class SplashViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+
+            settings.observeInt(SettingsKeys.THEME_TYPE).collect { themeSetting ->
+                val themeType =
+                    if (themeSetting < 0)
+                        ThemeType.SYSTEM
+                    else
+                        ThemeType.fromInt(themeSetting)
+                _uiState.update { it.copy(themeType = themeType) }
+            }
         }
+    }
+
+    fun getThemeType() {
+        settings.observeInt(SettingsKeys.THEME_TYPE)
     }
 }
