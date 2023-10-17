@@ -75,7 +75,7 @@ fun NotesScreen(
 }
 
 @Composable
-fun NotesEmptyContent() {
+private fun NotesEmptyContent() {
     // TODO
     Text("You don't have any notes")
 }

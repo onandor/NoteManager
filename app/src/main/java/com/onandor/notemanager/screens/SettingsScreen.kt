@@ -45,7 +45,7 @@ fun SettingsScreen(
 }
 
 @Composable
-fun SettingsTopBar(navigateBack: () -> Unit) {
+private fun SettingsTopBar(navigateBack: () -> Unit) {
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)) {

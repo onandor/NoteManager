@@ -62,6 +62,6 @@ fun ArchiveScreen(
 }
 
 @Composable
-fun ArchiveEmptyContent() {
+private fun ArchiveEmptyContent() {
     Text("Your archive is empty")
 }

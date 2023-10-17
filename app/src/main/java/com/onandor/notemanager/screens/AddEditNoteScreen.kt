@@ -120,7 +120,7 @@ fun AddEditNoteScreen(
 }
 
 @Composable
-fun AddEditNoteTitleAndContent(
+private fun AddEditNoteTitleAndContent(
     modifier: Modifier,
     title: String,
     content: String,
@@ -161,7 +161,7 @@ fun AddEditNoteTitleAndContent(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun EditLabelsDialogContent(
+private fun EditLabelsDialogContent(
     labels: List<Label>,
     remainingLabels: List<Label>,
     onAddLabel: (Label) -> Unit,
@@ -244,7 +244,7 @@ fun EditLabelsDialogContent(
 }
 
 @Composable
-fun AddEditNoteTopAppBar(
+private fun AddEditNoteTopAppBar(
     viewModel: AddEditNoteViewModel,
     uiState: AddEditNoteUiState
 ) {
@@ -278,7 +278,7 @@ fun AddEditNoteTopAppBar(
 }
 
 @Composable
-fun AddEditNoteTopAppBar_Notes(
+private fun AddEditNoteTopAppBar_Notes(
     onSaveNote: () -> Unit,
     navigateBack: () -> Unit,
     onTrashNote: () -> Unit,
@@ -322,7 +322,7 @@ fun AddEditNoteTopAppBar_Notes(
 }
 
 @Composable
-fun AddEditNoteTopAppBar_Archive(
+private fun AddEditNoteTopAppBar_Archive(
     onSaveNote: () -> Unit,
     navigateBack: () -> Unit,
     onTrashNote: () -> Unit,
@@ -366,7 +366,7 @@ fun AddEditNoteTopAppBar_Archive(
 }
 
 @Composable
-fun AddEditNoteTopAppBar_Trash(
+private fun AddEditNoteTopAppBar_Trash(
     navigateBack: () -> Unit,
     onDeleteNote: () -> Unit
 ) {

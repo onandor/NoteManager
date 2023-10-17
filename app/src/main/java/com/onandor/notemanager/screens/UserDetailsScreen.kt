@@ -126,7 +126,7 @@ fun UserDetailsScreen(
 }
 
 @Composable
-fun SignedInInComponent(
+private fun SignedInInComponent(
     loading: Boolean,
     email: String,
     onSignOut: () -> Unit,
@@ -204,7 +204,7 @@ fun SignedInInComponent(
 }
 
 @Composable
-fun SignedOutComponent(
+private fun SignedOutComponent(
     onSignIn: () -> Unit
 ) {
     Surface(
@@ -239,7 +239,7 @@ fun SignedOutComponent(
 }
 
 @Composable
-fun UserDetailsTopBar(navigateBack: () -> Unit) {
+private fun UserDetailsTopBar(navigateBack: () -> Unit) {
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)) {
@@ -255,7 +255,7 @@ fun UserDetailsTopBar(navigateBack: () -> Unit) {
 }
 
 @Composable
-fun DeleteUserDialog(
+private fun DeleteUserDialog(
     password: String,
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
@@ -323,7 +323,7 @@ fun DeleteUserDialog(
 }
 
 @Composable
-fun ChangePasswordDialog(
+private fun ChangePasswordDialog(
     oldPassword: String,
     newPassword: String,
     newPasswordConfirmation: String,
@@ -427,7 +427,7 @@ fun ChangePasswordDialog(
 
 @Preview
 @Composable
-fun SignedInComponentPreview() {
+private fun SignedInComponentPreview() {
     SignedInInComponent(
         loading = false,
         email = "test@email.com",
@@ -439,7 +439,7 @@ fun SignedInComponentPreview() {
 
 @Preview
 @Composable
-fun SignedOutComponentPreview() {
+private fun SignedOutComponentPreview() {
     SignedOutComponent(
         onSignIn = { }
     )
@@ -447,7 +447,7 @@ fun SignedOutComponentPreview() {
 
 @Preview
 @Composable
-fun DeleteUserDialogPreview() {
+private fun DeleteUserDialogPreview() {
     DeleteUserDialog(
         password = "",
         onDismissRequest = { },
@@ -458,7 +458,7 @@ fun DeleteUserDialogPreview() {
 
 @Preview
 @Composable
-fun ChangePasswordDialogPreview() {
+private fun ChangePasswordDialogPreview() {
     ChangePasswordDialog(
         oldPassword = "",
         newPassword = "",

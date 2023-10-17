@@ -38,7 +38,7 @@ fun OnboardingScreen(
 }
 
 @Composable
-fun OnboardingContent(
+private fun OnboardingContent(
     onSkip: () -> Unit,
     onSignIn: () -> Unit
 ) {
@@ -92,6 +92,6 @@ fun OnboardingContent(
 
 @Preview
 @Composable
-fun OnboardingScreenPreview() {
+private fun OnboardingScreenPreview() {
     OnboardingContent(onSkip = { /*TODO*/ }, onSignIn = { })
 }

@@ -116,7 +116,7 @@ fun SignInRegisterScreen(
 }
 
 @Composable
-fun SignInForm(
+private fun SignInForm(
     modifier: Modifier,
     email: String,
     password: String,
@@ -214,7 +214,7 @@ fun SignInForm(
 }
 
 @Composable
-fun RegisterForm(
+private fun RegisterForm(
     modifier: Modifier,
     email: String,
     password: String,
@@ -334,7 +334,7 @@ fun RegisterForm(
 }
 
 @Composable
-fun SignInRegisterTopAppBar(navigateBack: () -> Unit) {
+private fun SignInRegisterTopAppBar(navigateBack: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -353,7 +353,7 @@ fun SignInRegisterTopAppBar(navigateBack: () -> Unit) {
 
 @Preview
 @Composable
-fun SignInFormPreview() {
+private fun SignInFormPreview() {
     SignInForm(
         modifier = Modifier.padding(all = 0.dp),
         email = "",
@@ -370,7 +370,7 @@ fun SignInFormPreview() {
 
 @Preview
 @Composable
-fun RegisterFormPreview() {
+private fun RegisterFormPreview() {
     RegisterForm(
         modifier = Modifier.padding(all = 0.dp),
         email = "",

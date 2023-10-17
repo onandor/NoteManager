@@ -74,12 +74,12 @@ fun TrashScreen(
 }
 
 @Composable
-fun TrashEmptyContent() {
+private fun TrashEmptyContent() {
     Text("The trash is empty")
 }
 
 @Composable
-fun TrashTopBar(
+private fun TrashTopBar(
     openDrawer: () -> Unit,
     onEmptyTrash: () -> Unit
 ) {

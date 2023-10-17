@@ -44,7 +44,7 @@ fun SignedOutScreen(
 }
 
 @Composable
-fun SignedOutContent(
+private fun SignedOutContent(
     onSignIn: () -> Unit,
     onDismiss: () -> Unit,
     onShowLearnMore: () -> Unit,
@@ -90,7 +90,7 @@ fun SignedOutContent(
 }
 
 @Composable
-fun ReasonsContent() {
+private fun ReasonsContent() {
     Text(stringResource(id = R.string.signed_out_desc_reasons))
     Spacer(modifier = Modifier.height(5.dp))
     Text(stringResource(id = R.string.signed_out_desc_reasons_list), modifier = Modifier.padding(start = 10.dp))
@@ -99,7 +99,7 @@ fun ReasonsContent() {
 }
 
 @Composable
-fun LearnMoreContent() {
+private fun LearnMoreContent() {
     Surface(
         modifier = Modifier.clip(RoundedCornerShape(16.dp)),
         color = MaterialTheme.colorScheme.surfaceVariant
@@ -118,7 +118,7 @@ fun LearnMoreContent() {
 
 @Preview
 @Composable
-fun SignedOutContentPreview() {
+private fun SignedOutContentPreview() {
     SignedOutContent(
         onSignIn = { },
         onDismiss = { },

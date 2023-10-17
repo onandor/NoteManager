@@ -113,7 +113,7 @@ fun EditLabelsScreen(
 }
 
 @Composable
-fun LabelList(
+private fun LabelList(
     labels: List<Label>,
     onLabelClick: (Label) -> Unit,
     onDeleteLabel: (Label) -> Unit
@@ -126,7 +126,7 @@ fun LabelList(
 }
 
 @Composable
-fun LabelItem(
+private fun LabelItem(
     label: Label,
     onLabelClick: (Label) -> Unit,
     onDeleteLabel: (Label) -> Unit
@@ -161,7 +161,7 @@ fun LabelItem(
 }
 
 @Composable
-fun AddEditLabelDialog(
+private fun AddEditLabelDialog(
     title: String,
     color: Color?,
     onTitleChanged: (String) -> Unit,
@@ -251,7 +251,7 @@ fun AddEditLabelDialog(
 }
 
 @Composable
-fun ColorChoice(
+private fun ColorChoice(
     color: Color,
     selected: Boolean = false,
     onClicked: (Color) -> Unit = { },
@@ -275,7 +275,7 @@ fun ColorChoice(
 }
 
 @Composable
-fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
+private fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
     Surface(modifier = Modifier
         .fillMaxWidth()
         .height(65.dp)) {
@@ -292,7 +292,7 @@ fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
 
 @Preview
 @Composable
-fun AddEditLabelDialogPreview() {
+private fun AddEditLabelDialogPreview() {
     AddEditLabelDialog(
         title = "",
         color = Color(200, 0, 0),
@@ -312,7 +312,7 @@ fun AddEditLabelDialogPreview() {
 
 @Preview
 @Composable
-fun LabelItemPreview() {
+private fun LabelItemPreview() {
     val label = Label(UUID.randomUUID(), "Very long test label wow very very long this is the longest", "#005500")
     LabelItem(
         label = label,
