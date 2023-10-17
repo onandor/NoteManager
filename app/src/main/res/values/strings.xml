@@ -23,6 +23,8 @@
     <string name="addeditnote_delete_note">Delete note</string>
     <string name="addeditnote_add_labels">Add labels</string>
     <string name="addeditnote_labels_loading_error">Error while loading labels</string>
+    <string name="addeditnote_hint_title">Title</string>
+    <string name="addeditnote_hint_content">Content</string>
     <string name="dialog_edit_note_labels_added">Added</string>
     <string name="dialog_edit_note_labels_empty">Empty</string>
     <string name="dialog_edit_note_labels_available">Available</string>

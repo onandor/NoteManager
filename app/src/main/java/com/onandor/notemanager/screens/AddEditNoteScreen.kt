@@ -2,17 +2,22 @@ package com.onandor.notemanager.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -22,24 +27,30 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -82,7 +93,7 @@ fun AddEditNoteScreen(
                 )
             }
         ) { innerPadding ->
-            AddEditNoteTitleAndContent(
+            TitleAndContentEditor(
                 modifier = Modifier.padding(innerPadding),
                 title = uiState.title,
                 content = uiState.content,
@@ -120,7 +131,7 @@ fun AddEditNoteScreen(
 }
 
 @Composable
-private fun AddEditNoteTitleAndContent(
+private fun TitleAndContentEditor(
     modifier: Modifier,
     title: String,
     content: String,
@@ -129,9 +140,9 @@ private fun AddEditNoteTitleAndContent(
 ) {
     Column (
         modifier = modifier
-            .fillMaxWidth()
-            //.padding(all = 16.dp)
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .height(IntrinsicSize.Max)
     ){
         val textFieldColors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
@@ -140,23 +151,73 @@ private fun AddEditNoteTitleAndContent(
             unfocusedIndicatorColor = Color.Transparent
         )
 
-        TextField(
+        EditorTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize(),
             value = title,
             onValueChange = onTitleChanged,
             colors = textFieldColors,
+            textStyle = TextStyle.Default.copy(
+                fontSize = 22.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            ),
             placeholder = {
-                Text("Title") // TODO: resource
+                Text(
+                    text = stringResource(id = R.string.addeditnote_hint_title),
+                    fontSize = 22.sp
+                )
             }
         )
-        TextField(
+        Spacer(modifier = Modifier.height(10.dp))
+        EditorTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             value = content,
             onValueChange = onContentChanged,
             colors = textFieldColors,
+            textStyle = TextStyle.Default.copy(
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            ),
             placeholder = {
-                Text("Your note goes here...")
+                Text(stringResource(id = R.string.addeditnote_hint_content))
             }
         )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditorTextField(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: @Composable (() -> Unit)? = null,
+    textStyle: TextStyle = TextStyle.Default,
+    colors: TextFieldColors = TextFieldDefaults.colors()
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier,
+        textStyle = textStyle,
+        cursorBrush = SolidColor(colors.cursorColor),
+        decorationBox = @Composable { innerTextField ->
+            TextFieldDefaults.DecorationBox(
+                value = value,
+                innerTextField = innerTextField,
+                enabled = true,
+                singleLine = false,
+                visualTransformation = VisualTransformation.None,
+                interactionSource = remember { MutableInteractionSource() },
+                colors = colors,
+                placeholder = placeholder,
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
+            )
+        }
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -388,4 +449,16 @@ private fun AddEditNoteTopAppBar_Trash(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun TitleAndContentEditorPreview() {
+    TitleAndContentEditor(
+        modifier = Modifier,
+        title = "",
+        content = "",
+        onTitleChanged = { },
+        onContentChanged = { }
+    )
 }
