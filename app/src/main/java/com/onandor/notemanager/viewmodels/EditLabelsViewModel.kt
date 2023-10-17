@@ -184,7 +184,6 @@ class EditLabelsViewModel @Inject constructor(
                 )
             }
         }
-        hideAddEditLabelDialog()
     }
 
     fun deleteLabel(label: Label) {

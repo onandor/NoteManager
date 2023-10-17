@@ -9,12 +9,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -25,10 +28,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -38,9 +43,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,25 +61,27 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
-import com.onandor.notemanager.components.DraggableBottomDialog
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.viewmodels.EditLabelsViewModel
+import kotlinx.coroutines.launch
 import java.util.UUID
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditLabelsScreen(
     viewModel: EditLabelsViewModel = hiltViewModel()
 ) {
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    val labelDialogState = rememberModalBottomSheetState()
+
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
         topBar = { EditLabelsTopAppBar(viewModel::navigateBack) },
         floatingActionButton = {
-            if (!uiState.addEditLabelDialogOpen) {
-                FloatingActionButton(onClick = viewModel::showAddEditLabelDialog) {
-                    Icon(Icons.Default.Add, stringResource(R.string.edit_labels_new_label))
-                }
+            FloatingActionButton(onClick = viewModel::showAddEditLabelDialog) {
+                Icon(Icons.Default.Add, stringResource(R.string.edit_labels_new_label))
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -95,16 +104,34 @@ fun EditLabelsScreen(
         }
     }
 
-    AddEditLabelDialog(
-        title = uiState.addEditLabelForm.title,
-        color = uiState.addEditLabelForm.color,
-        onTitleChanged = viewModel::addEditLabelUpdateTitle,
-        onColorChanged = viewModel::addEditLabelUpdateColor,
-        onSubmitChange = viewModel::saveLabel,
-        onCloseDialog = viewModel::hideAddEditLabelDialog,
-        visible = uiState.addEditLabelDialogOpen,
-        colorSelection = viewModel.colorSelection
-    )
+    fun hideAddEditLabelDialog() {
+        scope.launch {
+            labelDialogState.hide()
+            viewModel.hideAddEditLabelDialog()
+        }
+    }
+
+    if (uiState.addEditLabelDialogOpen) {
+        // For some reason on API 28 WI.navigationBars returns 0 size insets in the child
+        // composable, so the insets need to be read here
+        val navBarInsets = WindowInsets.navigationBars
+        ModalBottomSheet(
+            onDismissRequest = viewModel::hideAddEditLabelDialog,
+            sheetState = labelDialogState,
+            windowInsets = WindowInsets(0, 0, 0, 0),
+            dragHandle = { }
+        ) {
+            AddEditLabelDialogContent(
+                title = uiState.addEditLabelForm.title,
+                color = uiState.addEditLabelForm.color,
+                onTitleChanged = viewModel::addEditLabelUpdateTitle,
+                onColorChanged = viewModel::addEditLabelUpdateColor,
+                onSubmitChange = { viewModel.saveLabel(); hideAddEditLabelDialog() },
+                colorSelection = viewModel.colorSelection,
+                navBarInsets = navBarInsets
+            )
+        }
+    }
 
     BackHandler {
         if (uiState.addEditLabelDialogOpen) {
@@ -165,93 +192,88 @@ private fun LabelItem(
 }
 
 @Composable
-private fun AddEditLabelDialog(
+private fun AddEditLabelDialogContent(
     title: String,
     color: Color?,
     onTitleChanged: (String) -> Unit,
     onColorChanged: (Color?) -> Unit,
     onSubmitChange: () -> Unit,
-    onCloseDialog: () -> Unit,
-    visible: Boolean,
-    colorSelection: List<Color>
+    colorSelection: List<Color>,
+    navBarInsets: WindowInsets
 ) {
-    DraggableBottomDialog(
-        visible = visible,
-        onDismiss = onCloseDialog,
-        height = 260.dp
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(navBarInsets)
+            .padding(top = 15.dp, bottom = 15.dp)
     ) {
-        Column(
+        val colorSelectionScrollState = rememberScrollState()
+        val textFieldColors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        )
+
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = title,
+            onValueChange = onTitleChanged,
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.edit_labels_hint_title),
+                    fontSize = 20.sp
+                )
+            },
+            colors = textFieldColors,
+            textStyle = TextStyle(fontSize = 24.sp),
+            singleLine = true
+        )
+        Row(
+            modifier = Modifier.padding(start = 15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.edit_labels_color),
+                fontSize = 18.sp
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(stringResource(id = R.string.edit_labels_no_color))
+            RadioButton(
+                selected = color == null,
+                onClick = { onColorChanged(null) }
+            )
+        }
+        Row(
+            modifier = Modifier
+                .horizontalScroll(colorSelectionScrollState)
+                .fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.width(15.dp))
+            colorSelection.forEach { colorChoice ->
+                ColorChoice(
+                    color = colorChoice,
+                    selected = colorChoice == color,
+                    onClicked = onColorChanged,
+                    size = 50.dp
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+            }
+            Spacer(modifier = Modifier.width(5.dp))
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 15.dp, bottom = 15.dp)
+                .padding(end = 15.dp),
+            horizontalArrangement = Arrangement.End
         ) {
-            val colorSelectionScrollState = rememberScrollState()
-            val textFieldColors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            )
-
-            TextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = title,
-                onValueChange = onTitleChanged,
-                placeholder = {
-                    Text(
-                        text = stringResource(id = R.string.edit_labels_hint_title),
-                        fontSize = 20.sp
-                    )
-                },
-                colors = textFieldColors,
-                textStyle = TextStyle(fontSize = 24.sp),
-                singleLine = true
-            )
-            Row(
-                modifier = Modifier.padding(start = 15.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(id = R.string.edit_labels_color),
-                    fontSize = 18.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(stringResource(id = R.string.edit_labels_no_color))
-                RadioButton(
-                    selected = color == null,
-                    onClick = { onColorChanged(null) }
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .horizontalScroll(colorSelectionScrollState)
-                    .fillMaxWidth()
-            ) {
-                Spacer(modifier = Modifier.width(15.dp))
-                colorSelection.forEach { colorChoice ->
-                    ColorChoice(
-                        color = colorChoice,
-                        selected = colorChoice == color,
-                        onClicked = onColorChanged,
-                        size = 50.dp
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                }
-                Spacer(modifier = Modifier.width(5.dp))
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 15.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Button(onClick = onSubmitChange) {
-                    Text(text = stringResource(id = R.string.edit_labels_save))
-                }
+            Button(onClick = onSubmitChange) {
+                Text(text = stringResource(id = R.string.edit_labels_save))
             }
         }
     }
+
 }
 
 @Composable
@@ -292,26 +314,6 @@ private fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
             Text(stringResource(R.string.labels), fontSize = 20.sp)
         }
     }
-}
-
-@Preview
-@Composable
-private fun AddEditLabelDialogPreview() {
-    AddEditLabelDialog(
-        title = "",
-        color = Color(200, 0, 0),
-        onTitleChanged = { },
-        onColorChanged = { },
-        onSubmitChange = { },
-        onCloseDialog = { },
-        visible = true,
-        colorSelection = listOf(
-            Color.Transparent,
-            Color(200, 0, 0),
-            Color(0, 200, 0),
-            Color(0, 0, 200)
-        )
-    )
 }
 
 @Preview

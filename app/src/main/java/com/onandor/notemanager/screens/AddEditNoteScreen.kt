@@ -15,36 +15,31 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -65,72 +60,57 @@ import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.viewmodels.AddEditNoteUiState
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val coroutineScope = rememberCoroutineScope()
+    val labelDialogState = rememberModalBottomSheetState()
 
-    ModalBottomSheetLayout(
-        sheetContent = {
-            EditLabelsDialogContent(
-                labels = uiState.labels,
-                remainingLabels = uiState.remainingLabels,
-                onAddLabel = viewModel::addLabel,
-                onRemoveLabel = viewModel::removeLabel
+    Scaffold(
+        modifier = Modifier.statusBarsPadding(),
+        topBar = {
+            AddEditNoteTopAppBar(
+                viewModel = viewModel,
+                uiState = uiState
             )
-        },
-        sheetState = sheetState,
-        sheetShape = RoundedCornerShape(10.dp),
-        sheetBackgroundColor = MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        Scaffold(
-            modifier = Modifier.statusBarsPadding(),
-            topBar = {
-                AddEditNoteTopAppBar(
-                    viewModel = viewModel,
-                    uiState = uiState
-                )
-            }
-        ) { innerPadding ->
-            TitleAndContentEditor(
-                modifier = Modifier.padding(innerPadding),
-                title = uiState.title,
-                content = uiState.content,
-                onTitleChanged = viewModel::updateTitle,
-                onContentChanged = viewModel::updateContent,
-            )
-
-            LaunchedEffect(uiState.editLabelsDialogOpen) {
-                if (uiState.editLabelsDialogOpen) {
-                    coroutineScope.launch {
-                        sheetState.show()
-                    }
-                }
-            }
-            LaunchedEffect(sheetState.isVisible) {
-                if (!sheetState.isVisible) {
-                    viewModel.hideEditLabelsDialog()
-                }
-            }
         }
+    ) { innerPadding ->
+        TitleAndContentEditor(
+            modifier = Modifier.padding(innerPadding),
+            title = uiState.title,
+            content = uiState.content,
+            onTitleChanged = viewModel::updateTitle,
+            onContentChanged = viewModel::updateContent,
+        )
     }
 
     BackHandler {
         if (uiState.editLabelsDialogOpen) {
-            coroutineScope.launch {
-                sheetState.hide()
-            }
             viewModel.hideEditLabelsDialog()
         }
         else {
             viewModel.saveNote()
             viewModel.navigateBack()
+        }
+    }
+    if (uiState.editLabelsDialogOpen) {
+        val navBarInsets = WindowInsets.navigationBars
+        ModalBottomSheet(
+            onDismissRequest = viewModel::hideEditLabelsDialog,
+            sheetState = labelDialogState,
+            windowInsets = WindowInsets(0, 0, 0, 0),
+            dragHandle = { }
+        ) {
+            EditLabelsDialogContent(
+                labels = uiState.labels,
+                remainingLabels = uiState.remainingLabels,
+                onAddLabel = viewModel::addLabel,
+                onRemoveLabel = viewModel::removeLabel,
+                navBarInsets = navBarInsets
+            )
         }
     }
 }
@@ -231,12 +211,14 @@ private fun EditLabelsDialogContent(
     labels: List<Label>,
     remainingLabels: List<Label>,
     onAddLabel: (Label) -> Unit,
-    onRemoveLabel: (Label) -> Unit
+    onRemoveLabel: (Label) -> Unit,
+    navBarInsets: WindowInsets
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 15.dp, end = 15.dp, top = 20.dp, bottom = 20.dp)
+            .windowInsetsPadding(navBarInsets)
+            .padding(start = 15.dp, end = 15.dp, top = 35.dp, bottom = 20.dp)
             .verticalScroll(rememberScrollState())
     ) {
         Text(
