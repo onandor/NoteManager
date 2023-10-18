@@ -1,4 +1,4 @@
-package com.onandor.notemanager.screens
+package com.onandor.notemanager.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement

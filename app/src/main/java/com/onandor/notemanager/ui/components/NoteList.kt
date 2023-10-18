@@ -1,4 +1,4 @@
-package com.onandor.notemanager.components
+package com.onandor.notemanager.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border

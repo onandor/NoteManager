@@ -1,4 +1,4 @@
-package com.onandor.notemanager.components
+package com.onandor.notemanager.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

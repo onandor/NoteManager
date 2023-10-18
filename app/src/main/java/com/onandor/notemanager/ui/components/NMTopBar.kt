@@ -1,4 +1,4 @@
-package com.onandor.notemanager.components
+package com.onandor.notemanager.ui.components
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement

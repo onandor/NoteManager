@@ -1,4 +1,4 @@
-package com.onandor.notemanager.screens
+package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.graphics.Color

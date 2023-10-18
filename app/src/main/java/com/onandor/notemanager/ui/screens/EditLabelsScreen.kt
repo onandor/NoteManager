@@ -1,4 +1,4 @@
-package com.onandor.notemanager.screens
+package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -65,7 +65,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
-import com.onandor.notemanager.components.SimpleConfirmationDialog
+import com.onandor.notemanager.ui.components.SimpleConfirmationDialog
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.ui.theme.LocalTheme
 import com.onandor.notemanager.utils.LabelColor

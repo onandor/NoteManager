@@ -1,4 +1,4 @@
-package com.onandor.notemanager.screens
+package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
-import com.onandor.notemanager.components.LabelComponent
+import com.onandor.notemanager.ui.components.LabelComponent
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.viewmodels.AddEditNoteUiState
@@ -357,7 +357,7 @@ private fun AddEditNoteTopAppBar_Notes(
                 }
                 IconButton(onClick = { onArchiveNote(); navigateBack() }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_menu_archive_list),
+                        painter = painterResource(id = R.drawable.ic_drawer_archive_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
                     )
                 }
@@ -401,7 +401,7 @@ private fun AddEditNoteTopAppBar_Archive(
                 }
                 IconButton(onClick = { onUnArchiveNote(); navigateBack() }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_menu_archive_list),
+                        painter = painterResource(id = R.drawable.ic_drawer_archive_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
                     )
                 }
