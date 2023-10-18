@@ -78,7 +78,12 @@ fun AppDrawer(
         )
         Spacer(modifier = Modifier.height(16.dp))
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.List, contentDescription = stringResource(id = R.string.drawer_notes)) },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_drawer_notes_filled),
+                    contentDescription = stringResource(id = R.string.drawer_notes)
+                )
+            },
             label = { Text(stringResource(id = R.string.drawer_notes)) },
             selected = currentRoute == NavDestinations.NOTES,
             modifier = Modifier
@@ -91,8 +96,12 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(painterResource(id = R.drawable.ic_menu_archive_list),
-                contentDescription = stringResource(id = R.string.drawer_archive)) },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_drawer_archive_filled),
+                contentDescription = stringResource(id = R.string.drawer_archive)
+                )
+            },
             label = { Text(stringResource(id = R.string.drawer_archive)) },
             selected = currentRoute == NavDestinations.ARCHIVE,
             modifier = Modifier
@@ -105,7 +114,12 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.Delete, contentDescription = stringResource(id = R.string.drawer_trash)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(id = R.string.drawer_trash)
+                )
+            },
             label = { Text(stringResource(id = R.string.drawer_trash)) },
             selected = currentRoute == NavDestinations.TRASH,
             modifier = Modifier
@@ -118,7 +132,12 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.Star, contentDescription = stringResource(id = R.string.drawer_labels)) },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_label_filled),
+                    contentDescription = stringResource(id = R.string.drawer_labels)
+                )
+            },
             label = { Text(stringResource(id = R.string.drawer_labels)) },
             selected = currentRoute == NavDestinations.EDIT_LABELS,
             modifier = Modifier
@@ -132,7 +151,12 @@ fun AppDrawer(
         )
         Spacer(modifier = Modifier.weight(1f))
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(id = R.string.drawer_account)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.AccountCircle,
+                    contentDescription = stringResource(id = R.string.drawer_account)
+                )
+            },
             label = { Text(stringResource(id = R.string.drawer_account)) },
             selected = currentRoute == NavDestinations.USER_DETAILS,
             modifier = Modifier
@@ -145,7 +169,12 @@ fun AppDrawer(
             }
         )
         NavigationDrawerItem(
-            icon = { Icon(Icons.Filled.Settings, contentDescription = stringResource(id = R.string.drawer_settings)) },
+            icon = {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(id = R.string.drawer_settings)
+                )
+            },
             label = { Text(stringResource(id = R.string.drawer_settings)) },
             selected = currentRoute == NavDestinations.SETTINGS,
             modifier = Modifier

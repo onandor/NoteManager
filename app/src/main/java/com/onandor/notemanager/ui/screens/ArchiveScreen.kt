@@ -36,6 +36,7 @@ fun ArchiveScreen(
         topBar = {
             TopBar(
                 onOpenDrawer = onOpenDrawer,
+                noteListCollapsedView = collapsedView,
                 onToggleNoteListCollapsedView = onToggleCollapsedView
             )
         },

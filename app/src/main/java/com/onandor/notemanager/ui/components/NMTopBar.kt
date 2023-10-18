@@ -21,6 +21,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,7 @@ import com.onandor.notemanager.ui.theme.NoteManagerTheme
 @Composable
 fun TopBar(
     onOpenDrawer: () -> Unit,
+    noteListCollapsedView: Boolean,
     onToggleNoteListCollapsedView: () -> Unit
 ) {
     Surface(
@@ -48,7 +50,18 @@ fun TopBar(
             }
             Text(stringResource(R.string.topbar_search_notes))
             IconButton(onClick = onToggleNoteListCollapsedView) {
-                Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.topbar_change_view))
+                if (noteListCollapsedView) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_note_list_expanded_filled),
+                        contentDescription = stringResource(R.string.topbar_change_view)
+                    )
+                }
+                else {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_note_list_collapsed_filled),
+                        contentDescription = stringResource(R.string.topbar_change_view)
+                    )
+                }
             }
         }
     }
@@ -59,6 +72,10 @@ fun TopBar(
 @Composable
 fun TopBarPreview() {
     NoteManagerTheme {
-        TopBar(onOpenDrawer = { }, onToggleNoteListCollapsedView = { })
+        TopBar(
+            onOpenDrawer = { },
+            noteListCollapsedView = true,
+            onToggleNoteListCollapsedView = { }
+        )
     }
 }

@@ -44,6 +44,7 @@ fun NotesScreen(
         topBar = {
             TopBar(
                 onOpenDrawer = onOpenDrawer,
+                noteListCollapsedView = collapsedView,
                 onToggleNoteListCollapsedView = onToggleCollapsedView
             )
         },

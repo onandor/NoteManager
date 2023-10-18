@@ -351,13 +351,13 @@ private fun AddEditNoteTopAppBar_Notes(
             ) {
                 IconButton(onClick = { onAddLabels() }) {
                     Icon(
-                        imageVector = Icons.Filled.Add,
+                        painter = painterResource(id = R.drawable.ic_note_add_label_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_add_labels)
                     )
                 }
                 IconButton(onClick = { onArchiveNote(); navigateBack() }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_drawer_archive_filled),
+                        painter = painterResource(id = R.drawable.ic_note_archive_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
                     )
                 }
@@ -395,13 +395,13 @@ private fun AddEditNoteTopAppBar_Archive(
             ) {
                 IconButton(onClick = { onAddLabels(); navigateBack() }) {
                     Icon(
-                        imageVector = Icons.Filled.Add,
+                        painter = painterResource(id = R.drawable.ic_note_add_label_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_add_labels)
                     )
                 }
                 IconButton(onClick = { onUnArchiveNote(); navigateBack() }) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_drawer_archive_filled),
+                        painter = painterResource(id = R.drawable.ic_note_unarchive_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
                     )
                 }

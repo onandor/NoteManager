@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -85,7 +87,9 @@ private fun TrashTopBar(
     openDrawer: () -> Unit,
     onEmptyTrash: () -> Unit
 ) {
-    Surface(modifier = Modifier.fillMaxWidth().height(65.dp)) {
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .height(65.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -93,14 +97,17 @@ private fun TrashTopBar(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = { openDrawer() }) {
                     Icon(
-                        Icons.Filled.Menu,
+                        imageVector = Icons.Filled.Menu,
                         contentDescription = stringResource(R.string.topbar_drawer)
                     )
                 }
                 Text(stringResource(R.string.trash), fontSize = 20.sp)
             }
             IconButton(onClick = { onEmptyTrash() }) {
-                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.trash_empty_trash))
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_trash_empty_filled),
+                    contentDescription = stringResource(R.string.trash_empty_trash)
+                )
             }
         }
     }
