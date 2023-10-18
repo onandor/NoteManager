@@ -110,6 +110,7 @@ class EditLabelsViewModel @Inject constructor(
         addEditLabelDialogOpen.update { false }
         addEditLabelForm.update {
             it.copy(
+                id = null,
                 title = "",
                 titleValid = true,
                 color = LabelColors.none
