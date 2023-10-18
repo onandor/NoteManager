@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -296,11 +297,13 @@ private fun AddEditNoteTopAppBar(
     viewModel: AddEditNoteViewModel,
     uiState: AddEditNoteUiState
 ) {
+    val focusManager = LocalFocusManager.current
+
     when(uiState.location) {
         NoteLocation.NOTES -> {
             AddEditNoteTopAppBar_Notes(
                 onSaveNote = viewModel::saveNote,
-                navigateBack = viewModel::navigateBack,
+                navigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
                 onArchiveNote = viewModel::archiveNote,
                 onTrashNote = viewModel::trashNote,
                 onAddLabels = viewModel::showEditLabelsDialog
@@ -309,7 +312,7 @@ private fun AddEditNoteTopAppBar(
         NoteLocation.ARCHIVE -> {
             AddEditNoteTopAppBar_Archive(
                 onSaveNote = viewModel::saveNote,
-                navigateBack = viewModel::navigateBack,
+                navigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
                 onUnArchiveNote = viewModel::unArchiveNote,
                 onTrashNote = viewModel::trashNote,
                 onAddLabels = viewModel::showEditLabelsDialog
@@ -317,7 +320,7 @@ private fun AddEditNoteTopAppBar(
         }
         NoteLocation.TRASH -> {
             AddEditNoteTopAppBar_Trash(
-                navigateBack = viewModel::navigateBack,
+                navigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
                 onDeleteNote = viewModel::deleteNote
             )
         }
