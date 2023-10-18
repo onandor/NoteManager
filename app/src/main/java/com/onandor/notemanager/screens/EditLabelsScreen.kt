@@ -1,6 +1,9 @@
 package com.onandor.notemanager.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -61,6 +65,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.components.SimpleConfirmationDialog
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.ui.theme.LocalTheme
 import com.onandor.notemanager.utils.LabelColor
@@ -68,7 +73,6 @@ import com.onandor.notemanager.utils.LabelColorType
 import com.onandor.notemanager.utils.LabelColors
 import com.onandor.notemanager.utils.getAccentColor
 import com.onandor.notemanager.utils.getColor
-import com.onandor.notemanager.utils.labelColors
 import com.onandor.notemanager.viewmodels.EditLabelsViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -82,13 +86,20 @@ fun EditLabelsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val labelDialogState = rememberModalBottomSheetState()
+    val scrollState = rememberLazyListState()
 
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
         topBar = { EditLabelsTopAppBar(viewModel::navigateBack) },
         floatingActionButton = {
-            FloatingActionButton(onClick = viewModel::showAddEditLabelDialog) {
-                Icon(Icons.Default.Add, stringResource(R.string.edit_labels_new_label))
+            AnimatedVisibility(
+                visible = !scrollState.canScrollBackward,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                FloatingActionButton(onClick = viewModel::showAddEditLabelDialog) {
+                    Icon(Icons.Default.Add, stringResource(R.string.edit_labels_new_label))
+                }
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -102,11 +113,14 @@ fun EditLabelsScreen(
                 Text(stringResource(id = R.string.edit_labels_no_labels))
             }
             else {
-                LabelList(
-                    labels = uiState.labels,
-                    onLabelClick = viewModel::labelClick,
-                    onDeleteLabel = viewModel::deleteLabel
-                )
+                LazyColumn(
+                    modifier = Modifier.padding(start = 20.dp, end = 10.dp),
+                    state = scrollState
+                ) {
+                    items(uiState.labels) { label ->
+                        LabelItem(label, viewModel::labelClick, viewModel::showConfirmDeleteLabel)
+                    }
+                }
             }
         }
     }
@@ -139,6 +153,14 @@ fun EditLabelsScreen(
             )
         }
     }
+    
+    if (uiState.deleteDialogOpen) {
+        SimpleConfirmationDialog(
+            onDismissRequest = viewModel::cancelDeleteLabel,
+            onConfirmation = viewModel::deleteLabel,
+            text = stringResource(id = R.string.edit_labels_delete_confirmation)
+        )
+    }
 
     BackHandler {
         if (uiState.addEditLabelDialogOpen) {
@@ -146,19 +168,6 @@ fun EditLabelsScreen(
         }
         else {
             viewModel.navigateBack()
-        }
-    }
-}
-
-@Composable
-private fun LabelList(
-    labels: List<Label>,
-    onLabelClick: (Label) -> Unit,
-    onDeleteLabel: (Label) -> Unit
-) {
-    LazyColumn {
-        items(labels) { label ->
-            LabelItem(label, onLabelClick, onDeleteLabel)
         }
     }
 }
@@ -175,9 +184,8 @@ private fun LabelItem(
             .clickable { onLabelClick(label) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = Modifier.width(10.dp))
         ColorChoice(labelColor = label.color, size = 30.dp, onClicked = { onLabelClick(label) })
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(15.dp))
         Text(
             modifier = Modifier.weight(100f),
             text = label.title,
@@ -189,7 +197,6 @@ private fun LabelItem(
         IconButton(onClick = { onDeleteLabel(label) }) {
             Icon(Icons.Filled.Delete, stringResource(R.string.edit_labels_hint_delete))
         }
-        Spacer(modifier = Modifier.width(5.dp))
     }
 }
 

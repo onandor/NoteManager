@@ -104,4 +104,7 @@
     <string name="edit_labels_color">Color</string>
     <string name="edit_labels_no_color">No color</string>
     <string name="edit_labels_hint_delete">Delete</string>
+    <string name="edit_labels_delete_confirmation">By deleting a label it will get removed from all the notes it\'s added to. Are you sure?</string>
+    <string name="dialog_simple_confirmation_cancel">Cancel</string>
+    <string name="dialog_simple_confirmation_confirm">Confirm</string>
 </resources>

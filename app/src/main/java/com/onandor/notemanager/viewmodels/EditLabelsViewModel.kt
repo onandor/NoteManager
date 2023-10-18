@@ -37,7 +37,8 @@ data class EditLabelsUiState(
     val labels: List<Label> = emptyList(),
     val snackbarMessageResource: Int? = null,
     val addEditLabelDialogOpen: Boolean = false,
-    val addEditLabelForm: AddEditLabelForm = AddEditLabelForm()
+    val addEditLabelForm: AddEditLabelForm = AddEditLabelForm(),
+    val deleteDialogOpen: Boolean = false
 )
 
 @HiltViewModel
@@ -52,14 +53,16 @@ class EditLabelsViewModel @Inject constructor(
 
     private val addEditLabelDialogOpen = MutableStateFlow(false)
     private val addEditLabelForm = MutableStateFlow(AddEditLabelForm())
+    private val deleteDialogOpen = MutableStateFlow(false)
+    private var labelToDelete: Label? = null
 
     val colorSelection = labelColors.toList()
         .map { pair -> pair.second }
         .filterNot { labelColor -> labelColor.type == LabelColorType.None }
 
     val uiState: StateFlow<EditLabelsUiState> = combine(
-        _labelsAsync, addEditLabelDialogOpen, addEditLabelForm
-    ) { labelsAsync, editLabelDialogOpen, addEditLabelForm ->
+        _labelsAsync, addEditLabelDialogOpen, addEditLabelForm, deleteDialogOpen
+    ) { labelsAsync, editLabelDialogOpen, addEditLabelForm, deleteDialogOpen ->
         when(labelsAsync) {
             AsyncResult.Loading -> {
                 EditLabelsUiState()
@@ -75,7 +78,8 @@ class EditLabelsViewModel @Inject constructor(
                     loading = false,
                     labels = labelsAsync.data,
                     addEditLabelDialogOpen = editLabelDialogOpen,
-                    addEditLabelForm = addEditLabelForm
+                    addEditLabelForm = addEditLabelForm,
+                    deleteDialogOpen = deleteDialogOpen
                 )
             }
         }
@@ -153,9 +157,24 @@ class EditLabelsViewModel @Inject constructor(
         }
     }
 
-    fun deleteLabel(label: Label) {
+    fun showConfirmDeleteLabel(label: Label) {
+        labelToDelete = label
+        deleteDialogOpen.update { true }
+    }
+
+    fun cancelDeleteLabel() {
+        labelToDelete = null
+        deleteDialogOpen.update { false }
+    }
+
+    fun deleteLabel() {
+        if (labelToDelete == null)
+            return
+
         viewModelScope.launch {
-            labelRepository.deleteLabel(label.id)
+            labelRepository.deleteLabel(labelToDelete!!.id)
+            labelToDelete = null
+            deleteDialogOpen.update { false }
         }
     }
 }
