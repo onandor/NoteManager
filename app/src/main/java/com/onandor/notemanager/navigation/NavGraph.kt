@@ -1,6 +1,7 @@
 package com.onandor.notemanager.navigation
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
@@ -20,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -45,7 +45,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
@@ -72,6 +71,12 @@ fun NavGraph(
             try {
                 navController.navigate(it.destination, it.navOptions)
             } catch (_: IllegalArgumentException) {}
+        }
+    }
+
+    BackHandler(enabled = drawerState.isOpen || drawerState.isAnimationRunning) {
+        coroutineScope.launch {
+            drawerState.close()
         }
     }
 
