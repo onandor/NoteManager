@@ -67,7 +67,7 @@ fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val labelDialogState = rememberModalBottomSheetState()
+    val labelDialogState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
         modifier = Modifier.statusBarsPadding(),

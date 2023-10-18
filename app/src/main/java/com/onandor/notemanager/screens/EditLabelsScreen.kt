@@ -66,6 +66,7 @@ import com.onandor.notemanager.ui.theme.LocalTheme
 import com.onandor.notemanager.utils.LabelColor
 import com.onandor.notemanager.utils.LabelColorType
 import com.onandor.notemanager.utils.LabelColors
+import com.onandor.notemanager.utils.getAccentColor
 import com.onandor.notemanager.utils.getColor
 import com.onandor.notemanager.utils.labelColors
 import com.onandor.notemanager.viewmodels.EditLabelsViewModel
@@ -284,10 +285,16 @@ private fun ColorChoice(
     onClicked: (LabelColor) -> Unit = { },
     size: Dp
 ) {
-    val color = if (labelColor.type == LabelColorType.None)
-        MaterialTheme.colorScheme.surface
-    else
-        labelColor.getColor(LocalTheme.current.isDark)
+    val color: Color
+    val accentColor: Color
+    if (labelColor.type == LabelColorType.None) {
+        color = MaterialTheme.colorScheme.surface
+        accentColor = MaterialTheme.colorScheme.onSurface
+    }
+    else {
+        color = labelColor.getColor(LocalTheme.current.isDark)
+        accentColor = labelColor.getAccentColor(LocalTheme.current.isDark)
+    }
 
     OutlinedButton(
         modifier = Modifier
@@ -296,7 +303,8 @@ private fun ColorChoice(
         onClick = { onClicked(labelColor) },
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = color
+            containerColor = color,
+            contentColor = accentColor,
         )
     ) {
         if (selected) {

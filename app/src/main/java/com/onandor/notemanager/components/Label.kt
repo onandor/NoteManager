@@ -21,17 +21,10 @@ import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.ui.theme.LocalTheme
 import com.onandor.notemanager.utils.LabelColorType
 import com.onandor.notemanager.utils.LabelColors
+import com.onandor.notemanager.utils.getAccentColor
 import com.onandor.notemanager.utils.getColor
 import java.util.UUID
 import kotlin.math.sqrt
-
-private fun getBorderColor(color: Color, isSurfaceLight: Boolean): Color {
-    val offset = if (isSurfaceLight) -0.2f else 0.2f
-    val red = if (color.red + offset in 0f .. 1f) color.red + offset else color.red
-    val green = if (color.green + offset in 0f .. 1f) color.green + offset else color.green
-    val blue = if (color.blue + offset in 0f .. 1f) color.blue + offset else color.blue
-    return Color(red, green, blue)
-}
 
 @Composable
 fun LabelComponent(
@@ -45,19 +38,21 @@ fun LabelComponent(
     borderWidth: Dp = 1.dp,
     roundedCornerSize: Dp = 5.dp
 ) {
-    val surfaceColor = if (label.color.type == LabelColorType.None)
-        MaterialTheme.colorScheme.surface
-    else
-        label.color.getColor(LocalTheme.current.isDark)
-
-    val lightSurface = surfaceColor.luminance() > sqrt(1.05 * 0.05) - 0.05
-    val borderColor = getBorderColor(surfaceColor, lightSurface)
-    val textColor = if (lightSurface) Color.Black else Color.White
+    val color: Color
+    val accentColor: Color
+    if (label.color.type == LabelColorType.None) {
+        color = MaterialTheme.colorScheme.surface
+        accentColor = MaterialTheme.colorScheme.onSurface
+    }
+    else {
+        color = label.color.getColor(LocalTheme.current.isDark)
+        accentColor = label.color.getAccentColor(LocalTheme.current.isDark)
+    }
 
     var _modifier = modifier
         .border(
             width = borderWidth,
-            color = borderColor,
+            color = accentColor,
             shape = RoundedCornerShape(roundedCornerSize)
         )
         .clip(RoundedCornerShape(roundedCornerSize))
@@ -70,8 +65,8 @@ fun LabelComponent(
 
     Surface(
         modifier = _modifier,
-        color = surfaceColor,
-        contentColor = textColor
+        color = color,
+        contentColor = accentColor
     ) {
         Row(
             modifier = Modifier.padding(padding)

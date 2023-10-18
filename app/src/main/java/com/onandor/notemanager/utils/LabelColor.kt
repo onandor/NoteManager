@@ -1,44 +1,71 @@
 package com.onandor.notemanager.utils
 
 import androidx.compose.ui.graphics.Color
-import com.onandor.notemanager.ui.theme.Amber300
-import com.onandor.notemanager.ui.theme.Amber700
-import com.onandor.notemanager.ui.theme.Blue300
-import com.onandor.notemanager.ui.theme.Blue700
-import com.onandor.notemanager.ui.theme.BlueGray300
-import com.onandor.notemanager.ui.theme.BlueGray700
-import com.onandor.notemanager.ui.theme.Brown300
-import com.onandor.notemanager.ui.theme.Brown700
-import com.onandor.notemanager.ui.theme.Cyan300
-import com.onandor.notemanager.ui.theme.Cyan700
-import com.onandor.notemanager.ui.theme.DeepOrange300
-import com.onandor.notemanager.ui.theme.DeepOrange700
-import com.onandor.notemanager.ui.theme.DeepPurple300
-import com.onandor.notemanager.ui.theme.DeepPurple700
-import com.onandor.notemanager.ui.theme.Gray300
-import com.onandor.notemanager.ui.theme.Gray700
-import com.onandor.notemanager.ui.theme.Green300
-import com.onandor.notemanager.ui.theme.Green700
-import com.onandor.notemanager.ui.theme.Indigo300
-import com.onandor.notemanager.ui.theme.Indigo700
-import com.onandor.notemanager.ui.theme.LightBlue300
-import com.onandor.notemanager.ui.theme.LightBlue700
-import com.onandor.notemanager.ui.theme.LightGreen300
-import com.onandor.notemanager.ui.theme.LightGreen700
-import com.onandor.notemanager.ui.theme.Lime300
-import com.onandor.notemanager.ui.theme.Lime700
-import com.onandor.notemanager.ui.theme.Orange300
-import com.onandor.notemanager.ui.theme.Orange700
-import com.onandor.notemanager.ui.theme.Pink300
-import com.onandor.notemanager.ui.theme.Pink700
-import com.onandor.notemanager.ui.theme.Purple300
-import com.onandor.notemanager.ui.theme.Purple700
-import com.onandor.notemanager.ui.theme.Red300
-import com.onandor.notemanager.ui.theme.Red700
-import com.onandor.notemanager.ui.theme.Teal300
-import com.onandor.notemanager.ui.theme.Teal700
-import com.onandor.notemanager.ui.theme.Yellow300
-import com.onandor.notemanager.ui.theme.Yellow700
+import com.onandor.notemanager.ui.theme.Blue200
+import com.onandor.notemanager.ui.theme.Blue900
+import com.onandor.notemanager.ui.theme.Blue100
+import com.onandor.notemanager.ui.theme.BlueA700
+import com.onandor.notemanager.ui.theme.BlueGray200
+import com.onandor.notemanager.ui.theme.BlueGray900
+import com.onandor.notemanager.ui.theme.BlueGray100
+import com.onandor.notemanager.ui.theme.BlueGray800
+import com.onandor.notemanager.ui.theme.Brown200
+import com.onandor.notemanager.ui.theme.Brown900
+import com.onandor.notemanager.ui.theme.Brown100
+import com.onandor.notemanager.ui.theme.Brown800
+import com.onandor.notemanager.ui.theme.Cyan200
+import com.onandor.notemanager.ui.theme.Cyan900
+import com.onandor.notemanager.ui.theme.CyanA100
+import com.onandor.notemanager.ui.theme.Cyan800
+import com.onandor.notemanager.ui.theme.DeepOrange200
+import com.onandor.notemanager.ui.theme.DeepOrange900
+import com.onandor.notemanager.ui.theme.DeepOrange100
+import com.onandor.notemanager.ui.theme.DeepOrangeA700
+import com.onandor.notemanager.ui.theme.DeepPurple200
+import com.onandor.notemanager.ui.theme.DeepPurple900
+import com.onandor.notemanager.ui.theme.DeepPurpleA100
+import com.onandor.notemanager.ui.theme.DeepPurpleA700
+import com.onandor.notemanager.ui.theme.Green200
+import com.onandor.notemanager.ui.theme.Green900
+import com.onandor.notemanager.ui.theme.GreenA100
+import com.onandor.notemanager.ui.theme.Green800
+import com.onandor.notemanager.ui.theme.Indigo200
+import com.onandor.notemanager.ui.theme.Indigo900
+import com.onandor.notemanager.ui.theme.IndigoA100
+import com.onandor.notemanager.ui.theme.IndigoA700
+import com.onandor.notemanager.ui.theme.LightBlue200
+import com.onandor.notemanager.ui.theme.LightBlue900
+import com.onandor.notemanager.ui.theme.LightBlueA100
+import com.onandor.notemanager.ui.theme.LightBlueA700
+import com.onandor.notemanager.ui.theme.LightGreen200
+import com.onandor.notemanager.ui.theme.LightGreen900
+import com.onandor.notemanager.ui.theme.LightGreenA100
+import com.onandor.notemanager.ui.theme.LightGreen800
+import com.onandor.notemanager.ui.theme.Lime200
+import com.onandor.notemanager.ui.theme.Lime900
+import com.onandor.notemanager.ui.theme.LimeA100
+import com.onandor.notemanager.ui.theme.Lime800
+import com.onandor.notemanager.ui.theme.Orange200
+import com.onandor.notemanager.ui.theme.Orange100
+import com.onandor.notemanager.ui.theme.Orange900
+import com.onandor.notemanager.ui.theme.Pink200
+import com.onandor.notemanager.ui.theme.PinkA100
+import com.onandor.notemanager.ui.theme.Pink900
+import com.onandor.notemanager.ui.theme.Purple200
+import com.onandor.notemanager.ui.theme.Purple900
+import com.onandor.notemanager.ui.theme.PurpleA100
+import com.onandor.notemanager.ui.theme.Purple800
+import com.onandor.notemanager.ui.theme.Red200
+import com.onandor.notemanager.ui.theme.Red900
+import com.onandor.notemanager.ui.theme.Red100
+import com.onandor.notemanager.ui.theme.RedA700
+import com.onandor.notemanager.ui.theme.Teal200
+import com.onandor.notemanager.ui.theme.Teal900
+import com.onandor.notemanager.ui.theme.TealA100
+import com.onandor.notemanager.ui.theme.Teal800
+import com.onandor.notemanager.ui.theme.Yellow200
+import com.onandor.notemanager.ui.theme.YellowA100
+import com.onandor.notemanager.ui.theme.Yellow900
 
 enum class LabelColorType(val value: Int) {
     None(0),
@@ -55,47 +82,49 @@ enum class LabelColorType(val value: Int) {
     LightGreen(110),
     Lime(120),
     Yellow(130),
-    Amber(140),
     Orange(150),
     DeepOrange(160),
     Brown(170),
-    Gray(180),
-    BlueGray(190);
+    BlueGray(180);
 
     companion object {
         fun fromInt(value: Int) = LabelColorType.values().first { it.value == value }
     }
 }
 
-fun LabelColor.getColor(isDarkTheme: Boolean): Color = if (isDarkTheme) darkColor else lightColor
+fun LabelColor.getColor(isDarkTheme: Boolean): Color =
+    if (isDarkTheme) darkColor else lightColor
+
+fun LabelColor.getAccentColor(isDarkTheme: Boolean): Color =
+    if (isDarkTheme) lightAccent else darkAccent
 
 data class LabelColor(
     val type: LabelColorType,
     val lightColor: Color = Color.Unspecified,
-    val darkColor: Color = Color.Unspecified
+    val darkColor: Color = Color.Unspecified,
+    val lightAccent: Color = Color.Unspecified,
+    val darkAccent: Color = Color.Unspecified
 )
 
 object LabelColors {
     val none = LabelColor(LabelColorType.None)
-    val red = LabelColor(LabelColorType.Red, Red300, Red700)
-    val pink = LabelColor(LabelColorType.Pink, Pink300, Pink700)
-    val purple = LabelColor(LabelColorType.Purple, Purple300, Purple700)
-    val deepPurple = LabelColor(LabelColorType.DeepPurple, DeepPurple300, DeepPurple700)
-    val indigo = LabelColor(LabelColorType.Indigo, Indigo300, Indigo700)
-    val blue = LabelColor(LabelColorType.Blue, Blue300, Blue700)
-    val lightBlue = LabelColor(LabelColorType.LightBlue, LightBlue300, LightBlue700)
-    val cyan = LabelColor(LabelColorType.Cyan, Cyan300, Cyan700)
-    val teal = LabelColor(LabelColorType.Teal, Teal300, Teal700)
-    val green = LabelColor(LabelColorType.Green, Green300, Green700)
-    val lightGreen = LabelColor(LabelColorType.LightGreen, LightGreen300, LightGreen700)
-    val lime = LabelColor(LabelColorType.Lime, Lime300, Lime700)
-    val yellow = LabelColor(LabelColorType.Yellow, Yellow300, Yellow700)
-    val amber = LabelColor(LabelColorType.Amber, Amber300, Amber700)
-    val orange = LabelColor(LabelColorType.Orange, Orange300, Orange700)
-    val deepOrange = LabelColor(LabelColorType.DeepOrange, DeepOrange300, DeepOrange700)
-    val brown = LabelColor(LabelColorType.Brown, Brown300, Brown700)
-    val gray = LabelColor(LabelColorType.Gray, Gray300, Gray700)
-    val blueGray = LabelColor(LabelColorType.BlueGray, BlueGray300, BlueGray700)
+    val red = LabelColor(LabelColorType.Red, Red200, Red900, Red100, RedA700)
+    val pink = LabelColor(LabelColorType.Pink, Pink200, Pink900, PinkA100, Pink900)
+    val purple = LabelColor(LabelColorType.Purple, Purple200, Purple900, PurpleA100, Purple800)
+    val deepPurple = LabelColor(LabelColorType.DeepPurple, DeepPurple200, DeepPurple900, DeepPurpleA100, DeepPurpleA700)
+    val indigo = LabelColor(LabelColorType.Indigo, Indigo200, Indigo900, IndigoA100, IndigoA700)
+    val blue = LabelColor(LabelColorType.Blue, Blue200, Blue900, Blue100, BlueA700)
+    val lightBlue = LabelColor(LabelColorType.LightBlue, LightBlue200, LightBlue900, LightBlueA100, LightBlueA700)
+    val cyan = LabelColor(LabelColorType.Cyan, Cyan200, Cyan900, CyanA100, Cyan800)
+    val teal = LabelColor(LabelColorType.Teal, Teal200, Teal900, TealA100, Teal800)
+    val green = LabelColor(LabelColorType.Green, Green200, Green900, GreenA100, Green800)
+    val lightGreen = LabelColor(LabelColorType.LightGreen, LightGreen200, LightGreen900, LightGreenA100, LightGreen800)
+    val lime = LabelColor(LabelColorType.Lime, Lime200, Lime900, LimeA100, Lime800)
+    val yellow = LabelColor(LabelColorType.Yellow, Yellow200, Yellow900, YellowA100, Yellow900)
+    val orange = LabelColor(LabelColorType.Orange, Orange200, Orange900, Orange100, Orange900)
+    val deepOrange = LabelColor(LabelColorType.DeepOrange, DeepOrange200, DeepOrange900, DeepOrange100, DeepOrangeA700)
+    val brown = LabelColor(LabelColorType.Brown, Brown200, Brown900, Brown100, Brown800)
+    val blueGray = LabelColor(LabelColorType.BlueGray, BlueGray200, BlueGray900, BlueGray100, BlueGray800)
 }
 
 val labelColors = linkedMapOf(
@@ -113,10 +142,8 @@ val labelColors = linkedMapOf(
     LabelColorType.LightGreen to LabelColors.lightGreen,
     LabelColorType.Lime to LabelColors.lime,
     LabelColorType.Yellow to LabelColors.yellow,
-    LabelColorType.Amber to LabelColors.amber,
     LabelColorType.Orange to LabelColors.orange,
     LabelColorType.DeepOrange to LabelColors.deepOrange,
     LabelColorType.Brown to LabelColors.brown,
-    LabelColorType.Gray to LabelColors.gray,
     LabelColorType.BlueGray to LabelColors.blueGray
 )
