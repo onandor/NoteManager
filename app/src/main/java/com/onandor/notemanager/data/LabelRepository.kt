@@ -1,5 +1,6 @@
 package com.onandor.notemanager.data
 
+import androidx.compose.ui.text.toLowerCase
 import com.onandor.notemanager.data.local.db.LabelDao
 import com.onandor.notemanager.data.mapping.toExternal
 import com.onandor.notemanager.data.mapping.toLocal
@@ -27,7 +28,7 @@ class LabelRepository @Inject constructor(
     override fun getLabelsStream(): Flow<List<Label>> {
         return localDataSource.observeAll().map { labels ->
             withContext(dispatcher) {
-                labels.toExternal().sortedBy { it.title }
+                labels.toExternal().sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title })
             }
         }
     }
@@ -38,7 +39,7 @@ class LabelRepository @Inject constructor(
 
     override suspend fun getLabels(): List<Label> {
         return withContext(dispatcher) {
-            localDataSource.getAll().toExternal().sortedBy { it.title }
+            localDataSource.getAll().toExternal().sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title })
         }
     }
 
