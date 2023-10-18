@@ -5,6 +5,9 @@ import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.data.remote.models.RemoteLabel
 import com.onandor.notemanager.data.remote.models.RemoteNote
+import com.onandor.notemanager.utils.LabelColor
+import com.onandor.notemanager.utils.LabelColorType
+import com.onandor.notemanager.utils.labelColors
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -13,13 +16,13 @@ fun Label.toRemote(userId: Int) = RemoteLabel(
     id = id,
     userId = userId,
     title = title,
-    color = color
+    color = color.type.value
 )
 
 fun RemoteLabel.toExternal() = Label(
     id = id,
     title = title,
-    color = color
+    color = labelColors[LabelColorType.fromInt(color)]!!
 )
 
 @JvmName("externalToRemoteLabelList")

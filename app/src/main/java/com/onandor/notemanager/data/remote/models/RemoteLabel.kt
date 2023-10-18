@@ -6,5 +6,5 @@ data class RemoteLabel(
     val id: UUID,
     val userId: Int,
     val title: String,
-    val color: String
+    val color: Int
 )

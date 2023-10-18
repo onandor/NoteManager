@@ -5,17 +5,18 @@ import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.local.models.LocalLabel
 import com.onandor.notemanager.data.local.models.LocalNote
 import com.onandor.notemanager.data.local.models.LocalNoteWithLabels
+import com.onandor.notemanager.utils.labelColors
 
 fun Label.toLocal() = LocalLabel(
     id = id,
     title = title,
-    color = color
+    color = color.type
 )
 
 fun LocalLabel.toExternal() = Label(
     id = id,
     title = title,
-    color = color
+    color = labelColors[color]!!
 )
 
 @JvmName("localToExternalLabelList")

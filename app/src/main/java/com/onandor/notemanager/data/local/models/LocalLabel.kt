@@ -2,6 +2,7 @@ package com.onandor.notemanager.data.local.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.onandor.notemanager.utils.LabelColorType
 import java.util.UUID
 
 @Entity(
@@ -10,5 +11,5 @@ import java.util.UUID
 data class LocalLabel(
     @PrimaryKey var id: UUID,
     var title: String,
-    var color: String
+    var color: LabelColorType
 )

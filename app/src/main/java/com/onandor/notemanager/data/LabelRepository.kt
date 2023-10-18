@@ -5,6 +5,7 @@ import com.onandor.notemanager.data.mapping.toExternal
 import com.onandor.notemanager.data.mapping.toLocal
 import com.onandor.notemanager.di.ApplicationScope
 import com.onandor.notemanager.di.DefaultDispatcher
+import com.onandor.notemanager.utils.LabelColor
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -41,7 +42,7 @@ class LabelRepository @Inject constructor(
         }
     }
 
-    override suspend fun createLabel(title: String, color: String): UUID {
+    override suspend fun createLabel(title: String, color: LabelColor): UUID {
         val labelId = withContext(dispatcher) {
             UUID.randomUUID()
         }
@@ -54,7 +55,7 @@ class LabelRepository @Inject constructor(
         return labelId
     }
 
-    override suspend fun updateLabel(labelId: UUID, title: String, color: String) {
+    override suspend fun updateLabel(labelId: UUID, title: String, color: LabelColor) {
         val label = getLabel(labelId)?.copy(
             title = title,
             color = color

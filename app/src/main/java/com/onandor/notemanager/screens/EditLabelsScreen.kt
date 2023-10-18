@@ -62,6 +62,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.Label
+import com.onandor.notemanager.ui.theme.LocalTheme
+import com.onandor.notemanager.utils.LabelColor
+import com.onandor.notemanager.utils.LabelColorType
+import com.onandor.notemanager.utils.LabelColors
+import com.onandor.notemanager.utils.getColor
+import com.onandor.notemanager.utils.labelColors
 import com.onandor.notemanager.viewmodels.EditLabelsViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -168,13 +174,8 @@ private fun LabelItem(
             .clickable { onLabelClick(label) },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val color = if (label.color.isEmpty())
-            MaterialTheme.colorScheme.surfaceVariant
-        else
-            Color(android.graphics.Color.parseColor(label.color))
-
         Spacer(modifier = Modifier.width(10.dp))
-        ColorChoice(color = color, size = 30.dp, onClicked = { onLabelClick(label) })
+        ColorChoice(labelColor = label.color, size = 30.dp, onClicked = { onLabelClick(label) })
         Spacer(modifier = Modifier.width(10.dp))
         Text(
             modifier = Modifier.weight(100f),
@@ -194,11 +195,11 @@ private fun LabelItem(
 @Composable
 private fun AddEditLabelDialogContent(
     title: String,
-    color: Color?,
+    color: LabelColor,
     onTitleChanged: (String) -> Unit,
-    onColorChanged: (Color?) -> Unit,
+    onColorChanged: (LabelColor) -> Unit,
     onSubmitChange: () -> Unit,
-    colorSelection: List<Color>,
+    colorSelection: List<LabelColor>,
     navBarInsets: WindowInsets
 ) {
     Column(
@@ -240,8 +241,8 @@ private fun AddEditLabelDialogContent(
             Spacer(modifier = Modifier.weight(1f))
             Text(stringResource(id = R.string.edit_labels_no_color))
             RadioButton(
-                selected = color == null,
-                onClick = { onColorChanged(null) }
+                selected = color.type == LabelColorType.None,
+                onClick = { onColorChanged(LabelColors.none) }
             )
         }
         Row(
@@ -252,7 +253,7 @@ private fun AddEditLabelDialogContent(
             Spacer(modifier = Modifier.width(15.dp))
             colorSelection.forEach { colorChoice ->
                 ColorChoice(
-                    color = colorChoice,
+                    labelColor = colorChoice,
                     selected = colorChoice == color,
                     onClicked = onColorChanged,
                     size = 50.dp
@@ -278,18 +279,25 @@ private fun AddEditLabelDialogContent(
 
 @Composable
 private fun ColorChoice(
-    color: Color,
+    labelColor: LabelColor,
     selected: Boolean = false,
-    onClicked: (Color) -> Unit = { },
+    onClicked: (LabelColor) -> Unit = { },
     size: Dp
 ) {
+    val color = if (labelColor.type == LabelColorType.None)
+        MaterialTheme.colorScheme.surface
+    else
+        labelColor.getColor(LocalTheme.current.isDark)
+
     OutlinedButton(
         modifier = Modifier
             .width(size)
             .height(size),
-        onClick = { onClicked(color) },
+        onClick = { onClicked(labelColor) },
         contentPadding = PaddingValues(0.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = color)
+        colors = ButtonDefaults.buttonColors(
+            containerColor = color
+        )
     ) {
         if (selected) {
             Icon(
@@ -319,7 +327,7 @@ private fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
 @Preview
 @Composable
 private fun LabelItemPreview() {
-    val label = Label(UUID.randomUUID(), "Very long test label wow very very long this is the longest", "#005500")
+    val label = Label(UUID.randomUUID(), "Very long test label", LabelColors.green)
     LabelItem(
         label = label,
         onLabelClick = { },

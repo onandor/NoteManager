@@ -8,15 +8,10 @@ import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.utils.AsyncResult
-import com.onandor.notemanager.viewmodels.ColorSelection.BLUE
-import com.onandor.notemanager.viewmodels.ColorSelection.DARK_ORANGE
-import com.onandor.notemanager.viewmodels.ColorSelection.GREEN
-import com.onandor.notemanager.viewmodels.ColorSelection.LIGHT_RED
-import com.onandor.notemanager.viewmodels.ColorSelection.ORANGE
-import com.onandor.notemanager.viewmodels.ColorSelection.PINK
-import com.onandor.notemanager.viewmodels.ColorSelection.PURPLE
-import com.onandor.notemanager.viewmodels.ColorSelection.RED
-import com.onandor.notemanager.viewmodels.ColorSelection.YELLOW
+import com.onandor.notemanager.utils.LabelColor
+import com.onandor.notemanager.utils.LabelColorType
+import com.onandor.notemanager.utils.LabelColors
+import com.onandor.notemanager.utils.labelColors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,7 +29,7 @@ data class AddEditLabelForm(
     val id: UUID? = null,
     val title: String = "",
     val titleValid: Boolean = true,
-    val color: Color? = null
+    val color: LabelColor = LabelColors.none
 )
 
 data class EditLabelsUiState(
@@ -44,38 +39,6 @@ data class EditLabelsUiState(
     val addEditLabelDialogOpen: Boolean = false,
     val addEditLabelForm: AddEditLabelForm = AddEditLabelForm()
 )
-
-private fun String.toColor(): Color? {
-    return if (this.isEmpty())
-        null
-    else
-        Color(android.graphics.Color.parseColor(this))
-}
-
-private fun Color?.toHexString(): String {
-    if (this == null)
-        return ""
-
-    var red: String = (this.component1() * 255).toInt().toString(16)
-    red = if (red.length < 2) "0$red" else red
-    var green: String = (this.component2() * 255).toInt().toString(16)
-    green = if (green.length < 2) "0$green" else green
-    var blue: String = (this.component3() * 255).toInt().toString(16)
-    blue = if (blue.length < 2) "0$blue" else blue
-    return "#$red$green$blue"
-}
-
-private object ColorSelection {
-    val YELLOW = "#FFFF00".toColor()!!
-    val ORANGE = "#FFA500".toColor()!!
-    val DARK_ORANGE = "#E06F1F".toColor()!!
-    val RED = "#FF0000".toColor()!!
-    val LIGHT_RED = "#FF1A40".toColor()!!
-    val PINK = "#FF00FF".toColor()!!
-    val PURPLE = "#8A2BE2".toColor()!!
-    val BLUE = "#0000FF".toColor()!!
-    val GREEN = "#00FF00".toColor()!!
-}
 
 @HiltViewModel
 class EditLabelsViewModel @Inject constructor(
@@ -90,7 +53,10 @@ class EditLabelsViewModel @Inject constructor(
     private val addEditLabelDialogOpen = MutableStateFlow(false)
     private val addEditLabelForm = MutableStateFlow(AddEditLabelForm())
 
-    val colorSelection = listOf(YELLOW, ORANGE, DARK_ORANGE, RED, LIGHT_RED, PINK, PURPLE, BLUE, GREEN)
+    val colorSelection = labelColors.toList()
+        .map { pair -> pair.second }
+        .filterNot { labelColor -> labelColor.type == LabelColorType.None }
+
     val uiState: StateFlow<EditLabelsUiState> = combine(
         _labelsAsync, addEditLabelDialogOpen, addEditLabelForm
     ) { labelsAsync, editLabelDialogOpen, addEditLabelForm ->
@@ -130,7 +96,7 @@ class EditLabelsViewModel @Inject constructor(
                 id = label.id,
                 title = label.title,
                 titleValid = label.title.length in 1 .. 30,
-                color = label.color.toColor()
+                color = label.color
             )
         }
         showAddEditLabelDialog()
@@ -146,7 +112,7 @@ class EditLabelsViewModel @Inject constructor(
             it.copy(
                 title = "",
                 titleValid = true,
-                color = null
+                color = LabelColors.none
             )
         }
     }
@@ -160,7 +126,7 @@ class EditLabelsViewModel @Inject constructor(
         }
     }
 
-    fun addEditLabelUpdateColor(color: Color?) {
+    fun addEditLabelUpdateColor(color: LabelColor) {
         addEditLabelForm.update {
             it.copy(color = color)
         }
@@ -171,7 +137,7 @@ class EditLabelsViewModel @Inject constructor(
             viewModelScope.launch {
                 labelRepository.createLabel(
                     title = addEditLabelForm.value.title,
-                    color = addEditLabelForm.value.color.toHexString()
+                    color = addEditLabelForm.value.color
                 )
             }
         }
@@ -180,7 +146,7 @@ class EditLabelsViewModel @Inject constructor(
                 labelRepository.updateLabel(
                     labelId = addEditLabelForm.value.id!!,
                     title = addEditLabelForm.value.title,
-                    color = addEditLabelForm.value.color.toHexString()
+                    color = addEditLabelForm.value.color
                 )
             }
         }

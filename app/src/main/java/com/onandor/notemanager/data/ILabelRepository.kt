@@ -1,5 +1,6 @@
 package com.onandor.notemanager.data
 
+import com.onandor.notemanager.utils.LabelColor
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
@@ -13,9 +14,9 @@ interface ILabelRepository {
 
     suspend fun getLabels(): List<Label>
 
-    suspend fun createLabel(title: String, color: String): UUID
+    suspend fun createLabel(title: String, color: LabelColor): UUID
 
-    suspend fun updateLabel(labelId: UUID, title: String, color: String)
+    suspend fun updateLabel(labelId: UUID, title: String, color: LabelColor)
 
     suspend fun deleteLabel(labelId: UUID)
 

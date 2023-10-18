@@ -2,7 +2,6 @@ package com.onandor.notemanager.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,19 +15,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.onandor.notemanager.data.Label
+import com.onandor.notemanager.ui.theme.LocalTheme
+import com.onandor.notemanager.utils.LabelColorType
+import com.onandor.notemanager.utils.LabelColors
+import com.onandor.notemanager.utils.getColor
 import java.util.UUID
 import kotlin.math.sqrt
 
-private fun getBorderColor(color: Color, isLightColor: Boolean): Color {
-    val d = if (isLightColor) -0.2f else 0.2f
-    val red = if (color.component1() + d in 0f .. 1f) color.component1() + d else color.component1()
-    val green = if (color.component2() + d in 0f .. 1f) color.component2() + d else color.component2()
-    val blue = if (color.component3() + d in 0f .. 1f) color.component3() + d else color.component3()
+private fun getBorderColor(color: Color, isSurfaceLight: Boolean): Color {
+    val offset = if (isSurfaceLight) -0.2f else 0.2f
+    val red = if (color.red + offset in 0f .. 1f) color.red + offset else color.red
+    val green = if (color.green + offset in 0f .. 1f) color.green + offset else color.green
+    val blue = if (color.blue + offset in 0f .. 1f) color.blue + offset else color.blue
     return Color(red, green, blue)
 }
 
@@ -44,18 +45,19 @@ fun LabelComponent(
     borderWidth: Dp = 1.dp,
     roundedCornerSize: Dp = 5.dp
 ) {
-    val color = if (label.color.isEmpty())
-        MaterialTheme.colorScheme.surfaceVariant
+    val surfaceColor = if (label.color.type == LabelColorType.None)
+        MaterialTheme.colorScheme.surface
     else
-        Color(android.graphics.Color.parseColor(label.color))
+        label.color.getColor(LocalTheme.current.isDark)
 
-    val isLightColor = color.luminance() > sqrt(1.05 * 0.05) - 0.05
-    val contentColor = if (isLightColor) Color.Black else Color.White
+    val lightSurface = surfaceColor.luminance() > sqrt(1.05 * 0.05) - 0.05
+    val borderColor = getBorderColor(surfaceColor, lightSurface)
+    val textColor = if (lightSurface) Color.Black else Color.White
 
     var _modifier = modifier
         .border(
             width = borderWidth,
-            color = getBorderColor(color, isLightColor),
+            color = borderColor,
             shape = RoundedCornerShape(roundedCornerSize)
         )
         .clip(RoundedCornerShape(roundedCornerSize))
@@ -68,8 +70,8 @@ fun LabelComponent(
 
     Surface(
         modifier = _modifier,
-        color = color,
-        contentColor = contentColor
+        color = surfaceColor,
+        contentColor = textColor
     ) {
         Row(
             modifier = Modifier.padding(padding)
@@ -86,7 +88,7 @@ fun LabelComponent(
 @Preview
 @Composable
 fun LabelComponentPreview() {
-    val label = Label(UUID.randomUUID(), "Very long test label wow", "#005500")
+    val label = Label(UUID.randomUUID(), "Very long test label wow", LabelColors.green)
     LabelComponent(
         label = label,
         clickable = false,
