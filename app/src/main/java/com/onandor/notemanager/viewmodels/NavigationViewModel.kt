@@ -1,5 +1,6 @@
 package com.onandor.notemanager.viewmodels
 
+import androidx.compose.runtime.compositionLocalOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.local.datastore.ISettings
@@ -11,6 +12,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class NoteListOptions(
+    val collapsedView: Boolean = false
+)
+
+val LocalNoteListOptions = compositionLocalOf { NoteListOptions() }
 
 @HiltViewModel
 class NavigationViewModel @Inject constructor(

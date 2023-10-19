@@ -1,6 +1,5 @@
 package com.onandor.notemanager.navigation
 
-import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -16,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.onandor.notemanager.data.local.models.LocalNote
 import com.onandor.notemanager.ui.components.AppModalDrawer
 import com.onandor.notemanager.viewmodels.NavigationViewModel
 import com.onandor.notemanager.ui.screens.AddEditNoteScreen
@@ -41,6 +42,8 @@ import com.onandor.notemanager.ui.screens.SignInRegisterScreen
 import com.onandor.notemanager.ui.screens.SignedOutScreen
 import com.onandor.notemanager.ui.screens.TrashScreen
 import com.onandor.notemanager.ui.screens.UserDetailsScreen
+import com.onandor.notemanager.viewmodels.LocalNoteListOptions
+import com.onandor.notemanager.viewmodels.NoteListOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
@@ -70,6 +73,8 @@ fun NavGraph(
         navManagerState?.let {
             try {
                 navController.navigate(it.destination, it.navOptions)
+                // Live Edit craps out here because the graph is null inside the controller for some
+                // reason, it isn't a problem during normal use, so this solves the issue
             } catch (_: IllegalArgumentException) {}
         }
     }
@@ -83,6 +88,10 @@ fun NavGraph(
     Surface(
         color = animatedSurfaceColor.value
     ) {
+        val noteListOptions = NoteListOptions(
+            collapsedView = noteListCollapsedView.value
+        )
+
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -95,11 +104,10 @@ fun NavGraph(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
                 ) {
-                    Box(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars)) {
+                    CompositionLocalProvider(LocalNoteListOptions provides noteListOptions) {
                         NotesScreen(
                             onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                            onToggleCollapsedView = viewModel::toggleNoteListCollapsedView,
-                            collapsedView = noteListCollapsedView.value
+                            onToggleCollapsedView = viewModel::toggleNoteListCollapsedView
                         )
                     }
                 }
@@ -120,11 +128,12 @@ fun NavGraph(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
                 ) {
-                    ArchiveScreen(
-                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                        onToggleCollapsedView = viewModel::toggleNoteListCollapsedView,
-                        collapsedView = noteListCollapsedView.value
-                    )
+                    CompositionLocalProvider(LocalNoteListOptions provides noteListOptions) {
+                        ArchiveScreen(
+                            onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
+                            onToggleCollapsedView = viewModel::toggleNoteListCollapsedView
+                        )
+                    }
                 }
             }
             composable(NavDestinations.TRASH) {

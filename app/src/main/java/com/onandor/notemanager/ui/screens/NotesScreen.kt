@@ -27,6 +27,7 @@ import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.TopBar
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.utils.AddEditResults
+import com.onandor.notemanager.viewmodels.LocalNoteListOptions
 import com.onandor.notemanager.viewmodels.NotesViewModel
 import kotlinx.coroutines.launch
 
@@ -34,11 +35,12 @@ import kotlinx.coroutines.launch
 fun NotesScreen(
     onOpenDrawer: () -> Unit,
     onToggleCollapsedView: () -> Unit,
-    collapsedView: Boolean,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    val collapsedView = LocalNoteListOptions.current.collapsedView
+
     Scaffold (
         modifier = Modifier.statusBarsPadding(),
         topBar = {

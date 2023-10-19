@@ -20,17 +20,19 @@ import com.onandor.notemanager.ui.components.TopBar
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.ArchiveViewModel
+import com.onandor.notemanager.viewmodels.LocalNoteListOptions
 import kotlinx.coroutines.launch
 
 @Composable
 fun ArchiveScreen(
     onOpenDrawer: () -> Unit,
     onToggleCollapsedView: () -> Unit,
-    collapsedView: Boolean,
     viewModel: ArchiveViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+    val collapsedView = LocalNoteListOptions.current.collapsedView
+
     Scaffold (
         modifier = Modifier.statusBarsPadding(),
         topBar = {
