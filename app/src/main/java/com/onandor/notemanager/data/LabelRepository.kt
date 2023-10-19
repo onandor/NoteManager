@@ -1,6 +1,5 @@
 package com.onandor.notemanager.data
 
-import androidx.compose.ui.text.toLowerCase
 import com.onandor.notemanager.data.local.db.LabelDao
 import com.onandor.notemanager.data.mapping.toExternal
 import com.onandor.notemanager.data.mapping.toLocal

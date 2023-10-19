@@ -3,7 +3,6 @@ package com.onandor.notemanager.data.local.models
 import androidx.room.TypeConverter
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.utils.LabelColorType
-import com.onandor.notemanager.utils.labelColors
 import java.time.LocalDateTime
 
 class Converters {

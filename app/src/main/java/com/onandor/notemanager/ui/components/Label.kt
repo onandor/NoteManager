@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
@@ -24,7 +23,6 @@ import com.onandor.notemanager.utils.LabelColors
 import com.onandor.notemanager.utils.getAccentColor
 import com.onandor.notemanager.utils.getColor
 import java.util.UUID
-import kotlin.math.sqrt
 
 @Composable
 fun LabelComponent(
