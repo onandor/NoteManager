@@ -13,11 +13,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -25,9 +22,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.TopBar
-import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.utils.AddEditResults
-import com.onandor.notemanager.viewmodels.LocalNoteListOptions
+import com.onandor.notemanager.utils.LocalNoteListOptions
 import com.onandor.notemanager.viewmodels.NotesViewModel
 import kotlinx.coroutines.launch
 
@@ -40,6 +36,7 @@ fun NotesScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val collapsedView = LocalNoteListOptions.current.collapsedView
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold (
         modifier = Modifier.statusBarsPadding(),
@@ -47,7 +44,9 @@ fun NotesScreen(
             TopBar(
                 onOpenDrawer = onOpenDrawer,
                 noteListCollapsedView = collapsedView,
-                onToggleNoteListCollapsedView = onToggleCollapsedView
+                onToggleNoteListCollapsedView = onToggleCollapsedView,
+                onNoteSortingChanged = viewModel::changeSorting,
+                currentSorting = uiState.sorting
             )
         },
         floatingActionButton = {
@@ -57,8 +56,6 @@ fun NotesScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
         NoteList(
             notes = uiState.notes,
             onNoteClick = viewModel::noteClick,

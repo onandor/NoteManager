@@ -28,6 +28,8 @@ object SettingsKeys {
     val FIRST_LAUNCH = SettingsKey(false, booleanPreferencesKey("first_launch"))
     val INSTALLATION_ID = SettingsKey(true, stringPreferencesKey("installation_id"))
     val NOTE_LIST_COLLAPSED_VIEW = SettingsKey(false, booleanPreferencesKey("note_list_collapsed_view"))
+    val NOTE_LIST_SORT_BY = SettingsKey(false, intPreferencesKey("note_list_sort_by"))
+    val NOTE_LIST_ORDER = SettingsKey(false, intPreferencesKey("note_list_order"))
     val THEME_TYPE = SettingsKey(false, intPreferencesKey("theme_type"))
 }
 

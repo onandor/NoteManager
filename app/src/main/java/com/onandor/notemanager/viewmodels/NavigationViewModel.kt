@@ -1,11 +1,11 @@
 package com.onandor.notemanager.viewmodels
 
-import androidx.compose.runtime.compositionLocalOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.utils.NoteListOptions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,32 +13,29 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class NoteListOptions(
-    val collapsedView: Boolean = false
-)
-
-val LocalNoteListOptions = compositionLocalOf { NoteListOptions() }
-
 @HiltViewModel
 class NavigationViewModel @Inject constructor(
     val navigationManager: INavigationManager,
     private val settings: ISettings
 ) : ViewModel() {
 
-    private val _noteListCollapsedView = MutableStateFlow(false)
-    val noteListCollapsedView = _noteListCollapsedView.asStateFlow()
+    private val _noteListOptions = MutableStateFlow(NoteListOptions())
+    val noteListOptions = _noteListOptions.asStateFlow()
 
     init {
         viewModelScope.launch {
             val collapsed = settings.getBoolean(SettingsKeys.NOTE_LIST_COLLAPSED_VIEW, false)
-            _noteListCollapsedView.update { collapsed }
+
+            _noteListOptions.update {
+                it.copy(collapsedView = collapsed)
+            }
         }
     }
 
     fun toggleNoteListCollapsedView() {
-        _noteListCollapsedView.update { !it }
+        _noteListOptions.update { it.copy(collapsedView = !it.collapsedView) }
         viewModelScope.launch {
-            settings.save(SettingsKeys.NOTE_LIST_COLLAPSED_VIEW, _noteListCollapsedView.value)
+            settings.save(SettingsKeys.NOTE_LIST_COLLAPSED_VIEW, _noteListOptions.value.collapsedView)
         }
     }
 }

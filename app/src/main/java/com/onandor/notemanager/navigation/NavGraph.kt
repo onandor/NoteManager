@@ -3,12 +3,8 @@ package com.onandor.notemanager.navigation
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +25,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.onandor.notemanager.data.local.models.LocalNote
 import com.onandor.notemanager.ui.components.AppModalDrawer
 import com.onandor.notemanager.viewmodels.NavigationViewModel
 import com.onandor.notemanager.ui.screens.AddEditNoteScreen
@@ -42,8 +37,7 @@ import com.onandor.notemanager.ui.screens.SignInRegisterScreen
 import com.onandor.notemanager.ui.screens.SignedOutScreen
 import com.onandor.notemanager.ui.screens.TrashScreen
 import com.onandor.notemanager.ui.screens.UserDetailsScreen
-import com.onandor.notemanager.viewmodels.LocalNoteListOptions
-import com.onandor.notemanager.viewmodels.NoteListOptions
+import com.onandor.notemanager.utils.LocalNoteListOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
@@ -60,7 +54,6 @@ fun NavGraph(
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: startDestination
     val navManagerState by viewModel.navigationManager.navActions.collectAsState()
-    val noteListCollapsedView = viewModel.noteListCollapsedView.collectAsState()
 
     // Change theme smoothly
     val animatedSurfaceColor = animateColorAsState(
@@ -88,10 +81,6 @@ fun NavGraph(
     Surface(
         color = animatedSurfaceColor.value
     ) {
-        val noteListOptions = NoteListOptions(
-            collapsedView = noteListCollapsedView.value
-        )
-
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -104,7 +93,12 @@ fun NavGraph(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
                 ) {
-                    CompositionLocalProvider(LocalNoteListOptions provides noteListOptions) {
+                    CompositionLocalProvider(
+                        value = LocalNoteListOptions provides viewModel
+                            .noteListOptions
+                            .collectAsState()
+                            .value
+                    ) {
                         NotesScreen(
                             onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
                             onToggleCollapsedView = viewModel::toggleNoteListCollapsedView
@@ -128,7 +122,12 @@ fun NavGraph(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
                 ) {
-                    CompositionLocalProvider(LocalNoteListOptions provides noteListOptions) {
+                    CompositionLocalProvider(
+                        value = LocalNoteListOptions provides viewModel
+                            .noteListOptions
+                            .collectAsState()
+                            .value
+                    ) {
                         ArchiveScreen(
                             onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
                             onToggleCollapsedView = viewModel::toggleNoteListCollapsedView

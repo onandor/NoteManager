@@ -17,10 +17,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.TopBar
-import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.utils.AddEditResults
+import com.onandor.notemanager.utils.LocalNoteListOptions
 import com.onandor.notemanager.viewmodels.ArchiveViewModel
-import com.onandor.notemanager.viewmodels.LocalNoteListOptions
 import kotlinx.coroutines.launch
 
 @Composable
@@ -32,6 +31,7 @@ fun ArchiveScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val collapsedView = LocalNoteListOptions.current.collapsedView
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold (
         modifier = Modifier.statusBarsPadding(),
@@ -39,13 +39,13 @@ fun ArchiveScreen(
             TopBar(
                 onOpenDrawer = onOpenDrawer,
                 noteListCollapsedView = collapsedView,
-                onToggleNoteListCollapsedView = onToggleCollapsedView
+                onToggleNoteListCollapsedView = onToggleCollapsedView,
+                onNoteSortingChanged = viewModel::changeSorting,
+                currentSorting = uiState.sorting
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
-        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
         NoteList(
             notes = uiState.notes,
             onNoteClick = viewModel::noteClick,

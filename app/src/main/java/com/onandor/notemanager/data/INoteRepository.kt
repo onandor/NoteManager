@@ -1,7 +1,6 @@
 package com.onandor.notemanager.data
 
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDateTime
 import java.util.UUID
 
 interface INoteRepository {

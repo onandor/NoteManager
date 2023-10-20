@@ -11,6 +11,7 @@ import com.onandor.notemanager.utils.AddEditResult
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.utils.AsyncResult
+import com.onandor.notemanager.utils.NoteComparison
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +35,7 @@ class TrashViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.TRASH)
+        .map { it.sortedWith(NoteComparison.comparators[NoteComparison.modificationDateDescending]!!) }
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 

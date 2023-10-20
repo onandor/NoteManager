@@ -107,4 +107,8 @@
     <string name="edit_labels_delete_confirmation">By deleting a label it will get removed from all the notes it\'s added to. Are you sure?</string>
     <string name="dialog_simple_confirmation_cancel">Cancel</string>
     <string name="dialog_simple_confirmation_confirm">Confirm</string>
+    <string name="menu_note_sorting_title">Title</string>
+    <string name="menu_note_sorting_modification_date">Modification date</string>
+    <string name="menu_note_sorting_creation_date">Creation date</string>
+    <string name="menu_note_sorting_hint_sorting">Change sorting</string>
 </resources>
