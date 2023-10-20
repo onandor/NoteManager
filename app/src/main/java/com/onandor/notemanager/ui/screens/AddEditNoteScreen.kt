@@ -396,7 +396,7 @@ private fun AddEditNoteTopAppBar_Archive(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { onAddLabels(); navigateBack() }) {
+                IconButton(onClick = { onAddLabels() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_note_add_label_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_add_labels)
