@@ -23,19 +23,16 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.TopBar
 import com.onandor.notemanager.utils.AddEditResults
-import com.onandor.notemanager.utils.LocalNoteListOptions
 import com.onandor.notemanager.viewmodels.NotesViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun NotesScreen(
     onOpenDrawer: () -> Unit,
-    onToggleCollapsedView: () -> Unit,
     viewModel: NotesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
-    val collapsedView = LocalNoteListOptions.current.collapsedView
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold (
@@ -43,10 +40,10 @@ fun NotesScreen(
         topBar = {
             TopBar(
                 onOpenDrawer = onOpenDrawer,
-                noteListCollapsedView = collapsedView,
-                onToggleNoteListCollapsedView = onToggleCollapsedView,
+                noteListCollapsedView = uiState.noteListState.collapsed,
+                onToggleNoteListCollapsedView = viewModel::toggleNoteListCollapsedView,
                 onNoteSortingChanged = viewModel::changeSorting,
-                currentSorting = uiState.sorting
+                currentSorting = uiState.noteListState.sorting
             )
         },
         floatingActionButton = {
@@ -60,7 +57,7 @@ fun NotesScreen(
             notes = uiState.notes,
             onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
-            collapsedView = collapsedView,
+            collapsedView = uiState.noteListState.collapsed,
             emptyContent = { NotesEmptyContent() }
         )
 

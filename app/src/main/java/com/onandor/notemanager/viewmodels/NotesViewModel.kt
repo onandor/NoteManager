@@ -9,6 +9,7 @@ import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavActions
+import com.onandor.notemanager.ui.components.NoteListState
 import com.onandor.notemanager.utils.AddEditResult
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AddEditResults
@@ -25,14 +26,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class NotesUiState(
     val notes: List<Note> = listOf(),
     val addEditResult: AddEditResult = AddEditResults.NONE,
-    val sorting: NoteSorting = NoteSorting(NoteComparisonField.ModificationDate, Order.Descending)
+    val noteListState: NoteListState = NoteListState()
 )
 
 @HiltViewModel
@@ -43,11 +43,12 @@ class NotesViewModel @Inject constructor(
     private val settings: ISettings
 ) : ViewModel() {
 
-    private val sorting = combine(
+    private val noteListState = combine(
+        settings.observeBoolean(SettingsKeys.NOTE_LIST_COLLAPSED_VIEW, false),
         settings.observeInt(SettingsKeys.NOTE_LIST_SORT_BY),
         settings.observeInt(SettingsKeys.NOTE_LIST_ORDER)
-    ) { compareByInt, orderInt ->
-        if (compareByInt < 0 || orderInt < 0) {
+    ) { collapsed, compareByInt, orderInt ->
+        val sorting = if (compareByInt < 0 || orderInt < 0) {
             NoteSorting(NoteComparisonField.ModificationDate, Order.Descending)
         }
         else {
@@ -56,6 +57,10 @@ class NotesViewModel @Inject constructor(
                 order = Order.fromInt(orderInt)
             )
         }
+        NoteListState(
+            collapsed = collapsed,
+            sorting = sorting
+        )
     }
 
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.NOTES)
@@ -63,8 +68,8 @@ class NotesViewModel @Inject constructor(
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
     val uiState: StateFlow<NotesUiState> = combine(
-        _notesAsync, addEditResultState.result, sorting
-    ) { notesAsync, addEditResult, sorting ->
+        _notesAsync, addEditResultState.result, noteListState
+    ) { notesAsync, addEditResult, noteListState ->
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
@@ -75,11 +80,11 @@ class NotesViewModel @Inject constructor(
                 NotesUiState(addEditResult = addEditResult)
             }
             is AsyncResult.Success -> {
-                val sortedNotes = notesAsync.data.sortedWith(NoteComparison.comparators[sorting]!!)
+                val sortedNotes = notesAsync.data.sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
                 NotesUiState(
                     notes = sortedNotes,
                     addEditResult = addEditResult,
-                    sorting = sorting
+                    noteListState = noteListState
                 )
             }
         }
@@ -106,6 +111,12 @@ class NotesViewModel @Inject constructor(
         viewModelScope.launch {
             settings.save(SettingsKeys.NOTE_LIST_SORT_BY, sorting.compareBy.value)
             settings.save(SettingsKeys.NOTE_LIST_ORDER, sorting.order.value)
+        }
+    }
+
+    fun toggleNoteListCollapsedView() {
+        viewModelScope.launch {
+            settings.save(SettingsKeys.NOTE_LIST_COLLAPSED_VIEW, !noteListState.first().collapsed)
         }
     }
 }

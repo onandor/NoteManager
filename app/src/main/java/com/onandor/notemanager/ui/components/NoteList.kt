@@ -31,8 +31,16 @@ import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.utils.LabelColors
+import com.onandor.notemanager.utils.NoteComparisonField
+import com.onandor.notemanager.utils.NoteSorting
+import com.onandor.notemanager.utils.Order
 import java.time.LocalDateTime
 import java.util.UUID
+
+data class NoteListState(
+    val collapsed: Boolean = false,
+    val sorting: NoteSorting = NoteSorting(NoteComparisonField.ModificationDate, Order.Descending)
+)
 
 @Composable
 fun NoteList(

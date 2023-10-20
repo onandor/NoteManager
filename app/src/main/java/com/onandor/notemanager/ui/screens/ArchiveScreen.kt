@@ -18,19 +18,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.TopBar
 import com.onandor.notemanager.utils.AddEditResults
-import com.onandor.notemanager.utils.LocalNoteListOptions
 import com.onandor.notemanager.viewmodels.ArchiveViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun ArchiveScreen(
     onOpenDrawer: () -> Unit,
-    onToggleCollapsedView: () -> Unit,
     viewModel: ArchiveViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
-    val collapsedView = LocalNoteListOptions.current.collapsedView
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold (
@@ -38,10 +35,10 @@ fun ArchiveScreen(
         topBar = {
             TopBar(
                 onOpenDrawer = onOpenDrawer,
-                noteListCollapsedView = collapsedView,
-                onToggleNoteListCollapsedView = onToggleCollapsedView,
+                noteListCollapsedView = uiState.noteListState.collapsed,
+                onToggleNoteListCollapsedView = viewModel::toggleNoteListCollapsedView,
                 onNoteSortingChanged = viewModel::changeSorting,
-                currentSorting = uiState.sorting
+                currentSorting = uiState.noteListState.sorting
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -50,7 +47,7 @@ fun ArchiveScreen(
             notes = uiState.notes,
             onNoteClick = viewModel::noteClick,
             modifier = Modifier.padding(innerPadding),
-            collapsedView = collapsedView,
+            collapsedView = uiState.noteListState.collapsed,
             emptyContent = { ArchiveEmptyContent() }
         )
 

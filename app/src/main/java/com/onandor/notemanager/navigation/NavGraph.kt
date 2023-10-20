@@ -11,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,7 +36,6 @@ import com.onandor.notemanager.ui.screens.SignInRegisterScreen
 import com.onandor.notemanager.ui.screens.SignedOutScreen
 import com.onandor.notemanager.ui.screens.TrashScreen
 import com.onandor.notemanager.ui.screens.UserDetailsScreen
-import com.onandor.notemanager.utils.LocalNoteListOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
@@ -93,17 +91,9 @@ fun NavGraph(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
                 ) {
-                    CompositionLocalProvider(
-                        value = LocalNoteListOptions provides viewModel
-                            .noteListOptions
-                            .collectAsState()
-                            .value
-                    ) {
-                        NotesScreen(
-                            onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                            onToggleCollapsedView = viewModel::toggleNoteListCollapsedView
-                        )
-                    }
+                    NotesScreen(
+                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } }
+                    )
                 }
             }
             composable(
@@ -122,17 +112,9 @@ fun NavGraph(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
                 ) {
-                    CompositionLocalProvider(
-                        value = LocalNoteListOptions provides viewModel
-                            .noteListOptions
-                            .collectAsState()
-                            .value
-                    ) {
-                        ArchiveScreen(
-                            onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
-                            onToggleCollapsedView = viewModel::toggleNoteListCollapsedView
-                        )
-                    }
+                    ArchiveScreen(
+                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } }
+                    )
                 }
             }
             composable(NavDestinations.TRASH) {
