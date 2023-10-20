@@ -38,7 +38,8 @@ data class AddEditNoteUiState(
     val labels: List<Label> = emptyList(),
     val remainingLabels: List<Label> = emptyList(),
     val snackbarMessageResource: Int? = null,
-    val editLabelsDialogOpen: Boolean = false
+    val editLabelsDialogOpen: Boolean = false,
+    val newNote: Boolean = false
 )
 
 @HiltViewModel
@@ -86,6 +87,9 @@ class AddEditNoteViewModel @Inject constructor(
     init {
         if (noteId != null) {
             loadNote(noteId)
+        }
+        else {
+            _uiState.update { it.copy(newNote = true) }
         }
     }
 

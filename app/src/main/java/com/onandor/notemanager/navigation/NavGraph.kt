@@ -1,10 +1,11 @@
 package com.onandor.notemanager.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
@@ -77,14 +78,12 @@ fun NavGraph(
     }
 
     Surface(
+        modifier = Modifier.windowInsetsPadding(WindowInsets(0, 0, 0, 0)),
         color = animatedSurfaceColor.value
     ) {
         NavHost(
             navController = navController,
-            startDestination = startDestination,
-            modifier = modifier
-                .navigationBarsPadding()
-                .imePadding()
+            startDestination = startDestination
         ) {
             composable(NavDestinations.NOTES) {
                 AppModalDrawer(
@@ -97,13 +96,19 @@ fun NavGraph(
                 }
             }
             composable(
-                NavDestinations.ADD_EDIT_NOTE,
+                route = NavDestinations.ADD_EDIT_NOTE,
                 arguments = listOf(
                     navArgument(NavDestinationArgs.NOTE_ID_ARG) {
                         type = NavType.StringType
                         nullable = true
                     }
-                )
+                ),
+                enterTransition = {
+                    slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left)
+                },
+                exitTransition = {
+                    slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right)
+                }
             ) {
                 AddEditNoteScreen()
             }

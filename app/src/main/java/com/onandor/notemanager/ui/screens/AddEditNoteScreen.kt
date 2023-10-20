@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -25,7 +26,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,10 +39,13 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
@@ -73,7 +76,9 @@ fun AddEditNoteScreen(
     val labelDialogState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
-        modifier = Modifier.statusBarsPadding(),
+        modifier = Modifier
+            .statusBarsPadding()
+            .imePadding(),
         topBar = {
             AddEditNoteTopAppBar(
                 viewModel = viewModel,
@@ -87,6 +92,7 @@ fun AddEditNoteScreen(
             content = uiState.content,
             onTitleChanged = viewModel::updateTitle,
             onContentChanged = viewModel::updateContent,
+            newNote = uiState.newNote
         )
     }
 
@@ -99,6 +105,7 @@ fun AddEditNoteScreen(
             viewModel.navigateBack()
         }
     }
+
     if (uiState.editLabelsDialogOpen) {
         val navBarInsets = WindowInsets.navigationBars
         ModalBottomSheet(
@@ -125,6 +132,7 @@ private fun TitleAndContentEditor(
     content: String,
     onTitleChanged: (String) -> Unit,
     onContentChanged: (String) -> Unit,
+    newNote: Boolean
 ) {
     Column (
         modifier = modifier
@@ -138,11 +146,19 @@ private fun TitleAndContentEditor(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )
+        val focusRequester = FocusRequester()
+
+        LaunchedEffect(newNote) {
+            if (newNote) {
+                focusRequester.requestFocus()
+            }
+        }
 
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .animateContentSize(),
+                .animateContentSize()
+                .focusRequester(focusRequester),
             value = title,
             onValueChange = onTitleChanged,
             colors = textFieldColors,
@@ -163,7 +179,7 @@ private fun TitleAndContentEditor(
                 .fillMaxWidth()
                 .weight(1f),
             value = content,
-            onValueChange = onContentChanged,
+            onValueChange = { onContentChanged(it) } ,
             colors = textFieldColors,
             textStyle = TextStyle.Default.copy(
                 fontSize = 16.sp,
@@ -452,6 +468,7 @@ fun TitleAndContentEditorPreview() {
         title = "",
         content = "",
         onTitleChanged = { },
-        onContentChanged = { }
+        onContentChanged = { },
+        newNote = false
     )
 }
