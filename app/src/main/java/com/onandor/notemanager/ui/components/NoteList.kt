@@ -1,6 +1,7 @@
 package com.onandor.notemanager.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,6 +44,7 @@ data class NoteListState(
     val sorting: NoteSorting = NoteSorting(NoteComparisonField.ModificationDate, Order.Descending)
 )
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteList(
     notes: List<Note>,
@@ -56,8 +59,16 @@ fun NoteList(
         }
         else {
             LazyColumn {
-                items(notes) { note ->
-                    NoteItem(note, collapsedView, onNoteClick)
+                itemsIndexed(
+                    items = notes,
+                    key = { _, note -> note.id }
+                ) { _, note ->
+                    NoteItem(
+                        modifier = Modifier.animateItemPlacement(),
+                        note = note,
+                        collapsedView = collapsedView,
+                        onNoteClick = onNoteClick
+                    )
                 }
             }
         }
@@ -67,12 +78,13 @@ fun NoteList(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun NoteItem(
+    modifier: Modifier,
     note: Note,
     collapsedView: Boolean,
     onNoteClick: (Note) -> Unit
 ) {
     Surface (
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(start = 5.dp, end = 5.dp, bottom = 5.dp)
             .border(
@@ -153,6 +165,7 @@ fun PreviewNoteItem() {
     )
 
     NoteItem(
+        modifier = Modifier,
         note = note,
         collapsedView = false,
         onNoteClick = { }
