@@ -39,8 +39,8 @@ fun LabelComponent(
     val color: Color
     val accentColor: Color
     if (label.color.type == LabelColorType.None) {
-        color = MaterialTheme.colorScheme.surface
-        accentColor = MaterialTheme.colorScheme.onSurface
+        color = MaterialTheme.colorScheme.surfaceVariant
+        accentColor = MaterialTheme.colorScheme.onSurfaceVariant
     }
     else {
         color = label.color.getColor(LocalTheme.current.isDark)
@@ -48,11 +48,11 @@ fun LabelComponent(
     }
 
     var _modifier = modifier
-        .border(
+        /*.border(
             width = borderWidth,
             color = accentColor,
             shape = RoundedCornerShape(roundedCornerSize)
-        )
+        )*/
         .clip(RoundedCornerShape(roundedCornerSize))
     if (clickable)
         _modifier = _modifier.clickable { onClick(label) }
