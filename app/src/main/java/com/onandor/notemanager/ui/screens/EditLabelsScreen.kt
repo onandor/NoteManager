@@ -2,8 +2,10 @@ package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +24,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -79,7 +81,7 @@ import com.onandor.notemanager.viewmodels.EditLabelsViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun EditLabelsScreen(
     viewModel: EditLabelsViewModel = hiltViewModel()
@@ -116,11 +118,20 @@ fun EditLabelsScreen(
             }
             else {
                 LazyColumn(
-                    modifier = Modifier.padding(start = 20.dp, end = 10.dp),
+                    modifier = Modifier
+                        .animateContentSize(),
                     state = scrollState
                 ) {
-                    items(uiState.labels) { label ->
-                        LabelItem(label, viewModel::labelClick, viewModel::showConfirmDeleteLabel)
+                    itemsIndexed(
+                        items = uiState.labels,
+                        key = { _, label -> label.id}
+                    ) { _, label ->
+                        LabelItem(
+                            modifier = Modifier.animateItemPlacement(),
+                            label = label,
+                            onLabelClick = viewModel::labelClick,
+                            onDeleteLabel = viewModel::showConfirmDeleteLabel
+                        )
                     }
                 }
             }
@@ -176,14 +187,16 @@ fun EditLabelsScreen(
 
 @Composable
 private fun LabelItem(
+    modifier: Modifier,
     label: Label,
     onLabelClick: (Label) -> Unit,
     onDeleteLabel: (Label) -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clickable { onLabelClick(label) },
+            .clickable { onLabelClick(label) }
+            .padding(start = 20.dp, end = 10.dp, top = 5.dp, bottom = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ColorChoice(labelColor = label.color, size = 30.dp, onClicked = { onLabelClick(label) })
@@ -347,6 +360,7 @@ private fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
 private fun LabelItemPreview() {
     val label = Label(UUID.randomUUID(), "Very long test label", LabelColors.green)
     LabelItem(
+        modifier = Modifier,
         label = label,
         onLabelClick = { },
         onDeleteLabel = { }
