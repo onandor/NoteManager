@@ -1,6 +1,7 @@
 package com.onandor.notemanager.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -57,13 +58,19 @@ fun TrashScreen(
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-        NoteList(
-            notes = uiState.notes,
-            onNoteClick = viewModel::noteClick,
-            modifier = Modifier.padding(innerPadding),
-            collapsedView = false,
-            emptyContent = { TrashEmptyContent() }
-        )
+        if (uiState.notes.isEmpty()) {
+            Box(modifier = Modifier.padding(innerPadding)) {
+                Text("The trash is empty")
+            }
+        }
+        else {
+            NoteList(
+                notes = uiState.notes,
+                onNoteClick = viewModel::noteClick,
+                modifier = Modifier.padding(innerPadding),
+                collapsedView = false
+            )
+        }
 
         if (uiState.addEditResult != AddEditResults.NONE) {
             val resultText = stringResource(id = uiState.addEditResult.resource)
@@ -75,11 +82,6 @@ fun TrashScreen(
             }
         }
     }
-}
-
-@Composable
-private fun TrashEmptyContent() {
-    Text("The trash is empty")
 }
 
 @Composable
