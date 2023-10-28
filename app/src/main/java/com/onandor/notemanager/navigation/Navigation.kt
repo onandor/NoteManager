@@ -7,6 +7,7 @@ import com.onandor.notemanager.navigation.Screens.ARCHIVE_SCREEN
 import com.onandor.notemanager.navigation.Screens.EDIT_LABELS_SCREEN
 import com.onandor.notemanager.navigation.Screens.NOTES_SCREEN
 import com.onandor.notemanager.navigation.Screens.ONBOARDING_SCREEN
+import com.onandor.notemanager.navigation.Screens.SEARCH_SCREEN
 import com.onandor.notemanager.navigation.Screens.SETTINGS_SCREEN
 import com.onandor.notemanager.navigation.Screens.SIGNED_OUT_SCREEN
 import com.onandor.notemanager.navigation.Screens.SIGN_IN_REGISTER_SCREEN
@@ -24,6 +25,7 @@ private object Screens {
     const val USER_DETAILS_SCREEN = "userDetails"
     const val SIGNED_OUT_SCREEN = "signedOut"
     const val EDIT_LABELS_SCREEN = "editLabels"
+    const val SEARCH_SCREEN = "searchScreen"
 }
 
 object NavDestinations {
@@ -37,6 +39,7 @@ object NavDestinations {
     const val USER_DETAILS = USER_DETAILS_SCREEN
     const val SIGNED_OUT = SIGNED_OUT_SCREEN
     const val EDIT_LABELS = EDIT_LABELS_SCREEN
+    const val SEARCH = SEARCH_SCREEN
 }
 
 object NavDestinationArgs {
@@ -110,5 +113,9 @@ object NavActions {
 
     fun editLabels() = object : NavAction {
         override val destination: String = NavDestinations.EDIT_LABELS
+    }
+
+    fun search() = object : NavAction {
+        override val destination = NavDestinations.SEARCH
     }
 }

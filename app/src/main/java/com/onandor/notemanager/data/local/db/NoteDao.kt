@@ -20,6 +20,16 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE location = :noteLocation")
     fun observeAllByLocation(noteLocation: NoteLocation): Flow<List<LocalNoteWithLabels>>
 
+    @Query("""
+        SELECT * FROM notes
+        WHERE (location = :noteLocation
+        AND (:searchString LIKE ""
+            OR (title LIKE '%' || :searchString || '%'
+            OR content LIKE '%' || :searchString || '%')))
+        """)
+    fun observeAllByLocationAndSearchString(noteLocation: NoteLocation, searchString: String):
+            Flow<List<LocalNoteWithLabels>>
+
     @Query("SELECT * FROM notes WHERE id = :noteId")
     fun observeById(noteId: UUID): Flow<LocalNoteWithLabels?>
 

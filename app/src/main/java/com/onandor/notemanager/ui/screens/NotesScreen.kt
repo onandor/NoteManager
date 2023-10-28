@@ -57,7 +57,8 @@ fun NotesScreen(
                  noteListCollapsedView = uiState.noteListState.collapsed,
                  onToggleNoteListCollapsedView = viewModel::toggleNoteListCollapsedView,
                  onNoteSortingChanged = viewModel::changeSorting,
-                 currentSorting = uiState.noteListState.sorting
+                 currentSorting = uiState.noteListState.sorting,
+                 onSearchClicked = viewModel::showSearch
              )
         },
         floatingActionButton = {

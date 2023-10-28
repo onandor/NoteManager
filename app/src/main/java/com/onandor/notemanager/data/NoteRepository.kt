@@ -15,6 +15,7 @@ import com.onandor.notemanager.di.DefaultDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
@@ -46,6 +47,16 @@ class NoteRepository @Inject constructor(
         return noteDao.observeAllByLocation(location).map { notes ->
             withContext(dispatcher) {
                 notes.toExternal()
+            }
+        }
+    }
+
+    override fun getSearchedNotesStream(location: NoteLocation, search: String, labels: List<Label>): Flow<List<Note>> {
+        return noteDao.observeAllByLocationAndSearchString(location, search).map { notes ->
+            withContext(dispatcher) {
+                notes.toExternal()
+            }.filter { note ->
+                note.labels.containsAll(labels)
             }
         }
     }

@@ -3,6 +3,7 @@ package com.onandor.notemanager.ui.components
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,7 +29,8 @@ fun MainTopAppBar(
     noteListCollapsedView: Boolean,
     onToggleNoteListCollapsedView: () -> Unit,
     currentSorting: NoteSorting,
-    onNoteSortingChanged: (NoteSorting) -> Unit
+    onNoteSortingChanged: (NoteSorting) -> Unit,
+    onSearchClicked: () -> Unit
 ) {
     TopAppBar(
         scrollBehavior = scrollBehavior,
@@ -44,6 +46,12 @@ fun MainTopAppBar(
             }
         },
         actions = {
+            IconButton(onClick = onSearchClicked) {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = stringResource(id = R.string.topbar_search_notes)
+                )
+            }
             NoteSortingMenu(
                 currentSorting = currentSorting,
                 onSortingClicked = onNoteSortingChanged

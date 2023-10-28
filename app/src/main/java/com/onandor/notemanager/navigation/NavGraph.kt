@@ -32,6 +32,7 @@ import com.onandor.notemanager.ui.screens.ArchiveScreen
 import com.onandor.notemanager.ui.screens.EditLabelsScreen
 import com.onandor.notemanager.ui.screens.NotesScreen
 import com.onandor.notemanager.ui.screens.OnboardingScreen
+import com.onandor.notemanager.ui.screens.SearchScreen
 import com.onandor.notemanager.ui.screens.SettingsScreen
 import com.onandor.notemanager.ui.screens.SignInRegisterScreen
 import com.onandor.notemanager.ui.screens.SignedOutScreen
@@ -149,6 +150,9 @@ fun NavGraph(
             }
             composable(NavDestinations.EDIT_LABELS) {
                 EditLabelsScreen()
+            }
+            composable(NavDestinations.SEARCH) {
+                SearchScreen()
             }
         }
     }

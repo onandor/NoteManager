@@ -119,4 +119,8 @@ class NotesViewModel @Inject constructor(
             settings.save(SettingsKeys.NOTE_LIST_COLLAPSED_VIEW, !noteListState.first().collapsed)
         }
     }
+
+    fun showSearch() {
+        navManager.navigateTo(NavActions.search())
+    }
 }
