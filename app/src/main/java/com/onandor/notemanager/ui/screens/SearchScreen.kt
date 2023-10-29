@@ -95,7 +95,8 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
             ) {
                 ResultList(
                     mainNotes = uiState.mainNotes,
-                    archiveNotes = uiState.archiveNotes
+                    archiveNotes = uiState.archiveNotes,
+                    onNoteClick = { note -> focusManager.clearFocus(); viewModel.noteClick(note) }
                 )
             }
         }
@@ -110,7 +111,8 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
 @Composable
 fun ResultList(
     mainNotes: List<Note>,
-    archiveNotes: List<Note>
+    archiveNotes: List<Note>,
+    onNoteClick: (Note) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
@@ -126,7 +128,7 @@ fun ResultList(
                 modifier = Modifier.animateItemPlacement(),
                 note = note,
                 collapsedView = false,
-                onNoteClick = { }
+                onNoteClick = onNoteClick
             )
         }
         item {
@@ -148,7 +150,7 @@ fun ResultList(
                 modifier = Modifier.animateItemPlacement(),
                 note = note,
                 collapsedView = false,
-                onNoteClick = { }
+                onNoteClick = onNoteClick
             )
         }
     }

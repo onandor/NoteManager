@@ -7,6 +7,7 @@ import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.navigation.NavActions
 import com.onandor.notemanager.utils.AsyncResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -149,6 +150,10 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             _searchForm.update { it.copy(text = newText) }
         }
+    }
+
+    fun noteClick(note: Note) {
+        navManager.navigateTo(NavActions.addEditNote(note.id.toString()), popCurrent = true)
     }
 
     fun navigateBack() {

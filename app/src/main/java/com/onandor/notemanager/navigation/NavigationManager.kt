@@ -17,8 +17,8 @@ class NavigationManager : INavigationManager {
 
     override val navActions =_navActions.asStateFlow()
 
-    override fun navigateTo(navAction: NavAction?) {
-        if (_navActions.value != null)
+    override fun navigateTo(navAction: NavAction?, popCurrent: Boolean) {
+        if (_navActions.value != null && !popCurrent)
             backStack.push(_navActions.value)
         _navActions.update { navAction }
     }

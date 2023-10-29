@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.StateFlow
 interface INavigationManager {
 
     val navActions: StateFlow<NavAction?>
-    fun navigateTo(navAction: NavAction?)
+    fun navigateTo(navAction: NavAction?, popCurrent: Boolean = false)
     fun navigateBack()
     fun setInitialBackStackAction(navAction: NavAction)
 }
