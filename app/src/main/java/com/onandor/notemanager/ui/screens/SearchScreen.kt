@@ -74,13 +74,25 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             LoadingIndicator(loading = uiState.loading)
-            if (uiState.emptySearch) {
+            AnimatedVisibility(
+                visible = uiState.emptySearch,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 EmptyContent(text = stringResource(id = R.string.search_empty_search))
             }
-            else if (!uiState.loading && uiState.emptyResult) {
+            AnimatedVisibility(
+                visible = !uiState.emptySearch && !uiState.loading && uiState.emptyResult,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 EmptyContent(text = stringResource(id = R.string.search_no_results))
             }
-            else {
+            AnimatedVisibility(
+                visible = !uiState.emptySearch && !uiState.loading && !uiState.emptyResult,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
                 ResultList(
                     mainNotes = uiState.mainNotes,
                     archiveNotes = uiState.archiveNotes
