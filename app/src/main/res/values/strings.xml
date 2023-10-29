@@ -111,4 +111,11 @@
     <string name="menu_note_sorting_modification_date">Modification date</string>
     <string name="menu_note_sorting_creation_date">Creation date</string>
     <string name="menu_note_sorting_hint_sorting">Change sorting</string>
+    <string name="search_notes">Notes</string>
+    <string name="search_archive">Archive</string>
+    <string name="search_no_results">No notes are matching your criteria</string>
+    <string name="search_empty_search">Search your notes by their title and content or by applied labels</string>
+    <string name="search_hint_search">Search</string>
+    <string name="search_button_hint_go_back">Go back</string>
+    <string name="search_hint_clear_search">Clear search</string>
 </resources>

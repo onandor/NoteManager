@@ -54,9 +54,9 @@ class NoteRepository @Inject constructor(
     override fun getSearchedNotesStream(location: NoteLocation, search: String, labels: List<Label>): Flow<List<Note>> {
         return noteDao.observeAllByLocationAndSearchString(location, search).map { notes ->
             withContext(dispatcher) {
-                notes.toExternal()
-            }.filter { note ->
-                note.labels.containsAll(labels)
+                notes.toExternal().filter { note ->
+                    note.labels.containsAll(labels)
+                }
             }
         }
     }
