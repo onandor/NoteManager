@@ -26,8 +26,8 @@
     <string name="addeditnote_hint_title">Title</string>
     <string name="addeditnote_hint_content">Content</string>
     <string name="dialog_edit_note_labels_added">Added</string>
-    <string name="dialog_edit_note_labels_empty">Empty</string>
     <string name="dialog_edit_note_labels_available">Available</string>
+    <string name="dialog_label_selection_empty">Empty</string>
     <string name="archive_note_list_empty">Your archive is empty</string>
     <string name="addeditresult_saved">Note saved</string>
     <string name="addeditresult_archived">Note archived</string>
@@ -118,4 +118,7 @@
     <string name="search_hint_search">Search</string>
     <string name="search_button_hint_go_back">Go back</string>
     <string name="search_hint_clear_search">Clear search</string>
+    <string name="search_search_by_labels">Search by labels</string>
+    <string name="dialog_search_by_labels_selected">Selected</string>
+    <string name="dialog_search_by_labels_unselected">Not selected</string>
 </resources>

@@ -5,8 +5,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,13 +28,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,7 +47,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -61,19 +55,16 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
-import com.onandor.notemanager.ui.components.LabelComponent
-import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.NoteLocation
+import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.viewmodels.AddEditNoteUiState
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val labelDialogState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
         modifier = Modifier
@@ -108,20 +99,15 @@ fun AddEditNoteScreen(
 
     if (uiState.editLabelsDialogOpen) {
         val navBarInsets = WindowInsets.navigationBars
-        ModalBottomSheet(
+        LabelSelectionBottomDialog(
             onDismissRequest = viewModel::hideEditLabelsDialog,
-            sheetState = labelDialogState,
-            windowInsets = WindowInsets(0, 0, 0, 0),
-            dragHandle = { }
-        ) {
-            EditLabelsDialogContent(
-                labels = uiState.labels,
-                remainingLabels = uiState.remainingLabels,
-                onAddLabel = viewModel::addLabel,
-                onRemoveLabel = viewModel::removeLabel,
-                navBarInsets = navBarInsets
-            )
-        }
+            insets = navBarInsets,
+            selectedLabels = uiState.addedLabels,
+            labels = uiState.labels,
+            selectedText = stringResource(id = R.string.dialog_edit_note_labels_added),
+            unSelectedText = stringResource(id = R.string.dialog_edit_note_labels_available),
+            onChangeLabelSelection = viewModel::addRemoveLabel
+        )
     }
 }
 
@@ -225,91 +211,6 @@ fun EditorTextField(
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun EditLabelsDialogContent(
-    labels: List<Label>,
-    remainingLabels: List<Label>,
-    onAddLabel: (Label) -> Unit,
-    onRemoveLabel: (Label) -> Unit,
-    navBarInsets: WindowInsets
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(navBarInsets)
-            .padding(start = 15.dp, end = 15.dp, top = 35.dp, bottom = 20.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Text(
-            text = stringResource(id = R.string.dialog_edit_note_labels_added),
-            fontSize = 23.sp
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        if (labels.isEmpty()) {
-            Text(
-                text = stringResource(id = R.string.dialog_edit_note_labels_empty),
-                fontStyle = FontStyle.Italic
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-        else {
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateContentSize(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top),
-            ) {
-                labels.forEach { label ->
-                    LabelComponent(
-                        label = label,
-                        clickable = true,
-                        onClick = onRemoveLabel,
-                        padding = 10.dp,
-                        fontSize = 20.sp,
-                        borderWidth = 2.dp,
-                        roundedCornerSize = 10.dp
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = stringResource(id = R.string.dialog_edit_note_labels_available),
-            fontSize = 23.sp
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        if (remainingLabels.isEmpty()) {
-            Text(
-                text = stringResource(id = R.string.dialog_edit_note_labels_empty),
-                fontStyle = FontStyle.Italic
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-        }
-        else {
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .animateContentSize(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Top)
-            ) {
-                remainingLabels.forEach { label ->
-                    LabelComponent(
-                        label = label,
-                        clickable = true,
-                        onClick = onAddLabel,
-                        padding = 10.dp,
-                        fontSize = 20.sp,
-                        borderWidth = 2.dp,
-                        roundedCornerSize = 10.dp
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 private fun AddEditNoteTopAppBar(

@@ -15,6 +15,12 @@ interface INoteRepository {
         labels: List<Label> = emptyList()
     ): Flow<List<Note>>
 
+    fun getSearchedNotesStream(
+        locations: List<NoteLocation>,
+        search: String = "",
+        labels: List<Label> = emptyList()
+    ): Flow<List<Note>>
+
     suspend fun getNote(noteId: UUID): Note?
 
     suspend fun getNotes(): List<Note>

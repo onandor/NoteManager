@@ -61,6 +61,16 @@ class NoteRepository @Inject constructor(
         }
     }
 
+    override fun getSearchedNotesStream(locations: List<NoteLocation>, search: String, labels: List<Label>): Flow<List<Note>> {
+        return noteDao.observeAllByMultipleLocationsAndSearchString(locations, search).map { notes ->
+            withContext(dispatcher) {
+                notes.toExternal().filter { note ->
+                    note.labels.containsAll(labels)
+                }.sortedBy { note -> note.location }
+            }
+        }
+    }
+
     override suspend fun getNote(noteId: UUID): Note? {
         return noteDao.getById(noteId)?.toExternal()
     }

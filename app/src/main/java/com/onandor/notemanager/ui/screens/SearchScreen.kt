@@ -5,30 +5,39 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,11 +47,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,7 +62,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.Note
+import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.NoteItem
 import com.onandor.notemanager.viewmodels.SearchViewModel
 
@@ -59,6 +72,7 @@ import com.onandor.notemanager.viewmodels.SearchViewModel
 fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
+    val scrollState = rememberLazyListState()
 
     Scaffold(
         modifier = Modifier
@@ -70,6 +84,19 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                 onTextChanged = viewModel::updateSearchText,
                 onBackClicked = { focusManager.clearFocus(); viewModel.navigateBack() }
             )
+        },
+        floatingActionButton =  {
+            AnimatedVisibility(
+                visible = !scrollState.canScrollBackward,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = { viewModel.changeSearchByLabelsDialogOpen(true) },
+                    icon = { Icon(painterResource(id = R.drawable.ic_label_filled), "")},
+                    text = { Text(stringResource(id = R.string.search_search_by_labels)) }
+                )
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -96,10 +123,28 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                 ResultList(
                     mainNotes = uiState.mainNotes,
                     archiveNotes = uiState.archiveNotes,
-                    onNoteClick = { note -> focusManager.clearFocus(); viewModel.noteClick(note) }
+                    onNoteClick = { note -> focusManager.clearFocus(); viewModel.noteClick(note) },
+                    scrollState = scrollState
                 )
             }
         }
+
+        if (uiState.searchByLabelsDialogOpen) {
+            val navBarInsets = WindowInsets.navigationBars
+            LabelSelectionBottomDialog(
+                onDismissRequest = viewModel::confirmSearchLabels,
+                insets = navBarInsets,
+                labels = uiState.labels,
+                selectedLabels = uiState.searchLabels,
+                selectedText = stringResource(id = R.string.dialog_search_by_labels_selected),
+                unSelectedText = stringResource(id = R.string.dialog_search_by_labels_unselected),
+                onChangeLabelSelection = viewModel::addRemoveSearchLabel
+            )
+        }
+    }
+
+    LaunchedEffect(uiState.mainNotes) {
+        scrollState.scrollToItem(0)
     }
 
     BackHandler {
@@ -112,13 +157,15 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
 fun ResultList(
     mainNotes: List<Note>,
     archiveNotes: List<Note>,
-    onNoteClick: (Note) -> Unit
+    onNoteClick: (Note) -> Unit,
+    scrollState: LazyListState
 ) {
     LazyColumn(
         modifier = Modifier
             .padding(top = 5.dp)
             .fillMaxWidth()
-            .animateContentSize()
+            .animateContentSize(),
+        state = scrollState
     ) {
         itemsIndexed(
             items = mainNotes,
@@ -208,6 +255,28 @@ fun SearchBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun FilterLabelItem(
+    label: Label,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.clickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_label_filled),
+            contentDescription = ""
+        )
+        Text(label.title)
+        Checkbox(
+            checked = selected,
+            onCheckedChange = { onClick() }
+        )
     }
 }
 

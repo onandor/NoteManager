@@ -7,7 +7,6 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Label
-import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavDestinationArgs
@@ -18,7 +17,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -35,8 +33,8 @@ data class AddEditNoteUiState(
     val content: String = "",
     val location: NoteLocation = NoteLocation.NOTES,
     val modificationDate: LocalDateTime = LocalDateTime.now(),
+    val addedLabels: List<Label> = emptyList(),
     val labels: List<Label> = emptyList(),
-    val remainingLabels: List<Label> = emptyList(),
     val snackbarMessageResource: Int? = null,
     val editLabelsDialogOpen: Boolean = false,
     val newNote: Boolean = false
@@ -71,10 +69,7 @@ class AddEditNoteViewModel @Inject constructor(
                 uiState.copy(snackbarMessageResource = R.string.addeditnote_labels_loading_error)
             }
             is AsyncResult.Success -> {
-                val remainingLabels = labelsAsync.data.filterNot { label ->
-                    uiState.labels.any { noteLabel -> noteLabel.id == label.id }
-                }
-                uiState.copy(remainingLabels = remainingLabels)
+                uiState.copy(labels = labelsAsync.data)
             }
         }
     }
@@ -105,7 +100,7 @@ class AddEditNoteViewModel @Inject constructor(
                         content = note.content,
                         location = note.location,
                         modificationDate = note.modificationDate,
-                        labels = note.labels
+                        addedLabels = note.labels
                     )
                 }
             }
@@ -144,7 +139,7 @@ class AddEditNoteViewModel @Inject constructor(
             noteRepository.createNote(
                 title = _uiState.value.title,
                 content = _uiState.value.content,
-                labels = _uiState.value.labels,
+                labels = _uiState.value.addedLabels,
                 location = NoteLocation.NOTES
             )
         }
@@ -161,7 +156,7 @@ class AddEditNoteViewModel @Inject constructor(
                 title = _uiState.value.title,
                 content = _uiState.value.content
             )
-            noteRepository.updateNoteLabels(noteId, _uiState.value.labels)
+            noteRepository.updateNoteLabels(noteId, _uiState.value.addedLabels)
         }
     }
 
@@ -257,17 +252,31 @@ class AddEditNoteViewModel @Inject constructor(
         _uiState.update { it.copy(editLabelsDialogOpen = false) }
     }
 
+    fun addRemoveLabel(label: Label, added: Boolean) {
+        modified = true
+        _uiState.update {
+            val newLabels = it.addedLabels.toMutableList()
+            if (added) {
+                newLabels.add(label)
+            }
+            else {
+                newLabels.remove(label)
+            }
+            it.copy(addedLabels = newLabels)
+        }
+    }
+
     fun addLabel(label: Label) {
         modified = true
-        val newLabels = _uiState.value.labels.toMutableList()
+        val newLabels = _uiState.value.addedLabels.toMutableList()
         newLabels.add(label)
-        _uiState.update { it.copy(labels = newLabels) }
+        _uiState.update { it.copy(addedLabels = newLabels) }
     }
 
     fun removeLabel(label: Label) {
         modified = true
-        val newLabels = _uiState.value.labels.toMutableList()
+        val newLabels = _uiState.value.addedLabels.toMutableList()
         newLabels.remove(label)
-        _uiState.update { it.copy(labels = newLabels) }
+        _uiState.update { it.copy(addedLabels = newLabels) }
     }
 }
