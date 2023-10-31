@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +33,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -55,6 +56,7 @@ import com.onandor.notemanager.viewmodels.UserDetailsDialogType
 import com.onandor.notemanager.viewmodels.UserDetailsViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserDetailsScreen(
     viewModel: UserDetailsViewModel = hiltViewModel()
@@ -64,7 +66,16 @@ fun UserDetailsScreen(
 
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
-        topBar = { UserDetailsTopBar(viewModel::navigateBack) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.account)) },
+                navigationIcon = {
+                    IconButton(onClick = viewModel::navigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
+                    }
+                }
+            )
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -236,22 +247,6 @@ private fun SignedOutComponent(
                     Text(stringResource(R.string.user_details_button_sign_in_register))
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun UserDetailsTopBar(navigateBack: () -> Unit) {
-    Surface(modifier = Modifier
-        .fillMaxWidth()
-        .height(65.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navigateBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
-            }
-            Text(stringResource(R.string.account), fontSize = 20.sp)
         }
     }
 }
