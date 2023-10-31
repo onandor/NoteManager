@@ -3,11 +3,10 @@ package com.onandor.notemanager.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,20 +28,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,23 +59,33 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
-import com.onandor.notemanager.viewmodels.AddEditNoteUiState
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
     viewModel: AddEditNoteViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val focusManager = LocalFocusManager.current
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         modifier = Modifier
             .statusBarsPadding()
-            .imePadding(),
+            .imePadding()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AddEditNoteTopAppBar(
-                viewModel = viewModel,
-                uiState = uiState
+                noteLocation = uiState.location,
+                onSaveNote = viewModel::saveNote,
+                onNavigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
+                onArchiveNote = viewModel::archiveNote,
+                onUnArchiveNote = viewModel::unArchiveNote,
+                onTrashNote = viewModel::trashNote,
+                onDeleteNote = viewModel::deleteNote,
+                onAddLabels = viewModel::showEditLabelsDialog,
+                scrollBehavior = scrollBehavior
             )
         }
     ) { innerPadding ->
@@ -140,6 +152,7 @@ private fun TitleAndContentEditor(
             }
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -159,7 +172,7 @@ private fun TitleAndContentEditor(
                 )
             }
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(15.dp))
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -180,7 +193,7 @@ private fun TitleAndContentEditor(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditorTextField(
+private fun EditorTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
@@ -211,77 +224,35 @@ fun EditorTextField(
     )
 }
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddEditNoteTopAppBar(
-    viewModel: AddEditNoteViewModel,
-    uiState: AddEditNoteUiState
-) {
-    val focusManager = LocalFocusManager.current
-
-    when(uiState.location) {
-        NoteLocation.NOTES -> {
-            AddEditNoteTopAppBar_Notes(
-                onSaveNote = viewModel::saveNote,
-                navigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
-                onArchiveNote = viewModel::archiveNote,
-                onTrashNote = viewModel::trashNote,
-                onAddLabels = viewModel::showEditLabelsDialog
-            )
-        }
-        NoteLocation.ARCHIVE -> {
-            AddEditNoteTopAppBar_Archive(
-                onSaveNote = viewModel::saveNote,
-                navigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
-                onUnArchiveNote = viewModel::unArchiveNote,
-                onTrashNote = viewModel::trashNote,
-                onAddLabels = viewModel::showEditLabelsDialog
-            )
-        }
-        NoteLocation.TRASH -> {
-            AddEditNoteTopAppBar_Trash(
-                navigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
-                onDeleteNote = viewModel::deleteNote
-            )
-        }
-        NoteLocation.ALL -> { }
-    }
-}
-
-@Composable
-private fun AddEditNoteTopAppBar_Notes(
+    noteLocation: NoteLocation,
     onSaveNote: () -> Unit,
-    navigateBack: () -> Unit,
-    onTrashNote: () -> Unit,
+    onNavigateBack: () -> Unit,
     onArchiveNote: () -> Unit,
-    onAddLabels: () -> Unit
+    onUnArchiveNote: () -> Unit,
+    onTrashNote: () -> Unit,
+    onDeleteNote: () -> Unit,
+    onAddLabels: () -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
-    Surface(modifier = Modifier
-        .fillMaxWidth()
-        .height(65.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = { onSaveNote(); navigateBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+    val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
+        NoteLocation.NOTES -> {
+            {
                 IconButton(onClick = { onAddLabels() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_note_add_label_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_add_labels)
                     )
                 }
-                IconButton(onClick = { onArchiveNote(); navigateBack() }) {
+                IconButton(onClick = { onArchiveNote(); onNavigateBack() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_note_archive_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
                     )
                 }
-                IconButton(onClick = { onTrashNote(); navigateBack() }) {
+                IconButton(onClick = { onTrashNote(); onNavigateBack() }) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
                         contentDescription = stringResource(id = R.string.addeditnote_delete_note)
@@ -289,43 +260,21 @@ private fun AddEditNoteTopAppBar_Notes(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun AddEditNoteTopAppBar_Archive(
-    onSaveNote: () -> Unit,
-    navigateBack: () -> Unit,
-    onTrashNote: () -> Unit,
-    onUnArchiveNote: () -> Unit,
-    onAddLabels: () -> Unit
-) {
-    Surface(modifier = Modifier
-        .fillMaxWidth()
-        .height(65.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = { onSaveNote(); navigateBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
-            }
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        NoteLocation.ARCHIVE -> {
+            {
                 IconButton(onClick = { onAddLabels() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_note_add_label_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_add_labels)
                     )
                 }
-                IconButton(onClick = { onUnArchiveNote(); navigateBack() }) {
+                IconButton(onClick = { onUnArchiveNote(); onNavigateBack() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_note_unarchive_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
                     )
                 }
-                IconButton(onClick = { onTrashNote(); navigateBack() }) {
+                IconButton(onClick = { onTrashNote(); onNavigateBack() }) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
                         contentDescription = stringResource(id = R.string.addeditnote_delete_note)
@@ -333,37 +282,43 @@ private fun AddEditNoteTopAppBar_Archive(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun AddEditNoteTopAppBar_Trash(
-    navigateBack: () -> Unit,
-    onDeleteNote: () -> Unit
-) {
-    Surface(modifier = Modifier
-        .fillMaxWidth()
-        .height(65.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = { navigateBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
-            }
-            IconButton(onClick = { onDeleteNote(); navigateBack() }) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(id = R.string.addeditnote_delete_note)
-                )
+        NoteLocation.TRASH -> {
+            {
+                IconButton(onClick = { onNavigateBack() }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.addeditnote_hint_go_back))
+                }
+                IconButton(onClick = { onDeleteNote(); onNavigateBack() }) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(id = R.string.addeditnote_delete_note)
+                    )
+                }
             }
         }
+        NoteLocation.ALL -> { { } }
     }
+
+    TopAppBar(
+        title = { },
+        navigationIcon = {
+            IconButton(onClick = { onSaveNote(); onNavigateBack() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.addeditnote_hint_go_back)
+                )
+            }
+        },
+        actions = actions,
+        colors = TopAppBarDefaults.topAppBarColors(
+            scrolledContainerColor = MaterialTheme.colorScheme.surface
+        ),
+        scrollBehavior = scrollBehavior
+    )
 }
 
 @Preview
 @Composable
-fun TitleAndContentEditorPreview() {
+private fun TitleAndContentEditorPreview() {
     TitleAndContentEditor(
         modifier = Modifier,
         title = "",
