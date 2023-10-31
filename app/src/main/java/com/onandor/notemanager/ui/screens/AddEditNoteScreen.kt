@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,20 +39,30 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onInterceptKeyBeforeSoftKeyboard
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -95,7 +106,11 @@ fun AddEditNoteScreen(
             content = uiState.content,
             onTitleChanged = viewModel::updateTitle,
             onContentChanged = viewModel::updateContent,
-            newNote = uiState.newNote
+            onMoveCursor = viewModel::moveCursor,
+            editDisabled = uiState.location == NoteLocation.TRASH,
+            focusManager = focusManager,
+            newNote = uiState.newNote,
+            editLabelsDialogOpen = uiState.editLabelsDialogOpen
         )
     }
 
@@ -123,41 +138,50 @@ fun AddEditNoteScreen(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun TitleAndContentEditor(
     modifier: Modifier,
-    title: String,
-    content: String,
-    onTitleChanged: (String) -> Unit,
-    onContentChanged: (String) -> Unit,
-    newNote: Boolean
+    title: TextFieldValue,
+    content: TextFieldValue,
+    onTitleChanged: (TextFieldValue) -> Unit,
+    onContentChanged: (TextFieldValue) -> Unit,
+    onMoveCursor: (TextRange) -> Unit,
+    editDisabled: Boolean,
+    focusManager: FocusManager,
+    newNote: Boolean,
+    editLabelsDialogOpen: Boolean
 ) {
+    val titleFocusRequester = FocusRequester()
+    val contentFocusRequester = FocusRequester()
+    var titleFocused by remember { mutableStateOf(false) }
+    var contentFocused by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+    var scrollToEnd by remember { mutableStateOf(false) }
+
     Column (
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(scrollState)
             .height(IntrinsicSize.Max)
-    ){
+    ) {
         val textFieldColors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
         )
-        val focusRequester = FocusRequester()
-
-        LaunchedEffect(newNote) {
-            if (newNote) {
-                focusRequester.requestFocus()
-            }
-        }
 
         Spacer(modifier = Modifier.height(10.dp))
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .animateContentSize()
-                .focusRequester(focusRequester),
+                .focusRequester(titleFocusRequester)
+                .onFocusChanged { titleFocused = it.isFocused }
+                .onInterceptKeyBeforeSoftKeyboard { event ->
+                    event.key == Key.Enter || event.key == Key.NumPadEnter
+                },
             value = title,
             onValueChange = onTitleChanged,
             colors = textFieldColors,
@@ -170,13 +194,23 @@ private fun TitleAndContentEditor(
                     text = stringResource(id = R.string.addeditnote_hint_title),
                     fontSize = 22.sp
                 )
-            }
+            },
+            readOnly = editDisabled,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    onMoveCursor(TextRange(content.text.length))
+                    contentFocusRequester.requestFocus()
+                }
+            )
         )
         Spacer(modifier = Modifier.height(15.dp))
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f),
+                .weight(1f)
+                .focusRequester(contentFocusRequester)
+                .onFocusChanged { contentFocused = it.isFocused },
             value = content,
             onValueChange = { onContentChanged(it) } ,
             colors = textFieldColors,
@@ -186,8 +220,32 @@ private fun TitleAndContentEditor(
             ),
             placeholder = {
                 Text(stringResource(id = R.string.addeditnote_hint_content))
-            }
+            },
+            readOnly = editDisabled
         )
+    }
+
+    LaunchedEffect(key1 = editLabelsDialogOpen, key2 = newNote) {
+        if (editLabelsDialogOpen) {
+            val _titleFocused = titleFocused
+            val _contentFocused = contentFocused
+            focusManager.clearFocus()
+            titleFocused = _titleFocused
+            contentFocused = _contentFocused
+        }
+        else {
+            if (titleFocused)
+                titleFocusRequester.requestFocus()
+            else if (contentFocused || newNote)
+                contentFocusRequester.requestFocus()
+        }
+    }
+
+    LaunchedEffect(scrollToEnd) {
+        if (scrollToEnd) {
+            scrollState.scrollTo(scrollState.maxValue)
+            scrollToEnd = false
+        }
     }
 }
 
@@ -195,11 +253,15 @@ private fun TitleAndContentEditor(
 @Composable
 private fun EditorTextField(
     modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     placeholder: @Composable (() -> Unit)? = null,
     textStyle: TextStyle = TextStyle.Default,
-    colors: TextFieldColors = TextFieldDefaults.colors()
+    colors: TextFieldColors = TextFieldDefaults.colors(),
+    readOnly: Boolean,
+    singleLine: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(),
+    keyboardActions: KeyboardActions = KeyboardActions()
 ) {
     BasicTextField(
         value = value,
@@ -207,10 +269,13 @@ private fun EditorTextField(
         modifier = modifier,
         textStyle = textStyle,
         cursorBrush = SolidColor(colors.cursorColor),
-        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+        keyboardOptions = keyboardOptions.copy(capitalization = KeyboardCapitalization.Sentences),
+        readOnly = readOnly,
+        singleLine = singleLine,
+        keyboardActions = keyboardActions,
         decorationBox = @Composable { innerTextField ->
             TextFieldDefaults.DecorationBox(
-                value = value,
+                value = value.text,
                 innerTextField = innerTextField,
                 enabled = true,
                 singleLine = false,
@@ -284,9 +349,6 @@ private fun AddEditNoteTopAppBar(
         }
         NoteLocation.TRASH -> {
             {
-                IconButton(onClick = { onNavigateBack() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.addeditnote_hint_go_back))
-                }
                 IconButton(onClick = { onDeleteNote(); onNavigateBack() }) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
@@ -313,18 +375,5 @@ private fun AddEditNoteTopAppBar(
             scrolledContainerColor = MaterialTheme.colorScheme.surface
         ),
         scrollBehavior = scrollBehavior
-    )
-}
-
-@Preview
-@Composable
-private fun TitleAndContentEditorPreview() {
-    TitleAndContentEditor(
-        modifier = Modifier,
-        title = "",
-        content = "",
-        onTitleChanged = { },
-        onContentChanged = { },
-        newNote = false
     )
 }

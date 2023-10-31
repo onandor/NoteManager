@@ -1,5 +1,7 @@
 package com.onandor.notemanager.viewmodels
 
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,8 +31,8 @@ import java.util.UUID
 import javax.inject.Inject
 
 data class AddEditNoteUiState(
-    val title: String = "",
-    val content: String = "",
+    val title: TextFieldValue = TextFieldValue(""),
+    val content: TextFieldValue = TextFieldValue(""),
     val location: NoteLocation = NoteLocation.NOTES,
     val modificationDate: LocalDateTime = LocalDateTime.now(),
     val addedLabels: List<Label> = emptyList(),
@@ -96,8 +98,8 @@ class AddEditNoteViewModel @Inject constructor(
 
                 _uiState.update {
                     it.copy(
-                        title = note.title,
-                        content = note.content,
+                        title = TextFieldValue(note.title),
+                        content = TextFieldValue(note.content),
                         location = note.location,
                         modificationDate = note.modificationDate,
                         addedLabels = note.labels
@@ -108,7 +110,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun saveNote() {
-        if (_uiState.value.title.isEmpty() and _uiState.value.content.isEmpty()) {
+        if (_uiState.value.title.text.isEmpty() and _uiState.value.content.text.isEmpty()) {
             if (noteId == null) {
                 addEditResultState.set(AddEditResults.DISCARDED)
                 return
@@ -137,8 +139,8 @@ class AddEditNoteViewModel @Inject constructor(
     private fun createNewNote() {
         viewModelScope.launch {
             noteRepository.createNote(
-                title = _uiState.value.title,
-                content = _uiState.value.content,
+                title = _uiState.value.title.text,
+                content = _uiState.value.content.text,
                 labels = _uiState.value.addedLabels,
                 location = NoteLocation.NOTES
             )
@@ -153,8 +155,8 @@ class AddEditNoteViewModel @Inject constructor(
             // TODO: do it in one action
             noteRepository.updateNoteTitleAndContent(
                 noteId = noteId,
-                title = _uiState.value.title,
-                content = _uiState.value.content
+                title = _uiState.value.title.text,
+                content = _uiState.value.content.text
             )
             noteRepository.updateNoteLabels(noteId, _uiState.value.addedLabels)
         }
@@ -163,8 +165,8 @@ class AddEditNoteViewModel @Inject constructor(
     private fun createAndArchiveNewNote() {
         viewModelScope.launch {
             val noteId = noteRepository.createNote(
-                title = _uiState.value.title,
-                content = _uiState.value.content,
+                title = _uiState.value.title.text,
+                content = _uiState.value.content.text,
                 labels = listOf(),
                 location = NoteLocation.NOTES
             )
@@ -175,7 +177,7 @@ class AddEditNoteViewModel @Inject constructor(
         }
     }
 
-    fun updateTitle(newTitle: String) {
+    fun updateTitle(newTitle: TextFieldValue) {
         modified = true
         _uiState.update {
             it.copy(
@@ -184,7 +186,7 @@ class AddEditNoteViewModel @Inject constructor(
         }
     }
 
-    fun updateContent(newContent: String) {
+    fun updateContent(newContent: TextFieldValue) {
         modified = true
         _uiState.update {
             it.copy(
@@ -195,7 +197,7 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun archiveNote() {
         if (noteId == null) {
-            if (_uiState.value.title.isEmpty() and _uiState.value.content.isEmpty()) {
+            if (_uiState.value.title.text.isEmpty() and _uiState.value.content.text.isEmpty()) {
                 addEditResultState.set(AddEditResults.DISCARDED)
                 return
             }
@@ -266,17 +268,12 @@ class AddEditNoteViewModel @Inject constructor(
         }
     }
 
-    fun addLabel(label: Label) {
-        modified = true
-        val newLabels = _uiState.value.addedLabels.toMutableList()
-        newLabels.add(label)
-        _uiState.update { it.copy(addedLabels = newLabels) }
-    }
-
-    fun removeLabel(label: Label) {
-        modified = true
-        val newLabels = _uiState.value.addedLabels.toMutableList()
-        newLabels.remove(label)
-        _uiState.update { it.copy(addedLabels = newLabels) }
+    fun moveCursor(textRange: TextRange) {
+        _uiState.update {
+            val content = it.content.copy(
+                selection = textRange
+            )
+            it.copy(content = content)
+        }
     }
 }
