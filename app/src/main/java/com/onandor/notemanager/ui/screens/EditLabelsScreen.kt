@@ -47,10 +47,10 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -95,7 +95,16 @@ fun EditLabelsScreen(
 
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
-        topBar = { EditLabelsTopAppBar(viewModel::navigateBack) },
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.labels)) },
+                navigationIcon = {
+                    IconButton(onClick = viewModel::navigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.edit_labels_go_back))
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = !scrollState.canScrollBackward,
@@ -336,22 +345,6 @@ private fun ColorChoice(
                 imageVector = Icons.Filled.Check,
                 contentDescription = null
             )
-        }
-    }
-}
-
-@Composable
-private fun EditLabelsTopAppBar(navigateBack: () -> Unit) {
-    Surface(modifier = Modifier
-        .fillMaxWidth()
-        .height(65.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navigateBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.edit_labels_go_back))
-            }
-            Text(stringResource(R.string.labels), fontSize = 20.sp)
         }
     }
 }
