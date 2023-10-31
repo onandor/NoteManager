@@ -2,38 +2,31 @@ package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.onandor.notemanager.R
-import com.onandor.notemanager.ui.theme.LocalTheme
 import com.onandor.notemanager.ui.theme.ThemeType
 import com.onandor.notemanager.viewmodels.SettingsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
@@ -52,9 +45,13 @@ fun SettingsScreen(
     Scaffold(
         modifier = Modifier.statusBarsPadding(),
         topBar = {
-            SettingsTopBar(
-                navigateBack = viewModel::navigateBack,
-                surfaceColor = animatedSurfaceColor.value
+            TopAppBar(
+                title = { Text(stringResource(R.string.settings)) },
+                navigationIcon = {
+                    IconButton(onClick = viewModel::navigateBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -81,27 +78,5 @@ fun SettingsScreen(
 
     BackHandler {
         viewModel.navigateBack()
-    }
-}
-
-@Composable
-private fun SettingsTopBar(
-    navigateBack: () -> Unit,
-    surfaceColor: Color
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(65.dp),
-        color = surfaceColor
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navigateBack() }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_go_back))
-            }
-            Text(stringResource(R.string.settings), fontSize = 20.sp)
-        }
     }
 }
