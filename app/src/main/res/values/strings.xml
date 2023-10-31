@@ -12,7 +12,7 @@
     <string name="notes_new_note">New note</string>
     <string name="notes_note_list_empty">You don\'t have any notes</string>
     <string name="trash_empty_trash">Empty trash</string>
-    <string name="trash_note_list_empty">Your trash is empty</string>
+    <string name="trash_empty">The trash is empty</string>
     <string name="dialog_empty_trash_description">Are you sure you want to empty the trash? Doing so will permanently delete all trashed notes.</string>
     <string name="dialog_empty_trash_button_confirm">Confirm</string>
     <string name="dialog_empty_trash_button_cancel">Cancel</string>

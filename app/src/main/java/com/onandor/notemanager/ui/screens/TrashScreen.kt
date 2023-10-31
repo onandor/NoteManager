@@ -1,9 +1,7 @@
 package com.onandor.notemanager.ui.screens
 
-import android.widget.Space
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,6 +42,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.TrashViewModel
@@ -69,9 +68,10 @@ fun TrashScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         if (uiState.notes.isEmpty()) {
-            Box(modifier = Modifier.padding(innerPadding)) {
-                Text("The trash is empty")
-            }
+            EmptyContent(
+                painter = painterResource(id = R.drawable.ic_trash_empty),
+                text = stringResource(id = R.string.trash_empty)
+            )
         }
         else {
             NoteList(

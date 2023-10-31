@@ -10,7 +10,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +34,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -62,8 +60,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
-import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.Note
+import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.NoteItem
 import com.onandor.notemanager.viewmodels.SearchViewModel
@@ -106,14 +104,20 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                EmptyContent(text = stringResource(id = R.string.search_empty_search))
+                EmptyContent(
+                    imageVector = Icons.Filled.Search,
+                    text = stringResource(id = R.string.search_empty_search)
+                )
             }
             AnimatedVisibility(
                 visible = !uiState.emptySearch && !uiState.loading && uiState.emptyResult,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                EmptyContent(text = stringResource(id = R.string.search_no_results))
+                EmptyContent(
+                    imageVector = Icons.Filled.Search,
+                    text = stringResource(id = R.string.search_no_results)
+                )
             }
             AnimatedVisibility(
                 visible = !uiState.emptySearch && !uiState.loading && !uiState.emptyResult,
@@ -259,28 +263,6 @@ fun SearchBar(
 }
 
 @Composable
-fun FilterLabelItem(
-    label: Label,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier.clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_label_filled),
-            contentDescription = ""
-        )
-        Text(label.title)
-        Checkbox(
-            checked = selected,
-            onCheckedChange = { onClick() }
-        )
-    }
-}
-
-@Composable
 fun LoadingIndicator(loading: Boolean) {
     AnimatedVisibility(
         visible = loading,
@@ -309,30 +291,6 @@ fun LoadingIndicator(loading: Boolean) {
             }
         }
     }
-}
-
-@Composable
-fun EmptyContent(text: String) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                modifier = Modifier
-                    .width(120.dp)
-                    .height(120.dp),
-                imageVector = Icons.Filled.Search,
-                contentDescription = ""
-            )
-            Text(
-                modifier = Modifier.padding(start = 40.dp, end = 40.dp),
-                text = text,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-
 }
 
 @Preview
