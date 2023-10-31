@@ -124,14 +124,7 @@ fun NavGraph(
                 }
             }
             composable(NavDestinations.TRASH) {
-                AppModalDrawer(
-                    drawerState = drawerState,
-                    currentRoute = currentRoute,
-                ) {
-                    TrashScreen(
-                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } }
-                    )
-                }
+                TrashScreen()
             }
             composable(NavDestinations.SETTINGS) {
                 SettingsScreen()

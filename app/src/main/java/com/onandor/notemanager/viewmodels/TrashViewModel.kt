@@ -75,4 +75,8 @@ class TrashViewModel @Inject constructor(
     fun noteClick(note: Note) {
         navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
     }
+
+    fun navigateBack() {
+        navManager.navigateBack()
+    }
 }

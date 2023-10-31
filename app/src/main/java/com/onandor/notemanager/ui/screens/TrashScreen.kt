@@ -1,5 +1,6 @@
 package com.onandor.notemanager.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -8,7 +9,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -16,6 +19,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,16 +41,16 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TrashScreen(
-    onOpenDrawer: () -> Unit,
     viewModel: TrashViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
+
     Scaffold (
         modifier = Modifier.statusBarsPadding(),
         topBar = {
-            TrashTopBar(
-                openDrawer = onOpenDrawer,
+            TrashTopAppBar(
+                onNavigateBack = viewModel::navigateBack,
                 onEmptyTrash = viewModel::emptyTrash
             )
         },
@@ -77,36 +81,36 @@ fun TrashScreen(
                 viewModel.addEditResultSnackbarShown()
             }
         }
+
+        BackHandler {
+            viewModel.navigateBack()
+        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TrashTopBar(
-    openDrawer: () -> Unit,
+private fun TrashTopAppBar(
+    onNavigateBack: () -> Unit,
     onEmptyTrash: () -> Unit
 ) {
-    Surface(modifier = Modifier
-        .fillMaxWidth()
-        .height(65.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { openDrawer() }) {
-                    Icon(
-                        imageVector = Icons.Filled.Menu,
-                        contentDescription = stringResource(R.string.topbar_drawer)
-                    )
-                }
-                Text(stringResource(R.string.trash), fontSize = 20.sp)
+    TopAppBar(
+        title = { Text(stringResource(R.string.trash)) },
+        navigationIcon = {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.topbar_drawer)
+                )
             }
-            IconButton(onClick = { onEmptyTrash() }) {
+        },
+        actions = {
+            IconButton(onClick = onEmptyTrash) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_trash_empty_filled),
                     contentDescription = stringResource(R.string.trash_empty_trash)
                 )
             }
         }
-    }
+    )
 }
