@@ -2,6 +2,9 @@ package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -20,6 +23,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -37,6 +42,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +60,8 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onInterceptKeyBeforeSoftKeyboard
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -200,6 +208,7 @@ private fun TitleAndContentEditor(
             keyboardActions = KeyboardActions(
                 onNext = {
                     onMoveCursor(TextRange(content.text.length))
+                    scrollToEnd = true
                     contentFocusRequester.requestFocus()
                 }
             )
@@ -243,7 +252,7 @@ private fun TitleAndContentEditor(
 
     LaunchedEffect(scrollToEnd) {
         if (scrollToEnd) {
-            scrollState.scrollTo(scrollState.maxValue)
+            scrollState.animateScrollTo(scrollState.maxValue)
             scrollToEnd = false
         }
     }
@@ -263,30 +272,52 @@ private fun EditorTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions(),
     keyboardActions: KeyboardActions = KeyboardActions()
 ) {
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        textStyle = textStyle,
-        cursorBrush = SolidColor(colors.cursorColor),
-        keyboardOptions = keyboardOptions.copy(capitalization = KeyboardCapitalization.Sentences),
-        readOnly = readOnly,
-        singleLine = singleLine,
-        keyboardActions = keyboardActions,
-        decorationBox = @Composable { innerTextField ->
-            TextFieldDefaults.DecorationBox(
-                value = value.text,
-                innerTextField = innerTextField,
-                enabled = true,
-                singleLine = false,
-                visualTransformation = VisualTransformation.None,
-                interactionSource = remember { MutableInteractionSource() },
-                colors = colors,
-                placeholder = placeholder,
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
-            )
-        }
+    val defaultTextSelectionColors = LocalTextSelectionColors.current
+    val disabledHandleTextSelectionColors = TextSelectionColors(
+        handleColor = Color.Transparent,
+        backgroundColor = MaterialTheme.colorScheme.primaryContainer
     )
+    val textSelectionColors = remember { mutableStateOf(defaultTextSelectionColors) }
+
+    CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors.value) {
+        BasicTextField(
+            value = value,
+            onValueChange = {
+                if (value.text.length != it.text.length)
+                    textSelectionColors.value = disabledHandleTextSelectionColors
+                onValueChange(it)
+            },
+            modifier = modifier
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        awaitFirstDown(pass = PointerEventPass.Initial)
+                        val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        if (upEvent != null) {
+                            textSelectionColors.value = defaultTextSelectionColors
+                        }
+                    }
+                },
+            textStyle = textStyle,
+            cursorBrush = SolidColor(colors.cursorColor),
+            keyboardOptions = keyboardOptions.copy(capitalization = KeyboardCapitalization.Sentences),
+            readOnly = readOnly,
+            singleLine = singleLine,
+            keyboardActions = keyboardActions,
+            decorationBox = @Composable { innerTextField ->
+                TextFieldDefaults.DecorationBox(
+                    value = value.text,
+                    innerTextField = innerTextField,
+                    enabled = true,
+                    singleLine = false,
+                    visualTransformation = VisualTransformation.None,
+                    interactionSource = remember { MutableInteractionSource() },
+                    colors = colors,
+                    placeholder = placeholder,
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
+                )
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
