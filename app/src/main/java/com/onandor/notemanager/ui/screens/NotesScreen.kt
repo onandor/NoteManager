@@ -24,10 +24,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.MainTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.utils.AddEditResults
@@ -75,9 +77,10 @@ fun NotesScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         if (uiState.notes.isEmpty()) {
-            Box(modifier = Modifier.padding(innerPadding)) {
-                Text("Your archive is empty")
-            }
+            EmptyContent(
+                painter = painterResource(id = R.drawable.ic_drawer_notes_filled),
+                text = stringResource(id = R.string.notes_empty)
+            )
         }
         else {
             NoteList(

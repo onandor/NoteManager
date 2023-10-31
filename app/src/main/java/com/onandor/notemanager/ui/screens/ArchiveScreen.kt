@@ -3,6 +3,8 @@ package com.onandor.notemanager.ui.screens
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -17,10 +19,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.MainTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.utils.AddEditResults
@@ -57,9 +61,10 @@ fun ArchiveScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         if (uiState.notes.isEmpty()) {
-            Box(modifier = Modifier.padding(innerPadding)) {
-                Text("Your archive is empty")
-            }
+            EmptyContent(
+                painter = painterResource(id = R.drawable.ic_archive_outlined),
+                text = stringResource(id = R.string.archive_empty)
+            )
         }
         else {
             NoteList(
