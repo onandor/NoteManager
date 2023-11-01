@@ -2,10 +2,13 @@ package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,8 +18,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -44,9 +49,12 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -62,9 +70,12 @@ import androidx.compose.ui.input.key.onInterceptKeyBeforeSoftKeyboard
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -78,7 +89,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
+import com.onandor.notemanager.utils.indexOfDifference
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,13 +100,13 @@ fun AddEditNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    //val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         modifier = Modifier
             .statusBarsPadding()
-            .imePadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+            .imePadding(),
+            //.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AddEditNoteTopAppBar(
                 noteLocation = uiState.location,
@@ -104,7 +117,7 @@ fun AddEditNoteScreen(
                 onTrashNote = viewModel::trashNote,
                 onDeleteNote = viewModel::deleteNote,
                 onAddLabels = viewModel::showEditLabelsDialog,
-                scrollBehavior = scrollBehavior
+                //scrollBehavior = scrollBehavior
             )
         }
     ) { innerPadding ->
@@ -160,12 +173,26 @@ private fun TitleAndContentEditor(
     newNote: Boolean,
     editLabelsDialogOpen: Boolean
 ) {
-    val titleFocusRequester = FocusRequester()
-    val contentFocusRequester = FocusRequester()
+    val titleFocusRequester = remember { FocusRequester() }
+    val contentFocusRequester = remember { FocusRequester() }
     var titleFocused by remember { mutableStateOf(false) }
     var contentFocused by remember { mutableStateOf(false) }
+
     val scrollState = rememberScrollState()
     var scrollToEnd by remember { mutableStateOf(false) }
+
+    var spaceAboveContent by remember { mutableIntStateOf(0) }
+    var editorViewportHeight by remember { mutableIntStateOf(0) }
+
+    val coroutineScope = rememberCoroutineScope()
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .navigationBarsPadding()
+        .onGloballyPositioned { coordinates ->
+            editorViewportHeight = coordinates.size.height
+        }
+    ) {}
 
     Column (
         modifier = modifier
@@ -180,15 +207,18 @@ private fun TitleAndContentEditor(
             unfocusedIndicatorColor = Color.Transparent
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(top = 10.dp, bottom = 15.dp)
                 .animateContentSize()
                 .focusRequester(titleFocusRequester)
                 .onFocusChanged { titleFocused = it.isFocused }
                 .onInterceptKeyBeforeSoftKeyboard { event ->
                     event.key == Key.Enter || event.key == Key.NumPadEnter
+                }
+                .onGloballyPositioned { coordinates ->
+                    spaceAboveContent = coordinates.size.height
                 },
             value = title,
             onValueChange = onTitleChanged,
@@ -213,7 +243,6 @@ private fun TitleAndContentEditor(
                 }
             )
         )
-        Spacer(modifier = Modifier.height(15.dp))
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -230,7 +259,33 @@ private fun TitleAndContentEditor(
             placeholder = {
                 Text(stringResource(id = R.string.addeditnote_hint_content))
             },
-            readOnly = editDisabled
+            readOnly = editDisabled,
+            onCursorYCoordChanged = { cursorYTop, cursorYBottom, lineHeight ->
+                val lowerLimit = scrollState.value - (1.5 * lineHeight).toInt()
+                val upperLimit = scrollState.value + (editorViewportHeight - (4.7 * lineHeight).toInt())
+                val cursorYTopWithTitleOffset = cursorYTop + spaceAboveContent
+                val cursorYBottomWithTitleOffset = cursorYBottom + spaceAboveContent
+                /*
+                 * 1.5 and 4.7 are kinds of magic values, for some reason the calculation is always
+                 * off by those amount of line heights, but since it works on 3 different DPIs I can't
+                 * be bothered to check why. (Might have to do something with editorViewportHeight or
+                 * spaceAboveContent not being calculated right.)
+                */
+                if (cursorYTopWithTitleOffset < lowerLimit) {
+                    // the top of the cursor is out of the view on the top of the screen
+                    val scrollPosition = cursorYTopWithTitleOffset + (1.5 * lineHeight).toInt()
+                    coroutineScope.launch {
+                        scrollState.animateScrollTo(scrollPosition)
+                    }
+                }
+                else if (cursorYBottomWithTitleOffset > upperLimit) {
+                    // the bottom of the cursor is out of the view on the bottom of the screen
+                    val scrollPosition = cursorYBottomWithTitleOffset - (editorViewportHeight - (4.7 * lineHeight).toInt())
+                    coroutineScope.launch {
+                        scrollState.animateScrollTo(scrollPosition)
+                    }
+                }
+            }
         )
     }
 
@@ -270,7 +325,8 @@ private fun EditorTextField(
     readOnly: Boolean,
     singleLine: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions(),
-    keyboardActions: KeyboardActions = KeyboardActions()
+    keyboardActions: KeyboardActions = KeyboardActions(),
+    onCursorYCoordChanged: (Int, Int, Int) -> Unit = { _, _, _ -> }
 ) {
     val defaultTextSelectionColors = LocalTextSelectionColors.current
     val disabledHandleTextSelectionColors = TextSelectionColors(
@@ -278,14 +334,60 @@ private fun EditorTextField(
         backgroundColor = MaterialTheme.colorScheme.primaryContainer
     )
     val textSelectionColors = remember { mutableStateOf(defaultTextSelectionColors) }
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
     CompositionLocalProvider(LocalTextSelectionColors provides textSelectionColors.value) {
         BasicTextField(
             value = value,
-            onValueChange = {
-                if (value.text.length != it.text.length)
+            onValueChange = { newValue ->
+                if (value.text.length != newValue.text.length) {
                     textSelectionColors.value = disabledHandleTextSelectionColors
-                onValueChange(it)
+
+                    val lineHeight = (textLayoutResult?.getLineBottom(0) ?: 0f).toInt()
+                    val cursorLine = textLayoutResult?.getLineForOffset(newValue.selection.start) ?: 0
+                    var cursorYTop = (textLayoutResult?.getLineTop(cursorLine) ?: 0f).toInt()
+                    var cursorYBottom = (textLayoutResult?.getLineBottom(cursorLine) ?: 0f).toInt()
+
+                    /*
+                     * The whole next block stems from the fact that onValueChange gets called before
+                     * onTextLayout, so textLayoutResult will always be outdated by one character.
+                     * This causes issues mostly when a new line is added, since textLayoutResult
+                     * doesn't know about that.
+                    */
+                    // If a character was added and not removed
+                    if (newValue.text.length > value.text.length) {
+                        // If we are at the end of the text and a new line was added
+                        if (newValue.text.length == newValue.selection.start && newValue.text.last() == '\n') {
+                            /*
+                             * Manually add the height of a line, since at this stage we are still
+                             * using the previous textLayoutResult and it doesn't know about the
+                             * new line.
+                            */
+                            cursorYTop += lineHeight
+                            cursorYBottom += lineHeight
+                        }
+                        else {
+                            /*
+                             * Else if a new character is added somewhere in the string, in the old
+                             * textLayoutResult the character on which the cursor is will be the first
+                             * character of the next line, and it will wrongly return that line, so
+                             * the height manually needs to be taken away.
+                             *
+                             * The catch is that we don't want to take away from the height if the added
+                             * character is a new line (because then textLayoutResult accidentally returns
+                             * the right value), so we need to check for that.
+                            */
+                            val diffIdx = value.text.indexOfDifference(newValue.text)
+                            if (textLayoutResult?.getLineForOffset(value.selection.start) != cursorLine
+                                && diffIdx != -1 && newValue.text[diffIdx] != '\n') {
+                                cursorYTop -= lineHeight
+                                cursorYBottom -= lineHeight
+                            }
+                        }
+                    }
+                    onCursorYCoordChanged(cursorYTop, cursorYBottom, lineHeight)
+                }
+                onValueChange(newValue)
             },
             modifier = modifier
                 .pointerInput(Unit) {
@@ -303,6 +405,9 @@ private fun EditorTextField(
             readOnly = readOnly,
             singleLine = singleLine,
             keyboardActions = keyboardActions,
+            onTextLayout = {
+                textLayoutResult = it
+            },
             decorationBox = @Composable { innerTextField ->
                 TextFieldDefaults.DecorationBox(
                     value = value.text,
@@ -331,7 +436,7 @@ private fun AddEditNoteTopAppBar(
     onTrashNote: () -> Unit,
     onDeleteNote: () -> Unit,
     onAddLabels: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior
+    //scrollBehavior: TopAppBarScrollBehavior
 ) {
     val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
         NoteLocation.NOTES -> {
@@ -405,6 +510,6 @@ private fun AddEditNoteTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             scrolledContainerColor = MaterialTheme.colorScheme.surface
         ),
-        scrollBehavior = scrollBehavior
+        //scrollBehavior = scrollBehavior
     )
 }
