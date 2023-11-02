@@ -1,24 +1,23 @@
 package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -39,6 +38,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
@@ -49,7 +49,6 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -71,8 +70,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
@@ -100,13 +99,12 @@ fun AddEditNoteScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
-    //val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         modifier = Modifier
-            .statusBarsPadding()
-            .imePadding(),
-            //.nestedScroll(scrollBehavior.nestedScrollConnection),
+            .imePadding()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AddEditNoteTopAppBar(
                 noteLocation = uiState.location,
@@ -117,7 +115,8 @@ fun AddEditNoteScreen(
                 onTrashNote = viewModel::trashNote,
                 onDeleteNote = viewModel::deleteNote,
                 onAddLabels = viewModel::showEditLabelsDialog,
-                //scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                scrolled = scrollBehavior.state.overlappedFraction > 0.01f
             )
         }
     ) { innerPadding ->
@@ -180,11 +179,12 @@ private fun TitleAndContentEditor(
 
     val scrollState = rememberScrollState()
     var scrollToEnd by remember { mutableStateOf(false) }
-
     var spaceAboveContent by remember { mutableIntStateOf(0) }
     var editorViewportHeight by remember { mutableIntStateOf(0) }
 
     val coroutineScope = rememberCoroutineScope()
+    val interactionSource = remember { MutableInteractionSource() }
+    val keyboard = LocalSoftwareKeyboardController.current
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -192,14 +192,21 @@ private fun TitleAndContentEditor(
         .onGloballyPositioned { coordinates ->
             editorViewportHeight = coordinates.size.height
         }
+        .clickable(
+            interactionSource = interactionSource,
+            indication = null
+        ) {
+            if (editDisabled)
+                return@clickable
+
+            onMoveCursor(TextRange(content.text.length))
+            scrollToEnd = true
+            contentFocusRequester.requestFocus()
+            keyboard?.show()
+        }
     ) {}
 
-    Column (
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .height(IntrinsicSize.Max)
-    ) {
+    Column (modifier = modifier.verticalScroll(scrollState)) {
         val textFieldColors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
@@ -246,11 +253,10 @@ private fun TitleAndContentEditor(
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
                 .focusRequester(contentFocusRequester)
                 .onFocusChanged { contentFocused = it.isFocused },
             value = content,
-            onValueChange = { onContentChanged(it) } ,
+            onValueChange = onContentChanged,
             colors = textFieldColors,
             textStyle = TextStyle.Default.copy(
                 fontSize = 16.sp,
@@ -436,7 +442,8 @@ private fun AddEditNoteTopAppBar(
     onTrashNote: () -> Unit,
     onDeleteNote: () -> Unit,
     onAddLabels: () -> Unit,
-    //scrollBehavior: TopAppBarScrollBehavior
+    scrollBehavior: TopAppBarScrollBehavior,
+    scrolled: Boolean
 ) {
     val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
         NoteLocation.NOTES -> {
@@ -496,20 +503,32 @@ private fun AddEditNoteTopAppBar(
         NoteLocation.ALL -> { { } }
     }
 
-    TopAppBar(
-        title = { },
-        navigationIcon = {
-            IconButton(onClick = { onSaveNote(); onNavigateBack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.addeditnote_hint_go_back)
-                )
-            }
-        },
-        actions = actions,
-        colors = TopAppBarDefaults.topAppBarColors(
-            scrolledContainerColor = MaterialTheme.colorScheme.surface
-        ),
-        //scrollBehavior = scrollBehavior
+    val color = if (scrolled)
+        TopAppBarDefaults.topAppBarColors().scrolledContainerColor
+    else
+        MaterialTheme.colorScheme.surface
+
+    val statusBarColor = animateColorAsState(
+        targetValue = color,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = ""
     )
+
+    Surface(color = statusBarColor.value) {
+        Row(modifier = Modifier.statusBarsPadding()) {
+            TopAppBar(
+                title = { },
+                navigationIcon = {
+                    IconButton(onClick = { onSaveNote(); onNavigateBack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.addeditnote_hint_go_back)
+                        )
+                    }
+                },
+                actions = actions,
+                scrollBehavior = scrollBehavior
+            )
+        }
+    }
 }
