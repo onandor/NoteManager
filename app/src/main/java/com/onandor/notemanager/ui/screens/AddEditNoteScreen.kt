@@ -84,10 +84,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
+import com.onandor.notemanager.ui.components.LifecycleObserver
 import com.onandor.notemanager.utils.indexOfDifference
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 import kotlinx.coroutines.launch
@@ -155,6 +157,12 @@ fun AddEditNoteScreen(
             unSelectedText = stringResource(id = R.string.dialog_edit_note_labels_available),
             onChangeLabelSelection = viewModel::addRemoveLabel
         )
+    }
+
+    LifecycleObserver { _, event ->
+        if (event == Lifecycle.Event.ON_PAUSE) {
+            viewModel.onPause()
+        }
     }
 }
 

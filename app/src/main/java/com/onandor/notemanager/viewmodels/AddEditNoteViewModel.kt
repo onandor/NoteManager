@@ -55,6 +55,7 @@ class AddEditNoteViewModel @Inject constructor(
     private val _noteId: String = savedStateHandle[NavDestinationArgs.NOTE_ID_ARG] ?: ""
     private var noteId: UUID? = if (_noteId.isNotEmpty()) UUID.fromString(_noteId) else null
     private var modified: Boolean = false
+    private var savedByUser: Boolean = false
 
     private val _labelsAsync = labelRepository.getLabelsStream()
         .map { AsyncResult.Success(it) }
@@ -95,7 +96,6 @@ class AddEditNoteViewModel @Inject constructor(
         }
 
         override fun onTick(millisUntilFinished: Long) {
-            println(secondsUntilSave)
             secondsUntilSave--
             if (secondsUntilSave == 0) {
                 running = false
@@ -141,6 +141,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun finishEditing() {
+        savedByUser = true
         if (_uiState.value.title.text.isEmpty() and _uiState.value.content.text.isEmpty()) {
             if (noteId == null) {
                 addEditResultState.set(AddEditResults.DISCARDED)
@@ -317,5 +318,18 @@ class AddEditNoteViewModel @Inject constructor(
             )
             it.copy(content = content)
         }
+    }
+
+    fun onPause() {
+        /*
+         * The purpose of this function is to save the note when the user closes the app while
+         * editing. Ideally this function would get called whenever the ON_DESTROY event is
+         * triggered, but I found out that it doesn't work reliably. Saving when the ON_PAUSE
+         * event is triggered does work, but the downside is that ON_PAUSE also gets triggered if
+         * the user simply navigates back to the previous screen, and in that case the note has
+         * already been saved/deleted/whatever. So there needs to be a check for that.
+         */
+        if (!savedByUser)
+            saveNote()
     }
 }
