@@ -108,7 +108,7 @@ fun AddEditNoteScreen(
         topBar = {
             AddEditNoteTopAppBar(
                 noteLocation = uiState.location,
-                onSaveNote = viewModel::saveNote,
+                onSaveNote = viewModel::finishEditing,
                 onNavigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
                 onArchiveNote = viewModel::archiveNote,
                 onUnArchiveNote = viewModel::unArchiveNote,
@@ -139,7 +139,7 @@ fun AddEditNoteScreen(
             viewModel.hideEditLabelsDialog()
         }
         else {
-            viewModel.saveNote()
+            viewModel.finishEditing()
             viewModel.navigateBack()
         }
     }

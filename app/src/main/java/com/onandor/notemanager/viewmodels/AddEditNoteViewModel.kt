@@ -1,5 +1,6 @@
 package com.onandor.notemanager.viewmodels
 
+import android.os.CountDownTimer
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
@@ -52,7 +53,7 @@ class AddEditNoteViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _noteId: String = savedStateHandle[NavDestinationArgs.NOTE_ID_ARG] ?: ""
-    private val noteId: UUID? = if (_noteId.isNotEmpty()) UUID.fromString(_noteId) else null
+    private var noteId: UUID? = if (_noteId.isNotEmpty()) UUID.fromString(_noteId) else null
     private var modified: Boolean = false
 
     private val _labelsAsync = labelRepository.getLabelsStream()
@@ -81,13 +82,43 @@ class AddEditNoteViewModel @Inject constructor(
             initialValue = AddEditNoteUiState()
         )
 
+    private val saveTimer = object: CountDownTimer(Long.MAX_VALUE, 1000) {
+        var secondsUntilSave = 4
+        var running = false
+
+        fun reset() {
+            secondsUntilSave = 4
+            if (!running) {
+                running = true
+                this.start()
+            }
+        }
+
+        override fun onTick(millisUntilFinished: Long) {
+            println(secondsUntilSave)
+            secondsUntilSave--
+            if (secondsUntilSave == 0) {
+                running = false
+                saveNote()
+                this.cancel()
+            }
+        }
+
+        override fun onFinish() { }
+    }
+
     init {
         if (noteId != null) {
-            loadNote(noteId)
+            loadNote(noteId!!)
         }
         else {
             _uiState.update { it.copy(newNote = true) }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        saveTimer.cancel()
     }
 
     private fun loadNote(noteId: UUID) {
@@ -109,14 +140,14 @@ class AddEditNoteViewModel @Inject constructor(
         }
     }
 
-    fun saveNote() {
+    fun finishEditing() {
         if (_uiState.value.title.text.isEmpty() and _uiState.value.content.text.isEmpty()) {
             if (noteId == null) {
                 addEditResultState.set(AddEditResults.DISCARDED)
                 return
             }
             viewModelScope.launch {
-                noteRepository.deleteNote(noteId)
+                noteRepository.deleteNote(noteId!!)
             }
             addEditResultState.set(AddEditResults.DISCARDED)
             return
@@ -125,6 +156,11 @@ class AddEditNoteViewModel @Inject constructor(
         if (!modified)
             return
 
+        saveNote()
+        addEditResultState.set(AddEditResults.SAVED)
+    }
+
+    private fun saveNote() {
         viewModelScope.launch {
             if (noteId == null) {
                 createNewNote()
@@ -133,12 +169,11 @@ class AddEditNoteViewModel @Inject constructor(
                 updateExistingNote()
             }
         }
-        addEditResultState.set(AddEditResults.SAVED)
     }
 
     private fun createNewNote() {
         viewModelScope.launch {
-            noteRepository.createNote(
+            noteId = noteRepository.createNote(
                 title = _uiState.value.title.text,
                 content = _uiState.value.content.text,
                 labels = _uiState.value.addedLabels,
@@ -154,11 +189,11 @@ class AddEditNoteViewModel @Inject constructor(
         viewModelScope.launch {
             // TODO: do it in one action
             noteRepository.updateNoteTitleAndContent(
-                noteId = noteId,
+                noteId = noteId!!,
                 title = _uiState.value.title.text,
                 content = _uiState.value.content.text
             )
-            noteRepository.updateNoteLabels(noteId, _uiState.value.addedLabels)
+            noteRepository.updateNoteLabels(noteId!!, _uiState.value.addedLabels)
         }
     }
 
@@ -178,8 +213,10 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun updateTitle(newTitle: TextFieldValue) {
-        if (_uiState.value.title.text != newTitle.text)
+        if (_uiState.value.title.text != newTitle.text) {
             modified = true
+            saveTimer.reset()
+        }
         _uiState.update {
             it.copy(
                 title = newTitle
@@ -188,8 +225,10 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun updateContent(newContent: TextFieldValue) {
-        if (_uiState.value.content.text != newContent.text)
+        if (_uiState.value.content.text != newContent.text) {
             modified = true
+            saveTimer.reset()
+        }
         _uiState.update {
             it.copy(
                 content = newContent
@@ -207,7 +246,7 @@ class AddEditNoteViewModel @Inject constructor(
         }
         else {
             viewModelScope.launch {
-                noteRepository.updateNoteLocation(noteId, NoteLocation.ARCHIVE)
+                noteRepository.updateNoteLocation(noteId!!, NoteLocation.ARCHIVE)
             }
         }
         addEditResultState.set(AddEditResults.ARCHIVED)
@@ -218,7 +257,7 @@ class AddEditNoteViewModel @Inject constructor(
             throw RuntimeException("AddEditNoteViewModel.unArchiveNote(): cannot unarchive nonexistent note")
         }
         viewModelScope.launch {
-            noteRepository.updateNoteLocation(noteId, NoteLocation.NOTES)
+            noteRepository.updateNoteLocation(noteId!!, NoteLocation.NOTES)
         }
         addEditResultState.set(AddEditResults.UNARCHIVED)
     }
@@ -229,7 +268,7 @@ class AddEditNoteViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            noteRepository.updateNoteLocation(noteId, NoteLocation.TRASH)
+            noteRepository.updateNoteLocation(noteId!!, NoteLocation.TRASH)
         }
         addEditResultState.set(AddEditResults.TRASHED)
     }
@@ -239,7 +278,7 @@ class AddEditNoteViewModel @Inject constructor(
             throw RuntimeException("AddEditNoteViewModel.deleteNote(): cannot delete nonexistent note")
         }
         viewModelScope.launch {
-            noteRepository.deleteNote(noteId)
+            noteRepository.deleteNote(noteId!!)
         }
         addEditResultState.set(AddEditResults.DELETED)
     }
@@ -268,6 +307,7 @@ class AddEditNoteViewModel @Inject constructor(
             }
             it.copy(addedLabels = newLabels)
         }
+        saveTimer.reset()
     }
 
     fun moveCursor(textRange: TextRange) {
