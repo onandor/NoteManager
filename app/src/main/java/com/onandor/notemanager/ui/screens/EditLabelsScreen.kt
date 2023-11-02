@@ -72,6 +72,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.components.SimpleConfirmationDialog
 import com.onandor.notemanager.data.Label
+import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.ui.theme.LocalTheme
 import com.onandor.notemanager.utils.LabelColor
 import com.onandor.notemanager.utils.LabelColorType
@@ -116,7 +117,11 @@ fun EditLabelsScreen(
                 }
             }
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = {
+            SwipeableSnackbarHost(hostState = snackbarHostState) {
+                SnackbarHost(hostState = snackbarHostState)
+            }
+        }
     ) { innerPadding ->
         Box(
             modifier = Modifier

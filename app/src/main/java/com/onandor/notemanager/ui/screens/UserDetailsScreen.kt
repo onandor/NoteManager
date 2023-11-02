@@ -52,6 +52,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.viewmodels.UserDetailsDialogType
 import com.onandor.notemanager.viewmodels.UserDetailsViewModel
 import kotlinx.coroutines.launch
@@ -76,7 +77,11 @@ fun UserDetailsScreen(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = {
+            SwipeableSnackbarHost(hostState = snackbarHostState) {
+                SnackbarHost(hostState = snackbarHostState)
+            }
+        }
     ) { innerPadding ->
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

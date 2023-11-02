@@ -3,7 +3,6 @@ package com.onandor.notemanager.ui.screens
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
@@ -14,7 +13,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -32,6 +30,7 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.MainTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
+import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.NotesViewModel
 import kotlinx.coroutines.launch
@@ -74,7 +73,11 @@ fun NotesScreen(
                 }
             }
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = {
+            SwipeableSnackbarHost(hostState = snackbarHostState) {
+                SnackbarHost(hostState = snackbarHostState)
+            }
+        }
     ) { innerPadding ->
         if (uiState.notes.isEmpty()) {
             EmptyContent(

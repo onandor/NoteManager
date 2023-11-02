@@ -44,10 +44,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.NoteList
+import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.TrashViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrashScreen(
     viewModel: TrashViewModel = hiltViewModel()
@@ -65,7 +67,11 @@ fun TrashScreen(
                 emptyTrashEnabled = uiState.notes.isNotEmpty()
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = {
+            SwipeableSnackbarHost(hostState = snackbarHostState) {
+                SnackbarHost(hostState = snackbarHostState)
+            }
+        }
     ) { innerPadding ->
         if (uiState.notes.isEmpty()) {
             EmptyContent(
