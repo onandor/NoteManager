@@ -75,7 +75,7 @@ fun NoteItem(
     Surface (
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 5.dp, end = 5.dp, bottom = 5.dp)
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
             .border(
                 width = 2.dp,
                 color = MaterialTheme.colorScheme.surfaceVariant,
@@ -86,12 +86,12 @@ fun NoteItem(
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = Modifier.padding(15.dp)
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 20.dp)
         ) {
             if (note.title.isNotEmpty()) {
                 Text(
                     text = note.title,
-                    fontSize = 22.sp
+                    fontSize = 21.sp
                 )
                 if (!collapsedView) {
                     Spacer(modifier = Modifier.height(10.dp))
@@ -100,7 +100,7 @@ fun NoteItem(
             AnimatedVisibility(visible = collapsedView && note.title.isEmpty()) {
                 Text(
                     text = note.content,
-                    lineHeight = 16.sp,
+                    lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

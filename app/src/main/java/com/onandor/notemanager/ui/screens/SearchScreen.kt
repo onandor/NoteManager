@@ -166,7 +166,7 @@ fun ResultList(
 ) {
     LazyColumn(
         modifier = Modifier
-            .padding(top = 5.dp)
+            .padding(top = 8.dp)
             .fillMaxWidth()
             .animateContentSize(),
         state = scrollState
