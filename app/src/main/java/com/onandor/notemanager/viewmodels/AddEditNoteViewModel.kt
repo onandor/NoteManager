@@ -189,7 +189,7 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun updateContent(newContent: TextFieldValue) {
         if (_uiState.value.content.text != newContent.text)
-            modified = false
+            modified = true
         _uiState.update {
             it.copy(
                 content = newContent
