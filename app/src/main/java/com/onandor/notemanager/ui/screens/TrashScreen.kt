@@ -1,6 +1,12 @@
 package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,6 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.components.EmptyContent
+import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.utils.AddEditResults
@@ -61,11 +68,45 @@ fun TrashScreen(
     Scaffold (
         modifier = Modifier.statusBarsPadding(),
         topBar = {
-            TrashTopAppBar(
-                onNavigateBack = viewModel::navigateBack,
-                onEmptyTrash = viewModel::openConfirmationDialog,
-                emptyTrashEnabled = uiState.notes.isNotEmpty()
-            )
+            AnimatedContent(
+                targetState = uiState.selectedNotes.isEmpty(),
+                label = "",
+                transitionSpec = {
+                    if (targetState) {
+                        slideInVertically { fullHeight -> -fullHeight } + fadeIn() togetherWith
+                                slideOutVertically { fullHeight -> fullHeight } + fadeOut()
+                    } else {
+                        slideInVertically { fullHeight -> fullHeight } + fadeIn() togetherWith
+                                slideOutVertically { fullHeight -> -fullHeight } + fadeOut()
+                    }
+                }
+            ) { noneSelected ->
+                if (noneSelected) {
+                    TrashTopAppBar(
+                        onNavigateBack = viewModel::navigateBack,
+                        onEmptyTrash = viewModel::openConfirmationDialog,
+                        emptyTrashEnabled = uiState.notes.isNotEmpty()
+                    )
+                } else {
+                    MultiSelectTopAppBar(
+                        onClearSelection = viewModel::clearSelection,
+                        selectedCount = uiState.selectedNotes.size
+                    ) {
+                        IconButton(onClick = viewModel::restoreSelectedNotes) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_restore_from_trash_filled),
+                                contentDescription = stringResource(id = R.string.trash_restore_selected)
+                            )
+                        }
+                        IconButton(onClick = viewModel::openConfirmationDialog) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_delete_forever_filled),
+                                contentDescription = stringResource(id = R.string.trash_delete_selected)
+                            )
+                        }
+                    }
+                }
+            }
         },
         snackbarHost = {
             SwipeableSnackbarHost(hostState = snackbarHostState) {
@@ -82,7 +123,9 @@ fun TrashScreen(
         else {
             NoteList(
                 notes = uiState.notes,
+                selectedNotes = uiState.selectedNotes,
                 onNoteClick = viewModel::noteClick,
+                onNoteLongClick = viewModel::noteLongClick,
                 modifier = Modifier.padding(innerPadding),
                 collapsedView = false
             )
@@ -100,8 +143,9 @@ fun TrashScreen(
 
         if (uiState.confirmationDialogOpen) {
             ConfirmationDialog(
-                onConfirmation = viewModel::emptyTrash,
-                onDismissRequest = viewModel::closeConfirmationDialog
+                onConfirmation = viewModel::dialogConfirmed,
+                onDismissRequest = viewModel::closeConfirmationDialog,
+                deleteSelection = uiState.selectedNotes.isNotEmpty()
             )
         }
 
@@ -114,7 +158,8 @@ fun TrashScreen(
 @Composable
 private fun ConfirmationDialog(
     onConfirmation: () -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    deleteSelection: Boolean
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Card(shape = RoundedCornerShape(16.dp)) {
@@ -132,7 +177,10 @@ private fun ConfirmationDialog(
                     contentDescription = ""
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(stringResource(id = R.string.dialog_empty_trash_description))
+                if (deleteSelection)
+                    Text(stringResource(id = R.string.dialog_trash_confirmation_delete_selected))
+                else
+                    Text(stringResource(id = R.string.dialog_trash_confirmation_empty_trash))
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),

@@ -1,6 +1,7 @@
 package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
@@ -9,20 +10,21 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +35,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -50,10 +53,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,8 +64,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.Note
+import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
+import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteItem
 import com.onandor.notemanager.viewmodels.SearchViewModel
 
@@ -77,11 +82,33 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
             .navigationBarsPadding()
             .imePadding(),
         topBar = {
-            SearchBar(
-                text = uiState.searchForm.text,
-                onTextChanged = viewModel::updateSearchText,
-                onBackClicked = { focusManager.clearFocus(); viewModel.navigateBack() }
-            )
+            AnimatedContent(
+                targetState = uiState.selectedNotes.isEmpty(),
+                label = "",
+                transitionSpec = {
+                    if (targetState) {
+                        slideInVertically { fullHeight -> -fullHeight } + fadeIn() togetherWith
+                                slideOutVertically { fullHeight -> fullHeight } + fadeOut()
+                    } else {
+                        slideInVertically { fullHeight -> fullHeight } + fadeIn() togetherWith
+                                slideOutVertically { fullHeight -> -fullHeight } + fadeOut()
+                    }
+                }
+            ) { noneSelected ->
+                if (noneSelected) {
+                    SearchBar(
+                        text = uiState.searchForm.text,
+                        onTextChanged = viewModel::updateSearchText,
+                        onBackClicked = { focusManager.clearFocus(); viewModel.navigateBack() }
+                    )
+                } else {
+                    SelectionTopBar(
+                        selectedNotes = uiState.selectedNotes,
+                        onClearSelection = viewModel::clearSelection,
+                        onMoveNotes = viewModel::moveSelectedNotes
+                    )
+                }
+            }
         },
         floatingActionButton =  {
             AnimatedVisibility(
@@ -127,7 +154,9 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                 ResultList(
                     mainNotes = uiState.mainNotes,
                     archiveNotes = uiState.archiveNotes,
+                    selectedNotes = uiState.selectedNotes,
                     onNoteClick = { note -> focusManager.clearFocus(); viewModel.noteClick(note) },
+                    onNoteLongClick = { note -> focusManager.clearFocus(); viewModel.noteLongClick(note) },
                     scrollState = scrollState
                 )
             }
@@ -161,16 +190,20 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
 fun ResultList(
     mainNotes: List<Note>,
     archiveNotes: List<Note>,
+    selectedNotes: List<Note>,
     onNoteClick: (Note) -> Unit,
+    onNoteLongClick: (Note) -> Unit,
     scrollState: LazyListState
 ) {
     LazyColumn(
         modifier = Modifier
-            .padding(top = 8.dp)
             .fillMaxWidth()
             .animateContentSize(),
         state = scrollState
     ) {
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
         itemsIndexed(
             items = mainNotes,
             key = { _, note -> note.id }
@@ -178,8 +211,10 @@ fun ResultList(
             NoteItem(
                 modifier = Modifier.animateItemPlacement(),
                 note = note,
+                selected = selectedNotes.contains(note),
                 collapsedView = false,
-                onNoteClick = onNoteClick
+                onNoteClick = onNoteClick,
+                onNoteLongClick = onNoteLongClick
             )
         }
         item {
@@ -200,15 +235,54 @@ fun ResultList(
             NoteItem(
                 modifier = Modifier.animateItemPlacement(),
                 note = note,
+                selected = selectedNotes.contains(note),
                 collapsedView = false,
-                onNoteClick = onNoteClick
+                onNoteClick = onNoteClick,
+                onNoteLongClick = onNoteLongClick
             )
         }
     }
 }
 
 @Composable
-fun SearchBar(
+fun SelectionTopBar(
+    selectedNotes: List<Note>,
+    onClearSelection: () -> Unit,
+    onMoveNotes: (NoteLocation) -> Unit
+) {
+    val newLocation = if (selectedNotes.any { it.location == NoteLocation.NOTES })
+        NoteLocation.ARCHIVE
+    else
+        NoteLocation.NOTES
+
+    MultiSelectTopAppBar(
+        onClearSelection = onClearSelection,
+        selectedCount = selectedNotes.size
+    ) {
+        IconButton(onClick = { onMoveNotes(newLocation) }) {
+            if (newLocation == NoteLocation.ARCHIVE) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_note_archive_filled),
+                    contentDescription = stringResource(id = R.string.search_archive)
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_note_unarchive_filled),
+                    contentDescription = stringResource(id = R.string.search_unarchive_selected)
+                )
+            }
+        }
+        IconButton(onClick = { onMoveNotes(NoteLocation.TRASH) }) {
+            Icon(
+                imageVector = Icons.Filled.Delete,
+                contentDescription = stringResource(id = R.string.search_trash_selected)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SearchBar(
     text: String,
     onTextChanged: (String) -> Unit,
     onBackClicked: () -> Unit
@@ -216,8 +290,12 @@ fun SearchBar(
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
+        val density = LocalDensity.current
+        val statusBarHeight = WindowInsets.statusBars.getTop(density)
         Row(
-            modifier = Modifier.statusBarsPadding(),
+            modifier = Modifier
+                .height(with(density) { statusBarHeight.toDp() } + 64.dp)
+                .statusBarsPadding(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val textFieldColors = TextFieldDefaults.colors(

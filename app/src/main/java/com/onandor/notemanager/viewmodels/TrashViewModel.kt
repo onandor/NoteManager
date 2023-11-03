@@ -25,7 +25,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TrashUiState(
-    val notes: List<Note> = listOf(),
+    val notes: List<Note> = emptyList(),
+    val selectedNotes: List<Note> = emptyList(),
     val addEditResult: AddEditResult = AddEditResults.NONE,
     val confirmationDialogOpen: Boolean = false
 )
@@ -69,19 +70,42 @@ class TrashViewModel @Inject constructor(
             initialValue = TrashUiState()
         )
 
-    fun emptyTrash() {
+    private fun emptyTrash() {
         viewModelScope.launch {
             noteRepository.emptyTrash()
             // TODO: notification
         }
+    }
+
+    fun dialogConfirmed() {
+        if (_uiState.value.selectedNotes.isEmpty())
+            emptyTrash()
+        else
+            deleteSelectedNotes()
         closeConfirmationDialog()
     }
+
     fun addEditResultSnackbarShown() {
         addEditResultState.clear()
     }
 
     fun noteClick(note: Note) {
-        navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+        if (_uiState.value.selectedNotes.isNotEmpty())
+            noteLongClick(note)
+        else
+            navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+    }
+
+    fun noteLongClick(note: Note) {
+        _uiState.update {
+            val newSelectedNotes = it.selectedNotes.toMutableList()
+            if (it.selectedNotes.contains(note)) {
+                newSelectedNotes.remove(note)
+            } else {
+                newSelectedNotes.add(note)
+            }
+            it.copy(selectedNotes = newSelectedNotes)
+        }
     }
 
     fun navigateBack() {
@@ -94,5 +118,28 @@ class TrashViewModel @Inject constructor(
 
     fun closeConfirmationDialog() {
         _uiState.update { it.copy(confirmationDialogOpen = false) }
+    }
+
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedNotes = emptyList()) }
+    }
+
+    fun restoreSelectedNotes() {
+        viewModelScope.launch {
+            _uiState.value.selectedNotes.forEach { note ->
+                noteRepository.updateNoteLocation(note.id, NoteLocation.NOTES)
+            }
+            clearSelection()
+        }
+    }
+
+    private fun deleteSelectedNotes() {
+        viewModelScope.launch {
+            _uiState.value.selectedNotes.forEach { note ->
+                noteRepository.deleteNote(note.id)
+            }
+            // TODO: snackbar
+            clearSelection()
+        }
     }
 }

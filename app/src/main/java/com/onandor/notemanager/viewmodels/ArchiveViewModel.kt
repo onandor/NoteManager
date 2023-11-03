@@ -19,6 +19,7 @@ import com.onandor.notemanager.utils.NoteComparisonField
 import com.onandor.notemanager.utils.NoteSorting
 import com.onandor.notemanager.utils.Order
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -26,11 +27,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ArchiveUiState(
-    val notes: List<Note> = listOf(),
+    val notes: List<Note> = emptyList(),
+    val selectedNotes: List<Note> = emptyList(),
     val addEditResult: AddEditResult = AddEditResults.NONE,
     val noteListState: NoteListState = NoteListState()
 )
@@ -67,21 +70,22 @@ class ArchiveViewModel @Inject constructor(
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
-    val uiState: StateFlow<NotesUiState> = combine(
-        _notesAsync, addEditResultState.result, noteListState
-    ) { notesAsync, addEditResult, noteListState ->
+    val _uiState = MutableStateFlow(ArchiveUiState())
+    val uiState: StateFlow<ArchiveUiState> = combine(
+        _uiState, _notesAsync, addEditResultState.result, noteListState
+    ) { uiState, notesAsync, addEditResult, noteListState ->
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
-                NotesUiState(addEditResult = addEditResult)
+                uiState.copy(addEditResult = addEditResult)
             }
             is AsyncResult.Error -> {
                 // TODO
-                NotesUiState(addEditResult = addEditResult)
+                uiState.copy(addEditResult = addEditResult)
             }
             is AsyncResult.Success -> {
                 val sortedNotes = notesAsync.data.sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
-                NotesUiState(
+                uiState.copy(
                     notes = sortedNotes,
                     addEditResult = addEditResult,
                     noteListState = noteListState
@@ -92,7 +96,7 @@ class ArchiveViewModel @Inject constructor(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = NotesUiState()
+            initialValue = ArchiveUiState()
         )
 
     fun addEditResultSnackbarShown() {
@@ -100,7 +104,22 @@ class ArchiveViewModel @Inject constructor(
     }
 
     fun noteClick(note: Note) {
-        navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+        if (_uiState.value.selectedNotes.isNotEmpty())
+            noteLongClick(note)
+        else
+            navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+    }
+
+    fun noteLongClick(note: Note) {
+        _uiState.update {
+            val newSelectedNotes = it.selectedNotes.toMutableList()
+            if (it.selectedNotes.contains(note)) {
+                newSelectedNotes.remove(note)
+            } else {
+                newSelectedNotes.add(note)
+            }
+            it.copy(selectedNotes = newSelectedNotes)
+        }
     }
 
     fun changeSorting(sorting: NoteSorting) {
@@ -118,5 +137,18 @@ class ArchiveViewModel @Inject constructor(
 
     fun showSearch() {
         navManager.navigateTo(NavActions.search())
+    }
+
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedNotes = emptyList()) }
+    }
+
+    fun moveSelectedNotes(location: NoteLocation) {
+        viewModelScope.launch {
+            _uiState.value.selectedNotes.forEach { note ->
+                noteRepository.updateNoteLocation(note.id, location)
+            }
+            clearSelection()
+        }
     }
 }

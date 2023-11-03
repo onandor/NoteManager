@@ -453,7 +453,7 @@ private fun AddEditNoteTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior,
     scrolled: Boolean
 ) {
-    val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
+        val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
         NoteLocation.NOTES -> {
             {
                 IconButton(onClick = { onAddLabels() }) {

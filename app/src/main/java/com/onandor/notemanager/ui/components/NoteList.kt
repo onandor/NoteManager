@@ -3,7 +3,7 @@ package com.onandor.notemanager.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -45,7 +45,9 @@ data class NoteListState(
 @Composable
 fun NoteList(
     notes: List<Note>,
+    selectedNotes: List<Note>,
     onNoteClick: (Note) -> Unit,
+    onNoteLongClick: (Note) -> Unit,
     modifier: Modifier,
     collapsedView: Boolean
 ) {
@@ -57,32 +59,45 @@ fun NoteList(
             NoteItem(
                 modifier = Modifier.animateItemPlacement(),
                 note = note,
+                selected = selectedNotes.contains(note),
                 collapsedView = collapsedView,
-                onNoteClick = onNoteClick
+                onNoteClick = onNoteClick,
+                onNoteLongClick = onNoteLongClick
             )
         }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun NoteItem(
     modifier: Modifier,
     note: Note,
+    selected: Boolean,
     collapsedView: Boolean,
-    onNoteClick: (Note) -> Unit
+    onNoteClick: (Note) -> Unit,
+    onNoteLongClick: (Note) -> Unit
 ) {
+    val borderSize = if (selected) 4.dp else 3.dp
+    val borderColor = if (selected)
+        MaterialTheme.colorScheme.secondary
+    else
+        MaterialTheme.colorScheme.surfaceVariant
+
     Surface (
         modifier = modifier
             .fillMaxWidth()
             .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
             .border(
-                width = 2.dp,
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                width = borderSize,
+                color = borderColor,
                 shape = RoundedCornerShape(20.dp)
             )
             .clip(RoundedCornerShape(20.dp))
-            .clickable { onNoteClick(note) },
+            .combinedClickable(
+                onClick = { onNoteClick(note) },
+                onLongClick = { onNoteLongClick(note) }
+            ),
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
@@ -156,7 +171,9 @@ fun PreviewNoteItem() {
     NoteItem(
         modifier = Modifier,
         note = note,
+        selected = false,
         collapsedView = false,
-        onNoteClick = { }
+        onNoteClick = { },
+        onNoteLongClick = { }
     )
 }

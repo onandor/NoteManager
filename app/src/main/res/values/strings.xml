@@ -11,9 +11,14 @@
     <string name="topbar_change_view">Change view</string>
     <string name="notes_new_note">New note</string>
     <string name="notes_empty">You don\'t have any notes</string>
+    <string name="notes_archive_selected">Archive selected notes</string>
+    <string name="notes_trash_selected">Trash selected notes</string>
     <string name="trash_empty_trash">Empty trash</string>
     <string name="trash_empty">The trash is empty</string>
-    <string name="dialog_empty_trash_description">Are you sure you want to empty the trash? Doing so will permanently delete all trashed notes.</string>
+    <string name="trash_restore_selected">Restore selected notes</string>
+    <string name="trash_delete_selected">Delete selected notes</string>
+    <string name="dialog_trash_confirmation_empty_trash">Are you sure you want to empty the trash? Doing so will permanently delete all trashed notes.</string>
+    <string name="dialog_trash_confirmation_delete_selected">Are you sure you want to delete the selected notes?</string>
     <string name="dialog_empty_trash_button_confirm">Confirm</string>
     <string name="dialog_empty_trash_button_cancel">Cancel</string>
     <string name="trash">Trash</string>
@@ -33,6 +38,8 @@
     <string name="dialog_edit_note_labels_available">Available</string>
     <string name="dialog_label_selection_empty">Empty</string>
     <string name="archive_empty">The archive is empty</string>
+    <string name="archive_unarchive_selected">Unarchive selected notes</string>
+    <string name="archive_trash_selected">Trash selected notes</string>
     <string name="addeditresult_saved">Note saved</string>
     <string name="addeditresult_archived">Note archived</string>
     <string name="addeditresult_unarchived">Note unarchived</string>
@@ -123,6 +130,10 @@
     <string name="search_button_hint_go_back">Go back</string>
     <string name="search_hint_clear_search">Clear search</string>
     <string name="search_search_by_labels">Search by labels</string>
+    <string name="search_archive_selected">Archive selected notes</string>
+    <string name="search_unarchive_selected">Unarchive selected notes</string>
+    <string name="search_trash_selected">Trash selected notes</string>
     <string name="dialog_search_by_labels_selected">Selected</string>
     <string name="dialog_search_by_labels_unselected">Not selected</string>
+    <string name="multi_select_clear_selection">Clear selection</string>
 </resources>

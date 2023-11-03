@@ -41,6 +41,7 @@ data class SearchUiState(
     val searchForm: SearchForm = SearchForm(),
     val mainNotes: List<Note> = emptyList(),
     val archiveNotes: List<Note> = emptyList(),
+    val selectedNotes: List<Note> = emptyList(),
     val labels: List<Label> = emptyList(),
     val searchLabels: List<Label> = emptyList(),
     val searchByLabelsDialogOpen: Boolean = false
@@ -193,7 +194,22 @@ class SearchViewModel @Inject constructor(
     }
 
     fun noteClick(note: Note) {
-        navManager.navigateTo(NavActions.addEditNote(note.id.toString()), popCurrent = true)
+        if (_uiState.value.selectedNotes.isNotEmpty())
+            noteLongClick(note)
+        else
+            navManager.navigateTo(NavActions.addEditNote(note.id.toString()), popCurrent = true)
+    }
+
+    fun noteLongClick(note: Note) {
+        _uiState.update {
+            val newSelectedNotes = it.selectedNotes.toMutableList()
+            if (it.selectedNotes.contains(note)) {
+                newSelectedNotes.remove(note)
+            } else {
+                newSelectedNotes.add(note)
+            }
+            it.copy(selectedNotes = newSelectedNotes)
+        }
     }
 
     fun navigateBack() {
@@ -202,5 +218,18 @@ class SearchViewModel @Inject constructor(
 
     fun changeSearchByLabelsDialogOpen(open: Boolean) {
         _uiState.update { it.copy(searchByLabelsDialogOpen = open) }
+    }
+
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedNotes = emptyList()) }
+    }
+
+    fun moveSelectedNotes(location: NoteLocation) {
+        viewModelScope.launch {
+            _uiState.value.selectedNotes.forEach { note ->
+                noteRepository.updateNoteLocation(note.id, location)
+            }
+            clearSelection()
+        }
     }
 }
