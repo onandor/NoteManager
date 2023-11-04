@@ -35,7 +35,6 @@ import com.onandor.notemanager.ui.components.MainTopAppBar
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
-import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.ArchiveViewModel
 import kotlinx.coroutines.launch
 
@@ -45,7 +44,7 @@ fun ArchiveScreen(
     onOpenDrawer: () -> Unit,
     viewModel: ArchiveViewModel = hiltViewModel()
 ) {
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
@@ -126,13 +125,19 @@ fun ArchiveScreen(
             )
         }
 
-        if (uiState.addEditResult != AddEditResults.NONE) {
-            val resultText = stringResource(id = uiState.addEditResult.resource)
-            LaunchedEffect(uiState.addEditResult) {
-                scope.launch {
-                    snackbarHostState.showSnackbar(resultText)
-                }
+        if (uiState.addEditSnackbarResource != 0) {
+            val resultText = stringResource(id = uiState.addEditSnackbarResource)
+            LaunchedEffect(uiState.addEditSnackbarResource) {
+                coroutineScope.launch { snackbarHostState.showSnackbar(resultText) }
                 viewModel.addEditResultSnackbarShown()
+            }
+        }
+
+        if (uiState.selectionSnackbarResource != 0) {
+            val snackbarText = stringResource(id = uiState.selectionSnackbarResource)
+            LaunchedEffect(uiState.selectionSnackbarResource) {
+                coroutineScope.launch { snackbarHostState.showSnackbar(snackbarText) }
+                viewModel.selectionSnackbarShown()
             }
         }
 

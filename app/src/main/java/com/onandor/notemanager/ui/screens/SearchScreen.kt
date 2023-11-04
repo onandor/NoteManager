@@ -44,6 +44,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -54,6 +56,8 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -74,7 +78,9 @@ import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteItem
+import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.viewmodels.SearchViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +89,8 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
     val focusManager = LocalFocusManager.current
     val scrollState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         modifier = Modifier
@@ -130,6 +138,11 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                     icon = { Icon(painterResource(id = R.drawable.ic_label_filled), "")},
                     text = { Text(stringResource(id = R.string.search_search_by_labels)) }
                 )
+            }
+        },
+        snackbarHost = {
+            SwipeableSnackbarHost(hostState = snackbarHostState) {
+                SnackbarHost(hostState = snackbarHostState)
             }
         }
     ) { innerPadding ->
@@ -182,6 +195,14 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                 unSelectedText = stringResource(id = R.string.dialog_search_by_labels_unselected),
                 onChangeLabelSelection = viewModel::addRemoveSearchLabel
             )
+        }
+    }
+
+    if (uiState.snackbarResource != 0) {
+        val resultText = stringResource(id = uiState.snackbarResource)
+        LaunchedEffect(uiState.snackbarResource) {
+            coroutineScope.launch { snackbarHostState.showSnackbar(resultText) }
+            viewModel.snackbarShown()
         }
     }
 

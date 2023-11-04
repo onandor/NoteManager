@@ -141,13 +141,19 @@ fun TrashScreen(
             )
         }
 
-        if (uiState.addEditResult != AddEditResults.NONE) {
-            val resultText = stringResource(id = uiState.addEditResult.resource)
-            LaunchedEffect(uiState.addEditResult) {
-                scope.launch {
-                    snackbarHostState.showSnackbar(resultText)
-                }
+        if (uiState.addEditSnackbarResource != 0) {
+            val resultText = stringResource(id = uiState.addEditSnackbarResource)
+            LaunchedEffect(uiState.addEditSnackbarResource) {
+                scope.launch { snackbarHostState.showSnackbar(resultText) }
                 viewModel.addEditResultSnackbarShown()
+            }
+        }
+
+        if (uiState.snackbarResource != 0) {
+            val snackbarText = stringResource(id = uiState.snackbarResource)
+            LaunchedEffect(uiState.addEditSnackbarResource) {
+                scope.launch { snackbarHostState.showSnackbar(snackbarText) }
+                viewModel.snackbarShown()
             }
         }
 

@@ -2,6 +2,7 @@ package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onandor.notemanager.R
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
@@ -34,8 +35,9 @@ import javax.inject.Inject
 data class ArchiveUiState(
     val notes: List<Note> = emptyList(),
     val selectedNotes: List<Note> = emptyList(),
-    val addEditResult: AddEditResult = AddEditResults.NONE,
-    val noteListState: NoteListState = NoteListState()
+    val noteListState: NoteListState = NoteListState(),
+    val addEditSnackbarResource: Int = 0,
+    val selectionSnackbarResource: Int = 0
 )
 
 @HiltViewModel
@@ -70,24 +72,24 @@ class ArchiveViewModel @Inject constructor(
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
-    val _uiState = MutableStateFlow(ArchiveUiState())
+    private val _uiState = MutableStateFlow(ArchiveUiState())
     val uiState: StateFlow<ArchiveUiState> = combine(
         _uiState, _notesAsync, addEditResultState.result, noteListState
     ) { uiState, notesAsync, addEditResult, noteListState ->
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
-                uiState.copy(addEditResult = addEditResult)
+                uiState.copy(addEditSnackbarResource = addEditResult.resource)
             }
             is AsyncResult.Error -> {
                 // TODO
-                uiState.copy(addEditResult = addEditResult)
+                uiState.copy(addEditSnackbarResource = addEditResult.resource)
             }
             is AsyncResult.Success -> {
                 val sortedNotes = notesAsync.data.sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
                 uiState.copy(
                     notes = sortedNotes,
-                    addEditResult = addEditResult,
+                    addEditSnackbarResource = addEditResult.resource,
                     noteListState = noteListState
                 )
             }
@@ -101,6 +103,10 @@ class ArchiveViewModel @Inject constructor(
 
     fun addEditResultSnackbarShown() {
         addEditResultState.clear()
+    }
+
+    fun selectionSnackbarShown() {
+        _uiState.update { it.copy(selectionSnackbarResource = 0) }
     }
 
     fun noteClick(note: Note) {
@@ -148,7 +154,22 @@ class ArchiveViewModel @Inject constructor(
             _uiState.value.selectedNotes.forEach { note ->
                 noteRepository.updateNoteLocation(note.id, location)
             }
+            val single = _uiState.value.selectedNotes.size == 1
             clearSelection()
+            val resource = when(location) {
+                NoteLocation.NOTES -> {
+                    if (single) R.string.snackbar_selection_note_unarchived
+                    else R.string.snackbar_selection_notes_unarchived
+                }
+                NoteLocation.TRASH -> {
+                    if (single) R.string.snackbar_selection_note_trashed
+                    else R.string.snackbar_selection_notes_trashed
+                }
+                else -> 0
+            }
+            _uiState.update {
+                it.copy(selectionSnackbarResource = resource)
+            }
         }
     }
 }

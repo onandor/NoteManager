@@ -2,6 +2,7 @@ package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Label
@@ -44,7 +45,8 @@ data class SearchUiState(
     val selectedNotes: List<Note> = emptyList(),
     val labels: List<Label> = emptyList(),
     val searchLabels: List<Label> = emptyList(),
-    val searchByLabelsDialogOpen: Boolean = false
+    val searchByLabelsDialogOpen: Boolean = false,
+    val snackbarResource: Int = 0
 )
 
 private data class AsyncData(
@@ -229,7 +231,30 @@ class SearchViewModel @Inject constructor(
             _uiState.value.selectedNotes.forEach { note ->
                 noteRepository.updateNoteLocation(note.id, location)
             }
+            val single = _uiState.value.selectedNotes.size == 1
             clearSelection()
+            val resource = when(location) {
+                NoteLocation.NOTES -> {
+                    if (single) R.string.snackbar_selection_note_unarchived
+                    else R.string.snackbar_selection_notes_unarchived
+                }
+                NoteLocation.ARCHIVE -> {
+                    if (single) R.string.snackbar_selection_note_archived
+                    else R.string.snackbar_selection_notes_archived
+                }
+                NoteLocation.TRASH -> {
+                    if (single) R.string.snackbar_selection_note_trashed
+                    else R.string.snackbar_selection_notes_trashed
+                }
+                else -> 0
+            }
+            _uiState.update {
+                it.copy(snackbarResource = resource)
+            }
         }
+    }
+
+    fun snackbarShown() {
+        _uiState.update { it.copy(snackbarResource = 0) }
     }
 }

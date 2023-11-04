@@ -2,6 +2,7 @@ package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onandor.notemanager.R
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.data.NoteRepository
@@ -27,8 +28,9 @@ import javax.inject.Inject
 data class TrashUiState(
     val notes: List<Note> = emptyList(),
     val selectedNotes: List<Note> = emptyList(),
-    val addEditResult: AddEditResult = AddEditResults.NONE,
-    val confirmationDialogOpen: Boolean = false
+    val confirmationDialogOpen: Boolean = false,
+    val addEditSnackbarResource: Int = 0,
+    val snackbarResource: Int = 0
 )
 
 @HiltViewModel
@@ -50,16 +52,16 @@ class TrashViewModel @Inject constructor(
         when(notesAsync) {
             AsyncResult.Loading -> {
                 // TODO
-                uiState.copy(addEditResult = addEditResult)
+                uiState.copy(addEditSnackbarResource = addEditResult.resource)
             }
             is AsyncResult.Error -> {
                 // TODO
-                uiState.copy(addEditResult = addEditResult)
+                uiState.copy(addEditSnackbarResource = addEditResult.resource)
             }
             is AsyncResult.Success -> {
                 uiState.copy(
                     notes = notesAsync.data,
-                    addEditResult = addEditResult
+                    addEditSnackbarResource = addEditResult.resource
                 )
             }
         }
@@ -73,7 +75,7 @@ class TrashViewModel @Inject constructor(
     private fun emptyTrash() {
         viewModelScope.launch {
             noteRepository.emptyTrash()
-            // TODO: notification
+            _uiState.update { it.copy(snackbarResource = R.string.trash_snackbar_trash_emptied) }
         }
     }
 
@@ -87,6 +89,10 @@ class TrashViewModel @Inject constructor(
 
     fun addEditResultSnackbarShown() {
         addEditResultState.clear()
+    }
+
+    fun snackbarShown() {
+        _uiState.update { it.copy(snackbarResource = 0) }
     }
 
     fun noteClick(note: Note) {
@@ -129,7 +135,13 @@ class TrashViewModel @Inject constructor(
             _uiState.value.selectedNotes.forEach { note ->
                 noteRepository.updateNoteLocation(note.id, NoteLocation.NOTES)
             }
+            val single = _uiState.value.selectedNotes.size == 1
             clearSelection()
+            val resource = if (single)
+                R.string.snackbar_selection_note_restored
+            else
+                R.string.snackbar_selection_notes_restored
+            _uiState.update { it.copy(snackbarResource = resource) }
         }
     }
 
@@ -138,8 +150,13 @@ class TrashViewModel @Inject constructor(
             _uiState.value.selectedNotes.forEach { note ->
                 noteRepository.deleteNote(note.id)
             }
-            // TODO: snackbar
+            val single = _uiState.value.selectedNotes.size == 1
             clearSelection()
+            val resource = if (single)
+                R.string.snackbar_selection_note_deleted
+            else
+                R.string.snackbar_selection_notes_deleted
+            _uiState.update { it.copy(snackbarResource = resource) }
         }
     }
 }

@@ -17,6 +17,7 @@
     <string name="trash_empty">The trash is empty</string>
     <string name="trash_restore_selected">Restore selected notes</string>
     <string name="trash_delete_selected">Delete selected notes</string>
+    <string name="trash_snackbar_trash_emptied">Trash emptied</string>
     <string name="dialog_trash_confirmation_empty_trash">Are you sure you want to empty the trash? Doing so will permanently delete all trashed notes.</string>
     <string name="dialog_trash_confirmation_delete_selected">Are you sure you want to delete the selected notes?</string>
     <string name="dialog_empty_trash_button_confirm">Confirm</string>
@@ -136,4 +137,16 @@
     <string name="dialog_search_by_labels_selected">Selected</string>
     <string name="dialog_search_by_labels_unselected">Not selected</string>
     <string name="multi_select_clear_selection">Clear selection</string>
+    <string name="snackbar_selection_note_archived">Selected note archived</string>
+    <string name="snackbar_selection_notes_archived">Selected notes archived</string>
+    <string name="snackbar_selection_note_unarchived">Selected note unarchived</string>
+    <string name="snackbar_selection_notes_unarchived">Notes unarchived</string>
+    <string name="snackbar_selection_note_trashed">Selected note trashed</string>
+    <string name="snackbar_selection_notes_trashed">Selected notes trashed</string>
+    <string name="snackbar_selection_note_removed_from_trash">Selected note removed from trash</string>
+    <string name='snackbar_selection_notes_removed_from_trash'>Selected notes removed from trash</string>
+    <string name="snackbar_selection_note_deleted">Selected note deleted</string>
+    <string name="snackbar_selection_notes_deleted">Selected notes deleted</string>
+    <string name="snackbar_selection_note_restored">Selected note restored</string>
+    <string name="snackbar_selection_notes_restored">Selected notes restored</string>
 </resources>
