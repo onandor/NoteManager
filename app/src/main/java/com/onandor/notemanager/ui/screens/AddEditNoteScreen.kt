@@ -7,9 +7,11 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,6 +52,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -115,8 +118,7 @@ fun AddEditNoteScreen(
                 onTrashNote = viewModel::trashNote,
                 onDeleteNote = viewModel::deleteNote,
                 onAddLabels = viewModel::showEditLabelsDialog,
-                scrollBehavior = scrollBehavior,
-                scrolled = scrollBehavior.state.overlappedFraction > 0.01f
+                scrollBehavior = scrollBehavior
             )
         }
     ) { innerPadding ->
@@ -124,6 +126,7 @@ fun AddEditNoteScreen(
             modifier = Modifier.padding(innerPadding),
             title = uiState.title,
             content = uiState.content,
+            modificationDate = uiState.modificationDate,
             onTitleChanged = viewModel::updateTitle,
             onContentChanged = viewModel::updateContent,
             onMoveCursor = viewModel::moveCursor,
@@ -170,6 +173,7 @@ private fun TitleAndContentEditor(
     modifier: Modifier,
     title: TextFieldValue,
     content: TextFieldValue,
+    modificationDate: String,
     onTitleChanged: (TextFieldValue) -> Unit,
     onContentChanged: (TextFieldValue) -> Unit,
     onMoveCursor: (TextRange) -> Unit,
@@ -183,15 +187,16 @@ private fun TitleAndContentEditor(
     var titleFocused by remember { mutableStateOf(false) }
     var contentFocused by remember { mutableStateOf(false) }
 
-    val scrollState = rememberScrollState()
-    var scrollToEnd by remember { mutableStateOf(false) }
-
+    var dateHeight by remember { mutableIntStateOf(0) }
     var titleHeight by remember { mutableIntStateOf(0) }
     var editorViewportHeight by remember { mutableIntStateOf(0) }
     val statusBarHeight = WindowInsets.statusBars.getTop(LocalDensity.current)
     val contentHeight by remember {
         derivedStateOf { editorViewportHeight - statusBarHeight }
     }
+
+    val scrollState = rememberScrollState()
+    var scrollToEnd by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
@@ -225,6 +230,21 @@ private fun TitleAndContentEditor(
             unfocusedIndicatorColor = Color.Transparent
         )
 
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    dateHeight = coordinates.size.height
+                },
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = modificationDate,
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                fontSize = 16.sp
+            )
+        }
         EditorTextField(
             modifier = Modifier
                 .fillMaxWidth()
@@ -282,8 +302,8 @@ private fun TitleAndContentEditor(
                 val bottomOffset = contentHeight - (4.8 * lineHeight).roundToInt()
                 val lowerLimit = scrollState.value - topOffset
                 val upperLimit = scrollState.value + bottomOffset
-                val cursorYTopWithTitleOffset = cursorYTop + titleHeight
-                val cursorYBottomWithTitleOffset = cursorYBottom + titleHeight
+                val cursorYTopWithTitleOffset = cursorYTop + titleHeight + dateHeight
+                val cursorYBottomWithTitleOffset = cursorYBottom + titleHeight + dateHeight
                 /*
                  * 1.3 and 4.8 are kinds of magic values, for some reason the calculation is always
                  * off by those amount of line heights, but since it works on 3 different DPIs I can't
@@ -455,8 +475,7 @@ private fun AddEditNoteTopAppBar(
     onTrashNote: () -> Unit,
     onDeleteNote: () -> Unit,
     onAddLabels: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior,
-    scrolled: Boolean
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
         val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
         NoteLocation.NOTES -> {

@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.lang.RuntimeException
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import java.util.UUID
 import javax.inject.Inject
 
@@ -35,7 +37,7 @@ data class AddEditNoteUiState(
     val title: TextFieldValue = TextFieldValue(""),
     val content: TextFieldValue = TextFieldValue(""),
     val location: NoteLocation = NoteLocation.NOTES,
-    val modificationDate: LocalDateTime = LocalDateTime.now(),
+    val modificationDate: String = "",
     val addedLabels: List<Label> = emptyList(),
     val labels: List<Label> = emptyList(),
     val snackbarMessageResource: Int? = null,
@@ -52,6 +54,7 @@ class AddEditNoteViewModel @Inject constructor(
     private val navManager: INavigationManager
 ) : ViewModel() {
 
+    private val dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.SHORT)
     private val _noteId: String = savedStateHandle[NavDestinationArgs.NOTE_ID_ARG] ?: ""
     private var noteId: UUID? = if (_noteId.isNotEmpty()) UUID.fromString(_noteId) else null
     private var modified: Boolean = false
@@ -112,7 +115,12 @@ class AddEditNoteViewModel @Inject constructor(
             loadNote(noteId!!)
         }
         else {
-            _uiState.update { it.copy(newNote = true) }
+            _uiState.update {
+                it.copy(
+                    newNote = true,
+                    modificationDate = dtf.format(LocalDateTime.now())
+                )
+            }
         }
     }
 
@@ -132,7 +140,7 @@ class AddEditNoteViewModel @Inject constructor(
                         title = TextFieldValue(note.title),
                         content = TextFieldValue(note.content),
                         location = note.location,
-                        modificationDate = note.modificationDate,
+                        modificationDate = dtf.format(note.modificationDate),
                         addedLabels = note.labels
                     )
                 }
@@ -170,6 +178,7 @@ class AddEditNoteViewModel @Inject constructor(
                 updateExistingNote()
             }
         }
+        _uiState.update { it.copy(modificationDate = dtf.format(LocalDateTime.now())) }
     }
 
     private fun createNewNote() {
