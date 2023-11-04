@@ -1,10 +1,7 @@
 package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -13,7 +10,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +18,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -38,17 +34,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +65,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -94,6 +90,7 @@ import com.onandor.notemanager.ui.components.LifecycleObserver
 import com.onandor.notemanager.utils.indexOfDifference
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -188,8 +185,13 @@ private fun TitleAndContentEditor(
 
     val scrollState = rememberScrollState()
     var scrollToEnd by remember { mutableStateOf(false) }
-    var spaceAboveContent by remember { mutableIntStateOf(0) }
+
+    var titleHeight by remember { mutableIntStateOf(0) }
     var editorViewportHeight by remember { mutableIntStateOf(0) }
+    val statusBarHeight = WindowInsets.statusBars.getTop(LocalDensity.current)
+    val contentHeight by remember {
+        derivedStateOf { editorViewportHeight - statusBarHeight }
+    }
 
     val coroutineScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
@@ -234,7 +236,7 @@ private fun TitleAndContentEditor(
                     event.key == Key.Enter || event.key == Key.NumPadEnter
                 }
                 .onGloballyPositioned { coordinates ->
-                    spaceAboveContent = coordinates.size.height
+                    titleHeight = coordinates.size.height
                 },
             value = title,
             onValueChange = onTitleChanged,
@@ -276,26 +278,28 @@ private fun TitleAndContentEditor(
             },
             readOnly = editDisabled,
             onCursorYCoordChanged = { cursorYTop, cursorYBottom, lineHeight ->
-                val lowerLimit = scrollState.value - (1.5 * lineHeight).toInt()
-                val upperLimit = scrollState.value + (editorViewportHeight - (4.7 * lineHeight).toInt())
-                val cursorYTopWithTitleOffset = cursorYTop + spaceAboveContent
-                val cursorYBottomWithTitleOffset = cursorYBottom + spaceAboveContent
+                val topOffset = (1.3 * lineHeight).roundToInt()
+                val bottomOffset = contentHeight - (4.8 * lineHeight).roundToInt()
+                val lowerLimit = scrollState.value - topOffset
+                val upperLimit = scrollState.value + bottomOffset
+                val cursorYTopWithTitleOffset = cursorYTop + titleHeight
+                val cursorYBottomWithTitleOffset = cursorYBottom + titleHeight
                 /*
-                 * 1.5 and 4.7 are kinds of magic values, for some reason the calculation is always
+                 * 1.3 and 4.8 are kinds of magic values, for some reason the calculation is always
                  * off by those amount of line heights, but since it works on 3 different DPIs I can't
                  * be bothered to check why. (Might have to do something with editorViewportHeight or
                  * spaceAboveContent not being calculated right.)
                 */
                 if (cursorYTopWithTitleOffset < lowerLimit) {
                     // the top of the cursor is out of the view on the top of the screen
-                    val scrollPosition = cursorYTopWithTitleOffset + (1.5 * lineHeight).toInt()
+                    val scrollPosition = cursorYTopWithTitleOffset + topOffset
                     coroutineScope.launch {
                         scrollState.animateScrollTo(scrollPosition)
                     }
                 }
                 else if (cursorYBottomWithTitleOffset > upperLimit) {
                     // the bottom of the cursor is out of the view on the bottom of the screen
-                    val scrollPosition = cursorYBottomWithTitleOffset - (editorViewportHeight - (4.7 * lineHeight).toInt())
+                    val scrollPosition = cursorYBottomWithTitleOffset - bottomOffset
                     coroutineScope.launch {
                         scrollState.animateScrollTo(scrollPosition)
                     }
