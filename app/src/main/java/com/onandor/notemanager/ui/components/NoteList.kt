@@ -114,7 +114,7 @@ fun NoteItem(
             }
             AnimatedVisibility(visible = collapsedView && note.title.isEmpty()) {
                 Text(
-                    text = note.content,
+                    text = note.content.trim(),
                     lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
