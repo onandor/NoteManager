@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,7 +32,9 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -48,6 +50,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
+import com.onandor.notemanager.ui.components.ColoredStatusBarTopAppBar
 import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
@@ -64,9 +67,14 @@ fun TrashScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = if (uiState.selectedNotes.isEmpty())
+        TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+    else
+        TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
     Scaffold (
-        modifier = Modifier.statusBarsPadding(),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AnimatedContent(
                 targetState = uiState.selectedNotes.isEmpty(),
@@ -85,12 +93,14 @@ fun TrashScreen(
                     TrashTopAppBar(
                         onNavigateBack = viewModel::navigateBack,
                         onEmptyTrash = viewModel::openConfirmationDialog,
-                        emptyTrashEnabled = uiState.notes.isNotEmpty()
+                        emptyTrashEnabled = uiState.notes.isNotEmpty(),
+                        scrollBehavior = scrollBehavior
                     )
                 } else {
                     MultiSelectTopAppBar(
                         onClearSelection = viewModel::clearSelection,
-                        selectedCount = uiState.selectedNotes.size
+                        selectedCount = uiState.selectedNotes.size,
+                        scrollBehavior = scrollBehavior
                     ) {
                         IconButton(onClick = viewModel::restoreSelectedNotes) {
                             Icon(
@@ -152,6 +162,12 @@ fun TrashScreen(
         BackHandler {
             viewModel.navigateBack()
         }
+
+        LaunchedEffect(uiState.selectedNotes.size) {
+            if (uiState.selectedNotes.isNotEmpty()) {
+                scrollBehavior.state.heightOffset = 0f
+            }
+        }
     }
 }
 
@@ -209,9 +225,10 @@ private fun ConfirmationDialog(
 private fun TrashTopAppBar(
     onNavigateBack: () -> Unit,
     onEmptyTrash: () -> Unit,
-    emptyTrashEnabled: Boolean
+    emptyTrashEnabled: Boolean,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
-    TopAppBar(
+    ColoredStatusBarTopAppBar(
         title = { Text(stringResource(R.string.trash)) },
         navigationIcon = {
             IconButton(onClick = onNavigateBack) {
@@ -231,6 +248,7 @@ private fun TrashTopAppBar(
                     contentDescription = stringResource(R.string.trash_empty_trash)
                 )
             }
-        }
+        },
+        scrollBehavior = scrollBehavior
     )
 }

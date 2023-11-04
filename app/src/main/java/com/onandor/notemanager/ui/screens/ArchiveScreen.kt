@@ -1,14 +1,12 @@
 package com.onandor.notemanager.ui.screens
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,7 +39,7 @@ import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.ArchiveViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArchiveScreen(
     onOpenDrawer: () -> Unit,
@@ -50,12 +48,14 @@ fun ArchiveScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val topAppBarState = rememberTopAppBarState()
+    val scrollBehavior = if (uiState.selectedNotes.isEmpty())
+        TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
+    else
+        TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
 
     Scaffold (
-        modifier = Modifier
-            .statusBarsPadding()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             AnimatedContent(
                 targetState = uiState.selectedNotes.isEmpty(),
@@ -84,7 +84,8 @@ fun ArchiveScreen(
                 } else {
                     MultiSelectTopAppBar(
                         onClearSelection = viewModel::clearSelection,
-                        selectedCount = uiState.selectedNotes.size
+                        selectedCount = uiState.selectedNotes.size,
+                        scrollBehavior = scrollBehavior
                     ) {
                         IconButton(onClick = { viewModel.moveSelectedNotes(NoteLocation.NOTES) }) {
                             Icon(
@@ -132,6 +133,12 @@ fun ArchiveScreen(
                     snackbarHostState.showSnackbar(resultText)
                 }
                 viewModel.addEditResultSnackbarShown()
+            }
+        }
+
+        LaunchedEffect(uiState.selectedNotes.size) {
+            if (uiState.selectedNotes.isNotEmpty()) {
+                scrollBehavior.state.heightOffset = 0f
             }
         }
     }

@@ -32,7 +32,7 @@ fun MainTopAppBar(
     onNoteSortingChanged: (NoteSorting) -> Unit,
     onSearchClicked: () -> Unit
 ) {
-    TopAppBar(
+    ColoredStatusBarTopAppBar(
         scrollBehavior = scrollBehavior,
         title = {
             Text(
@@ -70,9 +70,6 @@ fun MainTopAppBar(
                     )
                 }
             }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            scrolledContainerColor = MaterialTheme.colorScheme.surface
-        )
+        }
     )
 }

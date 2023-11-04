@@ -51,7 +51,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -59,6 +61,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -72,6 +75,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.components.SimpleConfirmationDialog
 import com.onandor.notemanager.data.Label
+import com.onandor.notemanager.ui.components.ColoredStatusBarTopAppBar
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.ui.theme.LocalTheme
 import com.onandor.notemanager.utils.LabelColor
@@ -93,17 +97,19 @@ fun EditLabelsScreen(
     val scope = rememberCoroutineScope()
     val labelDialogState = rememberModalBottomSheetState()
     val scrollState = rememberLazyListState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
-        modifier = Modifier.statusBarsPadding(),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            TopAppBar(
+            ColoredStatusBarTopAppBar(
                 title = { Text(stringResource(R.string.labels)) },
                 navigationIcon = {
                     IconButton(onClick = viewModel::navigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.edit_labels_go_back))
                     }
-                }
+                },
+                scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {

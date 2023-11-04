@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,12 +48,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -71,14 +76,17 @@ import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteItem
 import com.onandor.notemanager.viewmodels.SearchViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val scrollState = rememberLazyListState()
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
             .navigationBarsPadding()
             .imePadding(),
         topBar = {
@@ -105,7 +113,8 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                     SelectionTopBar(
                         selectedNotes = uiState.selectedNotes,
                         onClearSelection = viewModel::clearSelection,
-                        onMoveNotes = viewModel::moveSelectedNotes
+                        onMoveNotes = viewModel::moveSelectedNotes,
+                        scrollBehavior = scrollBehavior
                     )
                 }
             }
@@ -244,11 +253,13 @@ fun ResultList(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionTopBar(
     selectedNotes: List<Note>,
     onClearSelection: () -> Unit,
-    onMoveNotes: (NoteLocation) -> Unit
+    onMoveNotes: (NoteLocation) -> Unit,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
     val newLocation = if (selectedNotes.any { it.location == NoteLocation.NOTES })
         NoteLocation.ARCHIVE
@@ -257,7 +268,8 @@ fun SelectionTopBar(
 
     MultiSelectTopAppBar(
         onClearSelection = onClearSelection,
-        selectedCount = selectedNotes.size
+        selectedCount = selectedNotes.size,
+        scrollBehavior = scrollBehavior
     ) {
         IconButton(onClick = { onMoveNotes(newLocation) }) {
             if (newLocation == NoteLocation.ARCHIVE) {
@@ -281,6 +293,7 @@ fun SelectionTopBar(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchBar(
     text: String,
@@ -288,7 +301,7 @@ private fun SearchBar(
     onBackClicked: () -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = TopAppBarDefaults.topAppBarColors().scrolledContainerColor
     ) {
         val density = LocalDensity.current
         val statusBarHeight = WindowInsets.statusBars.getTop(density)

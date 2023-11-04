@@ -88,6 +88,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.NoteLocation
+import com.onandor.notemanager.ui.components.ColoredStatusBarTopAppBar
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.LifecycleObserver
 import com.onandor.notemanager.utils.indexOfDifference
@@ -511,32 +512,17 @@ private fun AddEditNoteTopAppBar(
         NoteLocation.ALL -> { { } }
     }
 
-    val color = if (scrolled)
-        TopAppBarDefaults.topAppBarColors().scrolledContainerColor
-    else
-        MaterialTheme.colorScheme.surface
-
-    val statusBarColor = animateColorAsState(
-        targetValue = color,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        label = ""
+    ColoredStatusBarTopAppBar(
+        title = { },
+        navigationIcon = {
+            IconButton(onClick = { onSaveNote(); onNavigateBack() }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.addeditnote_hint_go_back)
+                )
+            }
+        },
+        actions = actions,
+        scrollBehavior = scrollBehavior
     )
-
-    Surface(color = statusBarColor.value) {
-        Row(modifier = Modifier.statusBarsPadding()) {
-            TopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = { onSaveNote(); onNavigateBack() }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.addeditnote_hint_go_back)
-                        )
-                    }
-                },
-                actions = actions,
-                scrollBehavior = scrollBehavior
-            )
-        }
-    }
 }
