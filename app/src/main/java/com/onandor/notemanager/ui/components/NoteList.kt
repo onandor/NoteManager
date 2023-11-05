@@ -1,6 +1,8 @@
 package com.onandor.notemanager.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -19,8 +21,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -35,6 +44,7 @@ import com.onandor.notemanager.utils.LabelColors
 import com.onandor.notemanager.utils.NoteComparisonField
 import com.onandor.notemanager.utils.NoteSorting
 import com.onandor.notemanager.utils.Order
+import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -53,19 +63,58 @@ fun NoteList(
     modifier: Modifier,
     collapsedView: Boolean
 ) {
-    LazyColumn(modifier = modifier) {
-        itemsIndexed(
-            items = notes,
-            key = { _, note -> note.id }
-        ) { _, note ->
-            NoteItem(
-                modifier = Modifier.animateItemPlacement(),
-                note = note,
-                selected = selectedNotes.contains(note),
-                collapsedView = collapsedView,
-                onNoteClick = onNoteClick,
-                onNoteLongClick = onNoteLongClick
-            )
+    var _collapsedView by remember { mutableStateOf(collapsedView) }
+    var alpha by remember { mutableFloatStateOf(1f) }
+    val animatedAlpha by animateFloatAsState(
+        targetValue = alpha,
+        label = "",
+        animationSpec = tween(
+            durationMillis = 80,
+            easing = FastOutSlowInEasing
+        )
+    )
+
+    LaunchedEffect(collapsedView) {
+        if (collapsedView == _collapsedView)
+            return@LaunchedEffect
+
+        alpha = 0f
+        delay(100)
+        _collapsedView = collapsedView
+        alpha = 1f
+    }
+
+    if (_collapsedView) {
+        LazyColumn(modifier = modifier.alpha(animatedAlpha)) {
+            itemsIndexed(
+                items = notes,
+                key = { _, note -> note.id }
+            ) { _, note ->
+                NoteItem(
+                    modifier = Modifier.animateItemPlacement(),
+                    note = note,
+                    selected = selectedNotes.contains(note),
+                    collapsedView = true,
+                    onNoteClick = onNoteClick,
+                    onNoteLongClick = onNoteLongClick
+                )
+            }
+        }
+    } else {
+        LazyColumn(modifier = modifier.alpha(animatedAlpha)) {
+            itemsIndexed(
+                items = notes,
+                key = { _, note -> note.id }
+            ) { _, note ->
+                NoteItem(
+                    modifier = Modifier.animateItemPlacement(),
+                    note = note,
+                    selected = selectedNotes.contains(note),
+                    collapsedView = false,
+                    onNoteClick = onNoteClick,
+                    onNoteLongClick = onNoteLongClick
+                )
+            }
         }
     }
 }
@@ -118,7 +167,7 @@ fun NoteItem(
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }
-            AnimatedVisibility(visible = collapsedView && note.title.isEmpty()) {
+            if (collapsedView && note.title.isEmpty()) {
                 Text(
                     text = note.content.trim(),
                     lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
@@ -126,7 +175,7 @@ fun NoteItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            AnimatedVisibility(visible = !collapsedView) {
+            else if (!collapsedView) {
                 Column {
                     Text(
                         text = note.content,
