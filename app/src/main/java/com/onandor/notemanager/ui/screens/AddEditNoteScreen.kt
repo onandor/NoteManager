@@ -76,6 +76,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
@@ -241,8 +242,9 @@ private fun TitleAndContentEditor(
         ) {
             Text(
                 text = modificationDate,
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                fontSize = 16.sp
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 16.sp,
+                fontStyle = FontStyle.Italic
             )
         }
         EditorTextField(
@@ -457,7 +459,7 @@ private fun EditorTextField(
                     interactionSource = remember { MutableInteractionSource() },
                     colors = colors,
                     placeholder = placeholder,
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp)
+                    contentPadding = PaddingValues(start = 19.dp, end = 19.dp)
                 )
             }
         )

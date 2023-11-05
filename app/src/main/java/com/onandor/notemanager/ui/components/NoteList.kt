@@ -22,6 +22,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,6 +80,7 @@ fun NoteItem(
     onNoteClick: (Note) -> Unit,
     onNoteLongClick: (Note) -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     val borderSize = if (selected) 4.dp else 3.dp
     val borderColor = if (selected)
         MaterialTheme.colorScheme.secondary
@@ -96,7 +99,10 @@ fun NoteItem(
             .clip(RoundedCornerShape(20.dp))
             .combinedClickable(
                 onClick = { onNoteClick(note) },
-                onLongClick = { onNoteLongClick(note) }
+                onLongClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onNoteLongClick(note)
+                }
             ),
         shape = RoundedCornerShape(20.dp)
     ) {
