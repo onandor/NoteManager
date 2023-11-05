@@ -11,7 +11,6 @@ import com.onandor.notemanager.ui.theme.ThemeType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -20,7 +19,8 @@ import javax.inject.Inject
 data class SplashUiState(
     val isLoading: Boolean = true,
     val startDestination: String = NavDestinations.NOTES,
-    val themeType: ThemeType = ThemeType.SYSTEM
+    val themeType: ThemeType = ThemeType.SYSTEM,
+    val splashScreenVisible: Boolean = true
 )
 
 @HiltViewModel
@@ -63,7 +63,7 @@ class SplashViewModel @Inject constructor(
         }
     }
 
-    fun getThemeType() {
-        settings.observeInt(SettingsKeys.THEME_TYPE)
+    fun splashScreenRemoved() {
+        _uiState.update { it.copy(splashScreenVisible = false) }
     }
 }
