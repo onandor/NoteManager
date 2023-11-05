@@ -1,11 +1,15 @@
 package com.onandor.notemanager
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.view.View
+import android.view.animation.AnticipateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.ViewModelProvider
@@ -32,6 +36,19 @@ class NoteManagerActivity : ComponentActivity() {
         splashScreen.apply {
             setKeepOnScreenCondition {
                 splashViewModel.uiState.value.isLoading
+            }
+            setOnExitAnimationListener { splashScreenViewProvider ->
+                val slideUp = ObjectAnimator.ofFloat(
+                    splashScreenViewProvider.view,
+                    View.ALPHA,
+                    1f,
+                    0f
+                )
+                slideUp.interpolator = AnticipateInterpolator()
+                slideUp.duration = 300L
+
+                slideUp.doOnEnd { splashScreenViewProvider.remove() }
+                slideUp.start()
             }
         }
 
