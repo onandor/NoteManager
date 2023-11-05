@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class ArchiveUiState(
+    val loading: Boolean = true,
     val notes: List<Note> = emptyList(),
     val selectedNotes: List<Note> = emptyList(),
     val noteListState: NoteListState = NoteListState(),
@@ -83,11 +84,15 @@ class ArchiveViewModel @Inject constructor(
             }
             is AsyncResult.Error -> {
                 // TODO
-                uiState.copy(addEditSnackbarResource = addEditResult.resource)
+                uiState.copy(
+                    loading = false,
+                    addEditSnackbarResource = addEditResult.resource
+                )
             }
             is AsyncResult.Success -> {
                 val sortedNotes = notesAsync.data.sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
                 uiState.copy(
+                    loading = false,
                     notes = sortedNotes,
                     addEditSnackbarResource = addEditResult.resource,
                     noteListState = noteListState

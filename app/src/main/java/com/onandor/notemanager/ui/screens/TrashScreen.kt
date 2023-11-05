@@ -2,6 +2,7 @@ package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -124,13 +125,21 @@ fun TrashScreen(
             }
         }
     ) { innerPadding ->
-        if (uiState.notes.isEmpty()) {
+        AnimatedVisibility(
+            visible = uiState.notes.isEmpty() && !uiState.loading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             EmptyContent(
                 painter = painterResource(id = R.drawable.ic_trash_empty),
                 text = stringResource(id = R.string.trash_empty)
             )
         }
-        else {
+        AnimatedVisibility(
+            visible = uiState.notes.isNotEmpty() && !uiState.loading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             NoteList(
                 notes = uiState.notes,
                 selectedNotes = uiState.selectedNotes,

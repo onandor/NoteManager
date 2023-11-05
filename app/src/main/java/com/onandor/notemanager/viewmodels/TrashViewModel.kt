@@ -26,13 +26,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class TrashUiState(
+    val loading: Boolean = true,
     val notes: List<Note> = emptyList(),
     val selectedNotes: List<Note> = emptyList(),
     val confirmationDialogOpen: Boolean = false,
     val addEditSnackbarResource: Int = 0,
     val snackbarResource: Int = 0
 )
-
 @HiltViewModel
 class TrashViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
@@ -56,10 +56,14 @@ class TrashViewModel @Inject constructor(
             }
             is AsyncResult.Error -> {
                 // TODO
-                uiState.copy(addEditSnackbarResource = addEditResult.resource)
+                uiState.copy(
+                    loading = false,
+                    addEditSnackbarResource = addEditResult.resource
+                )
             }
             is AsyncResult.Success -> {
                 uiState.copy(
+                    loading = false,
                     notes = notesAsync.data,
                     addEditSnackbarResource = addEditResult.resource
                 )

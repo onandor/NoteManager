@@ -1,6 +1,7 @@
 package com.onandor.notemanager.ui.screens
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -108,13 +109,21 @@ fun ArchiveScreen(
             }
         }
     ) { innerPadding ->
-        if (uiState.notes.isEmpty()) {
+        AnimatedVisibility(
+            visible = uiState.notes.isEmpty() && !uiState.loading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             EmptyContent(
                 painter = painterResource(id = R.drawable.ic_archive_outlined),
                 text = stringResource(id = R.string.archive_empty)
             )
         }
-        else {
+        AnimatedVisibility(
+            visible = uiState.notes.isNotEmpty() && !uiState.loading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             NoteList(
                 notes = uiState.notes,
                 selectedNotes = uiState.selectedNotes,

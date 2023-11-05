@@ -124,13 +124,21 @@ fun NotesScreen(
             }
         }
     ) { innerPadding ->
-        if (uiState.notes.isEmpty()) {
+        AnimatedVisibility(
+            visible = uiState.notes.isEmpty() && !uiState.loading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             EmptyContent(
                 painter = painterResource(id = R.drawable.ic_drawer_notes_filled),
                 text = stringResource(id = R.string.notes_empty)
             )
         }
-        else {
+        AnimatedVisibility(
+            visible = uiState.notes.isNotEmpty() && !uiState.loading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
             NoteList(
                 notes = uiState.notes,
                 selectedNotes = uiState.selectedNotes,
