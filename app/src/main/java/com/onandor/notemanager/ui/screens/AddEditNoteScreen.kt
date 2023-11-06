@@ -91,6 +91,7 @@ import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.ui.components.ColoredStatusBarTopAppBar
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.LifecycleObserver
+import com.onandor.notemanager.ui.components.PinButton
 import com.onandor.notemanager.utils.indexOfDifference
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 import kotlinx.coroutines.launch
@@ -112,6 +113,7 @@ fun AddEditNoteScreen(
         topBar = {
             AddEditNoteTopAppBar(
                 noteLocation = uiState.location,
+                notePinned = uiState.pinned,
                 onSaveNote = viewModel::finishEditing,
                 onNavigateBack = { focusManager.clearFocus(); viewModel.navigateBack() },
                 onArchiveNote = viewModel::archiveNote,
@@ -119,6 +121,7 @@ fun AddEditNoteScreen(
                 onTrashNote = viewModel::trashNote,
                 onDeleteNote = viewModel::deleteNote,
                 onAddLabels = viewModel::showEditLabelsDialog,
+                onChangePinned = viewModel::changePinned,
                 scrollBehavior = scrollBehavior
             )
         }
@@ -470,6 +473,7 @@ private fun EditorTextField(
 @Composable
 private fun AddEditNoteTopAppBar(
     noteLocation: NoteLocation,
+    notePinned: Boolean,
     onSaveNote: () -> Unit,
     onNavigateBack: () -> Unit,
     onArchiveNote: () -> Unit,
@@ -477,11 +481,14 @@ private fun AddEditNoteTopAppBar(
     onTrashNote: () -> Unit,
     onDeleteNote: () -> Unit,
     onAddLabels: () -> Unit,
+    onChangePinned: (Boolean) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
-        val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
+
+    val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
         NoteLocation.NOTES -> {
             {
+                PinButton(pinned = notePinned, onChangePinned = onChangePinned)
                 IconButton(onClick = { onAddLabels() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_note_add_label_filled),
@@ -504,6 +511,7 @@ private fun AddEditNoteTopAppBar(
         }
         NoteLocation.ARCHIVE -> {
             {
+                PinButton(pinned = notePinned, onChangePinned = onChangePinned)
                 IconButton(onClick = { onAddLabels() }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_note_add_label_filled),

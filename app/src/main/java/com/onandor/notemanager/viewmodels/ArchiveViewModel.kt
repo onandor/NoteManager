@@ -11,9 +11,7 @@ import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavActions
 import com.onandor.notemanager.ui.components.NoteListState
-import com.onandor.notemanager.utils.AddEditResult
 import com.onandor.notemanager.utils.AddEditResultState
-import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.utils.AsyncResult
 import com.onandor.notemanager.utils.NoteComparison
 import com.onandor.notemanager.utils.NoteComparisonField
@@ -90,7 +88,9 @@ class ArchiveViewModel @Inject constructor(
                 )
             }
             is AsyncResult.Success -> {
-                val sortedNotes = notesAsync.data.sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
+                val sortedNotes = notesAsync.data
+                    .sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
+                    .sortedWith(compareByDescending(Note::pinned))
                 uiState.copy(
                     loading = false,
                     notes = sortedNotes,
@@ -172,6 +172,23 @@ class ArchiveViewModel @Inject constructor(
                 }
                 else -> 0
             }
+            _uiState.update {
+                it.copy(selectionSnackbarResource = resource)
+            }
+        }
+    }
+
+    fun changeSelectedNotesPinning(pinned: Boolean) {
+        viewModelScope.launch {
+            _uiState.value.selectedNotes.forEach { note ->
+                noteRepository.updateNotePinned(note.id, pinned)
+            }
+            val single = _uiState.value.selectedNotes.size == 1
+            clearSelection()
+            val resource = if (single)
+                R.string.snackbar_selection_note_pinned
+            else
+                R.string.snackbar_selection_notes_pinned
             _uiState.update {
                 it.copy(selectionSnackbarResource = resource)
             }

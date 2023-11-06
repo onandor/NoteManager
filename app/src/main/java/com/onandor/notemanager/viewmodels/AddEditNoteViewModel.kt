@@ -38,6 +38,7 @@ data class AddEditNoteUiState(
     val content: TextFieldValue = TextFieldValue(""),
     val location: NoteLocation = NoteLocation.NOTES,
     val modificationDate: String = "",
+    val pinned: Boolean = false,
     val addedLabels: List<Label> = emptyList(),
     val labels: List<Label> = emptyList(),
     val snackbarMessageResource: Int? = null,
@@ -141,6 +142,7 @@ class AddEditNoteViewModel @Inject constructor(
                         content = TextFieldValue(note.content),
                         location = note.location,
                         modificationDate = dtf.format(note.modificationDate),
+                        pinned = note.pinned,
                         addedLabels = note.labels
                     )
                 }
@@ -187,7 +189,8 @@ class AddEditNoteViewModel @Inject constructor(
                 title = _uiState.value.title.text,
                 content = _uiState.value.content.text,
                 labels = _uiState.value.addedLabels,
-                location = NoteLocation.NOTES
+                location = NoteLocation.NOTES,
+                pinned = _uiState.value.pinned
             )
         }
     }
@@ -204,6 +207,7 @@ class AddEditNoteViewModel @Inject constructor(
                 content = _uiState.value.content.text
             )
             noteRepository.updateNoteLabels(noteId!!, _uiState.value.addedLabels)
+            noteRepository.updateNotePinned(noteId!!, _uiState.value.pinned)
         }
     }
 
@@ -213,7 +217,8 @@ class AddEditNoteViewModel @Inject constructor(
                 title = _uiState.value.title.text,
                 content = _uiState.value.content.text,
                 labels = listOf(),
-                location = NoteLocation.NOTES
+                location = NoteLocation.NOTES,
+                pinned = _uiState.value.pinned
             )
             noteRepository.updateNoteLocation(
                 noteId = noteId,
@@ -340,5 +345,11 @@ class AddEditNoteViewModel @Inject constructor(
          */
         if (!savedByUser)
             saveNote()
+    }
+
+    fun changePinned(pinned: Boolean) {
+        modified = true
+        _uiState.update { it.copy(pinned = pinned) }
+        saveTimer.reset()
     }
 }

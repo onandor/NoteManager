@@ -78,6 +78,7 @@ import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteItem
+import com.onandor.notemanager.ui.components.PinButton
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.viewmodels.SearchViewModel
 import kotlinx.coroutines.launch
@@ -122,6 +123,7 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                         selectedNotes = uiState.selectedNotes,
                         onClearSelection = viewModel::clearSelection,
                         onMoveNotes = viewModel::moveSelectedNotes,
+                        onChangePinned = viewModel::changeSelectedNotesPinning,
                         scrollBehavior = scrollBehavior
                     )
                 }
@@ -280,6 +282,7 @@ fun SelectionTopBar(
     selectedNotes: List<Note>,
     onClearSelection: () -> Unit,
     onMoveNotes: (NoteLocation) -> Unit,
+    onChangePinned: (Boolean) -> Unit,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     val newLocation = if (selectedNotes.any { it.location == NoteLocation.NOTES })
@@ -292,6 +295,10 @@ fun SelectionTopBar(
         selectedCount = selectedNotes.size,
         scrollBehavior = scrollBehavior
     ) {
+        PinButton(
+            pinned = !selectedNotes.any { note -> !note.pinned },
+            onChangePinned = onChangePinned
+        )
         IconButton(onClick = { onMoveNotes(newLocation) }) {
             if (newLocation == NoteLocation.ARCHIVE) {
                 Icon(

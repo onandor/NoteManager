@@ -9,6 +9,7 @@ data class Note(
     val content: String,
     val labels: List<Label>,
     val location: NoteLocation,
+    val pinned: Boolean,
     val creationDate: LocalDateTime,
     val modificationDate: LocalDateTime
 )

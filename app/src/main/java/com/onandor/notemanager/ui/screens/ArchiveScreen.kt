@@ -35,6 +35,7 @@ import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.MainTopAppBar
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
+import com.onandor.notemanager.ui.components.PinButton
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.viewmodels.ArchiveViewModel
 import kotlinx.coroutines.launch
@@ -87,6 +88,10 @@ fun ArchiveScreen(
                         selectedCount = uiState.selectedNotes.size,
                         scrollBehavior = scrollBehavior
                     ) {
+                        PinButton(
+                            pinned = !uiState.selectedNotes.any { note -> !note.pinned },
+                            onChangePinned = viewModel::changeSelectedNotesPinning
+                        )
                         IconButton(onClick = { viewModel.moveSelectedNotes(NoteLocation.NOTES) }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_note_unarchive_filled),

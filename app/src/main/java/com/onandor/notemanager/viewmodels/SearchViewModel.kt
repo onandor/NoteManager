@@ -254,6 +254,29 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    fun changeSelectedNotesPinning(pinned: Boolean) {
+        viewModelScope.launch {
+            _uiState.value.selectedNotes.forEach { note ->
+                noteRepository.updateNotePinned(note.id, pinned)
+            }
+            val single = _uiState.value.selectedNotes.size == 1
+            clearSelection()
+            val resource = when (pinned) {
+                true -> {
+                    if (single) R.string.snackbar_selection_note_pinned
+                    else R.string.snackbar_selection_notes_pinned
+                }
+                false -> {
+                    if (single) R.string.snackbar_selection_note_unpinned
+                    else R.string.snackbar_selection_notes_unpinned
+                }
+            }
+            _uiState.update {
+                it.copy(snackbarResource = resource)
+            }
+        }
+    }
+
     fun snackbarShown() {
         _uiState.update { it.copy(snackbarResource = 0) }
     }

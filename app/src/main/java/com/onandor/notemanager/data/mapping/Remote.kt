@@ -36,6 +36,7 @@ fun Note.toRemote(userId: Int) = RemoteNote(
     content = content,
     labels = labels.toRemote(userId),
     location = location.value,
+    pinned = pinned,
     creationDate = creationDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
     modificationDate = modificationDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 )
@@ -46,6 +47,7 @@ fun RemoteNote.toExternal() = Note(
     content = content,
     labels = labels.toExternal(),
     location = NoteLocation.fromInt(location),
+    pinned = pinned,
     creationDate = Instant
         .ofEpochMilli(creationDate)
         .atZone(ZoneId.systemDefault())

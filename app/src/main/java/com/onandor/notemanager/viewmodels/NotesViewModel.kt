@@ -90,7 +90,9 @@ class NotesViewModel @Inject constructor(
                 )
             }
             is AsyncResult.Success -> {
-                val sortedNotes = notesAsync.data.sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
+                val sortedNotes = notesAsync.data
+                    .sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
+                    .sortedWith(compareByDescending(Note::pinned))
                 uiState.copy(
                     loading = false,
                     notes = sortedNotes,
@@ -175,6 +177,29 @@ class NotesViewModel @Inject constructor(
                     else R.string.snackbar_selection_notes_trashed
                 }
                 else -> 0
+            }
+            _uiState.update {
+                it.copy(selectionSnackbarResource = resource)
+            }
+        }
+    }
+
+    fun changeSelectedNotesPinning(pinned: Boolean) {
+        viewModelScope.launch {
+            _uiState.value.selectedNotes.forEach { note ->
+                noteRepository.updateNotePinned(note.id, pinned)
+            }
+            val single = _uiState.value.selectedNotes.size == 1
+            clearSelection()
+            val resource = when (pinned) {
+                true -> {
+                    if (single) R.string.snackbar_selection_note_pinned
+                    else R.string.snackbar_selection_notes_pinned
+                }
+                false -> {
+                    if (single) R.string.snackbar_selection_note_unpinned
+                    else R.string.snackbar_selection_notes_unpinned
+                }
             }
             _uiState.update {
                 it.copy(selectionSnackbarResource = resource)

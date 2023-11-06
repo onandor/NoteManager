@@ -7,9 +7,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,10 +36,12 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.onandor.notemanager.R
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
@@ -119,6 +124,26 @@ fun NoteList(
     }
 }
 
+@Composable
+private fun PinIcon() {
+    Surface(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+                shape = RoundedCornerShape(8.dp)
+            ),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+    ) {
+        Icon(
+            modifier = Modifier.padding(4.dp),
+            painter = painterResource(id = R.drawable.ic_note_pinned),
+            contentDescription = ""
+        )
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun NoteItem(
@@ -155,50 +180,58 @@ fun NoteItem(
             ),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 20.dp)
-        ) {
-            if (note.title.isNotEmpty()) {
-                Text(
-                    text = note.title,
-                    fontSize = 21.sp
-                )
-                if (!collapsedView) {
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-            }
-            if (collapsedView && note.title.isEmpty()) {
-                Text(
-                    text = note.content.trim(),
-                    lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            else if (!collapsedView) {
-                Column {
+        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 15.dp, bottom = 15.dp)) {
+            Column(modifier = Modifier.padding(top = 6.dp, bottom = 6.dp)) {
+                if (note.title.isNotEmpty()) {
                     Text(
-                        text = note.content,
-                        lineHeight = 16.sp,
-                        maxLines = 10,
+                        text = note.title,
+                        fontSize = 21.sp
+                    )
+                    if (!collapsedView) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                }
+                if (collapsedView && note.title.isEmpty()) {
+                    Text(
+                        text = note.content.trim(),
+                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    if (note.labels.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
-                            verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top)
-                        ) {
-                            note.labels.forEach { label ->
-                                LabelComponent(
-                                    label = label,
-                                    fontSize = 14.sp,
-                                    maxLength = 10,
-                                    padding = 5.dp
-                                )
+                }
+                else if (!collapsedView) {
+                    Column {
+                        Text(
+                            text = note.content,
+                            lineHeight = 16.sp,
+                            maxLines = 10,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (note.labels.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
+                                verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top)
+                            ) {
+                                note.labels.forEach { label ->
+                                    LabelComponent(
+                                        label = label,
+                                        fontSize = 14.sp,
+                                        maxLength = 10,
+                                        padding = 5.dp
+                                    )
+                                }
                             }
                         }
                     }
+                }
+            }
+            if (note.pinned) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    PinIcon()
                 }
             }
         }
@@ -219,6 +252,7 @@ fun PreviewNoteItem() {
         content = "This is a test note",
         labels = listOf(label),
         location = NoteLocation.NOTES,
+        pinned = true,
         creationDate = LocalDateTime.now(),
         modificationDate = LocalDateTime.now()
     )
@@ -231,4 +265,10 @@ fun PreviewNoteItem() {
         onNoteClick = { },
         onNoteLongClick = { }
     )
+}
+
+@Preview
+@Composable
+fun PreviewPinIcon() {
+    PinIcon()
 }

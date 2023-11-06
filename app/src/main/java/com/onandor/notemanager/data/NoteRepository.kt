@@ -85,7 +85,8 @@ class NoteRepository @Inject constructor(
         title: String,
         content: String,
         labels: List<Label>,
-        location: NoteLocation
+        location: NoteLocation,
+        pinned: Boolean
     ): UUID {
         val noteId = withContext(dispatcher) {
             UUID.randomUUID()
@@ -96,6 +97,7 @@ class NoteRepository @Inject constructor(
             content = content,
             labels = labels,
             location = location,
+            pinned = pinned,
             creationDate = LocalDateTime.now(),
             modificationDate = LocalDateTime.now()
         )
@@ -116,13 +118,15 @@ class NoteRepository @Inject constructor(
         title: String,
         content: String,
         labels: List<Label>,
-        location: NoteLocation
+        location: NoteLocation,
+        pinned: Boolean
     ) {
         val note = getNote(noteId)?.copy(
             title = title,
             content = content,
             labels = labels,
             location = location,
+            pinned = pinned,
             modificationDate = LocalDateTime.now()
         ) ?: throw Exception("Note (id $noteId) not found in local database")
 
@@ -160,6 +164,14 @@ class NoteRepository @Inject constructor(
 
     override suspend fun updateNoteLocation(noteId: UUID, location: NoteLocation) {
         val note = getNote(noteId)?.copy(location = location)
+            ?: throw Exception("Note (id $noteId) not found in local database")
+
+        noteDao.upsert(note.toLocal())
+        updateRemoteNote(note)
+    }
+
+    override suspend fun updateNotePinned(noteId: UUID, pinned: Boolean) {
+        val note = getNote(noteId)?.copy(pinned = pinned)
             ?: throw Exception("Note (id $noteId) not found in local database")
 
         noteDao.upsert(note.toLocal())

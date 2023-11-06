@@ -35,6 +35,8 @@
     <string name="addeditnote_hint_title">Title</string>
     <string name="addeditnote_hint_content">Content</string>
     <string name="addeditnote_hint_go_back">Go back</string>
+    <string name="addeditnote_hint_pin_note">Pin note</string>
+    <string name="addeditnote_hint_unpin_note">Unpin note</string>
     <string name="dialog_edit_note_labels_added">Added</string>
     <string name="dialog_edit_note_labels_available">Available</string>
     <string name="dialog_label_selection_empty">Empty</string>
@@ -149,4 +151,8 @@
     <string name="snackbar_selection_notes_deleted">Selected notes deleted</string>
     <string name="snackbar_selection_note_restored">Selected note restored</string>
     <string name="snackbar_selection_notes_restored">Selected notes restored</string>
+    <string name="snackbar_selection_note_pinned">Selected note pinned</string>
+    <string name="snackbar_selection_notes_pinned">Selected notes pinned</string>
+    <string name="snackbar_selection_note_unpinned">Selected note unpinned</string>
+    <string name="snackbar_selection_notes_unpinned">Selected notes unpinned</string>
 </resources>
