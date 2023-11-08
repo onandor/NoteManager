@@ -59,13 +59,13 @@ fun MainTopAppBar(
             IconButton(onClick = onToggleNoteListCollapsedView) {
                 if (noteListCollapsedView) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_note_list_expanded_filled),
+                        painter = painterResource(id = R.drawable.ic_note_list_expanded_outlined),
                         contentDescription = stringResource(R.string.topbar_change_view)
                     )
                 }
                 else {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_note_list_collapsed_filled),
+                        painter = painterResource(id = R.drawable.ic_note_list_collapsed_outlined),
                         contentDescription = stringResource(R.string.topbar_change_view)
                     )
                 }
