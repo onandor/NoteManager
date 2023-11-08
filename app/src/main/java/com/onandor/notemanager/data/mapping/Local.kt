@@ -31,6 +31,7 @@ fun Note.toLocal() = LocalNote(
     content = content,
     location = location,
     pinned = pinned,
+    pinHash = pinHash,
     creationDate = creationDate,
     modificationDate = modificationDate
 )
@@ -53,6 +54,7 @@ fun LocalNote.toExternal() = Note(
     labels = emptyList(),
     location = location,
     pinned = pinned,
+    pinHash = pinHash,
     creationDate = creationDate,
     modificationDate = modificationDate
 )

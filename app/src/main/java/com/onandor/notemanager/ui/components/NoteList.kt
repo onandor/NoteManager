@@ -7,7 +7,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -16,9 +15,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -125,22 +128,33 @@ fun NoteList(
 }
 
 @Composable
-private fun PinIcon() {
-    Surface(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
-                shape = RoundedCornerShape(8.dp)
-            ),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-    ) {
-        Icon(
-            modifier = Modifier.padding(4.dp),
-            painter = painterResource(id = R.drawable.ic_note_pinned),
-            contentDescription = ""
-        )
+private fun StatusIcons(
+    bottomPaddingVisible: Boolean,
+    pinned: Boolean,
+    locked: Boolean
+) {
+    val bottomPadding = if ((pinned || locked) && bottomPaddingVisible) 10.dp else 0.dp
+    Row(modifier = Modifier.padding(bottom = bottomPadding)) {
+        if (pinned) {
+            Icon(
+                modifier = Modifier.size(18.dp),
+                painter = painterResource(id = R.drawable.ic_note_pinned),
+                contentDescription = ""
+            )
+        }
+        if (pinned && locked) {
+            Spacer(modifier = Modifier.width(5.dp))
+        }
+        if (locked) {
+            Icon(
+                modifier = Modifier.size(18.dp),
+                imageVector = Icons.Filled.Lock,
+                contentDescription = ""
+            )
+        }
+        if (pinned || locked) {
+            Spacer(modifier = Modifier.width(5.dp))
+        }
     }
 }
 
@@ -180,18 +194,47 @@ fun NoteItem(
             ),
         shape = RoundedCornerShape(20.dp)
     ) {
-        Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 15.dp, bottom = 15.dp)) {
-            Column(modifier = Modifier.padding(top = 6.dp, bottom = 6.dp)) {
-                if (note.title.isNotEmpty()) {
+        Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 20.dp)) {
+            if (!collapsedView) {
+                StatusIcons(
+                    bottomPaddingVisible = true,
+                    pinned = note.pinned,
+                    locked = note.pinHash.isNotEmpty()
+                )
+            }
+            if (note.title.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (collapsedView) {
+                        StatusIcons(
+                            bottomPaddingVisible = false,
+                            pinned = note.pinned,
+                            locked = note.pinHash.isNotEmpty()
+                        )
+                    }
                     Text(
                         text = note.title,
-                        fontSize = 21.sp
+                        fontSize = 21.sp,
+                        maxLines = if (collapsedView) 1 else 3,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    if (!collapsedView) {
-                        Spacer(modifier = Modifier.height(10.dp))
-                    }
                 }
-                if (collapsedView && note.title.isEmpty()) {
+                if (!collapsedView) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+            }
+            if (collapsedView && note.title.isEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    StatusIcons(
+                        bottomPaddingVisible = false,
+                        pinned = note.pinned,
+                        locked = note.pinHash.isNotEmpty()
+                    )
                     Text(
                         text = note.content.trim(),
                         lineHeight = MaterialTheme.typography.bodySmall.lineHeight,
@@ -199,39 +242,31 @@ fun NoteItem(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                else if (!collapsedView) {
-                    Column {
-                        Text(
-                            text = note.content,
-                            lineHeight = 16.sp,
-                            maxLines = 10,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        if (note.labels.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(10.dp))
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
-                                verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top)
-                            ) {
-                                note.labels.forEach { label ->
-                                    LabelComponent(
-                                        label = label,
-                                        fontSize = 14.sp,
-                                        maxLength = 10,
-                                        padding = 5.dp
-                                    )
-                                }
+            }
+            else if (!collapsedView) {
+                Column {
+                    Text(
+                        text = note.content,
+                        lineHeight = 16.sp,
+                        maxLines = 10,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (note.labels.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.Start),
+                            verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top)
+                        ) {
+                            note.labels.forEach { label ->
+                                LabelComponent(
+                                    label = label,
+                                    fontSize = 14.sp,
+                                    maxLength = 10,
+                                    padding = 5.dp
+                                )
                             }
                         }
                     }
-                }
-            }
-            if (note.pinned) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    PinIcon()
                 }
             }
         }
@@ -253,6 +288,7 @@ fun PreviewNoteItem() {
         labels = listOf(label),
         location = NoteLocation.NOTES,
         pinned = true,
+        pinHash = "asd",
         creationDate = LocalDateTime.now(),
         modificationDate = LocalDateTime.now()
     )
@@ -265,10 +301,4 @@ fun PreviewNoteItem() {
         onNoteClick = { },
         onNoteLongClick = { }
     )
-}
-
-@Preview
-@Composable
-fun PreviewPinIcon() {
-    PinIcon()
 }

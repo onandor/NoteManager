@@ -31,6 +31,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -92,6 +96,7 @@ import com.onandor.notemanager.ui.components.ColoredStatusBarTopAppBar
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.LifecycleObserver
 import com.onandor.notemanager.ui.components.PinButton
+import com.onandor.notemanager.ui.components.PinEntryDialog
 import com.onandor.notemanager.utils.indexOfDifference
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 import kotlinx.coroutines.launch
@@ -122,6 +127,9 @@ fun AddEditNoteScreen(
                 onDeleteNote = viewModel::deleteNote,
                 onAddLabels = viewModel::showEditLabelsDialog,
                 onChangePinned = viewModel::changePinned,
+                onSetPin = viewModel::openChangePinDialog,
+                onRemovePin = viewModel::removePin,
+                locked = uiState.pinHash.isNotEmpty(),
                 scrollBehavior = scrollBehavior
             )
         }
@@ -161,6 +169,14 @@ fun AddEditNoteScreen(
             selectedText = stringResource(id = R.string.dialog_edit_note_labels_added),
             unSelectedText = stringResource(id = R.string.dialog_edit_note_labels_available),
             onChangeLabelSelection = viewModel::addRemoveLabel
+        )
+    }
+
+    if (uiState.changePinDialogOpen) {
+        PinEntryDialog(
+            onConfirmPin = viewModel::setPin,
+            onDismissRequest = viewModel::closeChangePinDialog,
+            description = stringResource(id = R.string.dialog_pin_entry_set_pin_desc)
         )
     }
 
@@ -469,6 +485,45 @@ private fun EditorTextField(
     }
 }
 
+@Composable
+fun MoreOptionsMenu(
+    onSetPin: () -> Unit,
+    onRemovePin: () -> Unit,
+    onTrashNote: () -> Unit,
+    locked: Boolean
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box(contentAlignment = Alignment.Center) {
+        IconButton(onClick = { expanded = true }) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(id = R.string.more_options)
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (locked) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(id = R.string.addeditnote_remove_pin)) },
+                    onClick = { onRemovePin(); expanded = false }
+                )
+            } else {
+                DropdownMenuItem(
+                    text = { Text(stringResource(id = R.string.addeditnote_set_pin)) },
+                    onClick = { onSetPin(); expanded = false }
+                )
+            }
+            DropdownMenuItem(
+                text = { Text(stringResource(id = R.string.addeditnote_trash_note)) },
+                onClick = { onTrashNote(); expanded = false }
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddEditNoteTopAppBar(
@@ -482,12 +537,23 @@ private fun AddEditNoteTopAppBar(
     onDeleteNote: () -> Unit,
     onAddLabels: () -> Unit,
     onChangePinned: (Boolean) -> Unit,
+    onSetPin: () -> Unit,
+    onRemovePin: () -> Unit,
+    locked: Boolean,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
 
     val actions: @Composable RowScope.() -> Unit = when(noteLocation) {
         NoteLocation.NOTES -> {
             {
+                if (locked) {
+                    Icon(
+                        modifier = Modifier.padding(end = 10.dp),
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = stringResource(id = R.string.addeditnote_note_locked),
+                        tint = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
                 PinButton(pinned = notePinned, onChangePinned = onChangePinned)
                 IconButton(onClick = { onAddLabels() }) {
                     Icon(
@@ -501,16 +567,24 @@ private fun AddEditNoteTopAppBar(
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
                     )
                 }
-                IconButton(onClick = { onTrashNote(); onNavigateBack() }) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(id = R.string.addeditnote_delete_note)
-                    )
-                }
+                MoreOptionsMenu(
+                    onSetPin = onSetPin,
+                    onRemovePin = onRemovePin,
+                    onTrashNote = { onTrashNote(); onNavigateBack() },
+                    locked = locked
+                )
             }
         }
         NoteLocation.ARCHIVE -> {
             {
+                if (locked) {
+                    Icon(
+                        modifier = Modifier.padding(end = 10.dp),
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = stringResource(id = R.string.addeditnote_note_locked),
+                        tint = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                }
                 PinButton(pinned = notePinned, onChangePinned = onChangePinned)
                 IconButton(onClick = { onAddLabels() }) {
                     Icon(
@@ -527,9 +601,15 @@ private fun AddEditNoteTopAppBar(
                 IconButton(onClick = { onTrashNote(); onNavigateBack() }) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(id = R.string.addeditnote_delete_note)
+                        contentDescription = stringResource(id = R.string.addeditnote_trash_note)
                     )
                 }
+                MoreOptionsMenu(
+                    onSetPin = onSetPin,
+                    onRemovePin = onRemovePin,
+                    onTrashNote = { onTrashNote(); onNavigateBack() },
+                    locked = locked
+                )
             }
         }
         NoteLocation.TRASH -> {
@@ -537,7 +617,7 @@ private fun AddEditNoteTopAppBar(
                 IconButton(onClick = { onDeleteNote(); onNavigateBack() }) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(id = R.string.addeditnote_delete_note)
+                        contentDescription = stringResource(id = R.string.addeditnote_trash_note)
                     )
                 }
             }

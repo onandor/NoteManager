@@ -107,6 +107,9 @@ dependencies {
     // Result
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.18")
 
+    // BCrypt
+    implementation("at.favre.lib:bcrypt:0.10.2")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -2,6 +2,7 @@ package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
@@ -46,7 +47,8 @@ data class SearchUiState(
     val labels: List<Label> = emptyList(),
     val searchLabels: List<Label> = emptyList(),
     val searchByLabelsDialogOpen: Boolean = false,
-    val snackbarResource: Int = 0
+    val snackbarResource: Int = 0,
+    val pinEntryDialogOpen: Boolean = false
 )
 
 private data class AsyncData(
@@ -121,6 +123,8 @@ class SearchViewModel @Inject constructor(
         }
     }
 
+    private var lockedNote: Note? = null
+
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = combine(
         _uiState, _notesAndLabelsAsync, _searchForm, _notesLoading
@@ -134,10 +138,10 @@ class SearchViewModel @Inject constructor(
                 )
             }
             is AsyncResult.Error -> {
-                // TODO: snackbar
                 uiState.copy(
                     loading = false,
-                    emptySearch = false
+                    emptySearch = false,
+                    snackbarResource = R.string.error_while_loading_notes
                 )
             }
             is AsyncResult.Success -> {
@@ -196,10 +200,16 @@ class SearchViewModel @Inject constructor(
     }
 
     fun noteClick(note: Note) {
-        if (_uiState.value.selectedNotes.isNotEmpty())
+        if (_uiState.value.selectedNotes.isNotEmpty()) {
             noteLongClick(note)
-        else
+        }
+        else if (note.pinHash.isNotEmpty()) {
+            lockedNote = note
+            openPinEntryDialog()
+        }
+        else {
             navManager.navigateTo(NavActions.addEditNote(note.id.toString()), popCurrent = true)
+        }
     }
 
     fun noteLongClick(note: Note) {
@@ -229,6 +239,12 @@ class SearchViewModel @Inject constructor(
     fun moveSelectedNotes(location: NoteLocation) {
         viewModelScope.launch {
             _uiState.value.selectedNotes.forEach { note ->
+                if (location == NoteLocation.TRASH) {
+                    if (note.pinned)
+                        noteRepository.updateNotePinned(note.id, false)
+                    if (note.pinHash.isNotEmpty())
+                        noteRepository.updateNotePinHash(note.id, "")
+                }
                 noteRepository.updateNoteLocation(note.id, location)
             }
             val single = _uiState.value.selectedNotes.size == 1
@@ -279,5 +295,29 @@ class SearchViewModel @Inject constructor(
 
     fun snackbarShown() {
         _uiState.update { it.copy(snackbarResource = 0) }
+    }
+
+    private fun openPinEntryDialog() {
+        _uiState.update { it.copy(pinEntryDialogOpen = true) }
+    }
+
+    fun closePinEntryDialog() {
+        _uiState.update { it.copy(pinEntryDialogOpen = false) }
+        lockedNote = null
+    }
+
+    fun confirmPinEntry(pin: String): Boolean {
+        if (lockedNote == null) {
+            closePinEntryDialog()
+            return true
+        }
+
+        val hashResult = BCrypt.verifyer().verify(pin.toCharArray(), lockedNote!!.pinHash)
+        if (!hashResult.verified)
+            return false
+
+        _uiState.update { it.copy(pinEntryDialogOpen = false) }
+        navManager.navigateTo(NavActions.addEditNote(lockedNote!!.id.toString()), popCurrent = true)
+        return true
     }
 }

@@ -30,7 +30,8 @@ interface INoteRepository {
         content: String,
         labels: List<Label>,
         location: NoteLocation,
-        pinned: Boolean
+        pinned: Boolean,
+        pinHash: String
     ): UUID
 
     suspend fun updateNote(
@@ -39,7 +40,8 @@ interface INoteRepository {
         content: String,
         labels: List<Label>,
         location: NoteLocation,
-        pinned: Boolean
+        pinned: Boolean,
+        pinHash: String
     )
 
     suspend fun updateNoteTitleAndContent(
@@ -53,6 +55,8 @@ interface INoteRepository {
     suspend fun updateNoteLocation(noteId: UUID, location: NoteLocation)
 
     suspend fun updateNotePinned(noteId: UUID, pinned: Boolean)
+
+    suspend fun updateNotePinHash(noteId: UUID, pinHash: String)
 
     suspend fun refreshNotes()
 

@@ -29,7 +29,7 @@
     <string name="settings_go_back">Go back</string>
     <string name="note_manager">Note Manager</string>
     <string name="addeditnote_archive_note">Archive note</string>
-    <string name="addeditnote_delete_note">Delete note</string>
+    <string name="addeditnote_trash_note">Trash note</string>
     <string name="addeditnote_add_labels">Add labels</string>
     <string name="addeditnote_labels_loading_error">Error while loading labels</string>
     <string name="addeditnote_hint_title">Title</string>
@@ -37,6 +37,10 @@
     <string name="addeditnote_hint_go_back">Go back</string>
     <string name="addeditnote_hint_pin_note">Pin note</string>
     <string name="addeditnote_hint_unpin_note">Unpin note</string>
+    <string name="addeditnote_set_pin">Lock note with PIN</string>
+    <string name="addeditnote_remove_pin">Remove PIN</string>
+    <string name="addeditnote_note_locked">Note locked</string>
+    <string name="more_options">More options</string>
     <string name="dialog_edit_note_labels_added">Added</string>
     <string name="dialog_edit_note_labels_available">Available</string>
     <string name="dialog_label_selection_empty">Empty</string>
@@ -155,4 +159,9 @@
     <string name="snackbar_selection_notes_pinned">Selected notes pinned</string>
     <string name="snackbar_selection_note_unpinned">Selected note unpinned</string>
     <string name="snackbar_selection_notes_unpinned">Selected notes unpinned</string>
+    <string name="keypad_delete_last_character">Delete last character</string>
+    <string name="keypad_confirm">Confirm</string>
+    <string name="dialog_pin_entry_locked_note_desc">This note is locked with a PIN. Enter it to unlock the note.</string>
+    <string name="dialog_pin_entry_set_pin_desc">Enter new PIN:</string>
+    <string name="error_while_loading_notes">Error while loading notes</string>
 </resources>

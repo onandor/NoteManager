@@ -2,6 +2,7 @@ package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Note
@@ -36,7 +37,8 @@ data class ArchiveUiState(
     val selectedNotes: List<Note> = emptyList(),
     val noteListState: NoteListState = NoteListState(),
     val addEditSnackbarResource: Int = 0,
-    val selectionSnackbarResource: Int = 0
+    val selectionSnackbarResource: Int = 0,
+    val pinEntryDialogOpen: Boolean = false
 )
 
 @HiltViewModel
@@ -71,20 +73,21 @@ class ArchiveViewModel @Inject constructor(
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
 
+    private var lockedNote: Note? = null
+
     private val _uiState = MutableStateFlow(ArchiveUiState())
     val uiState: StateFlow<ArchiveUiState> = combine(
         _uiState, _notesAsync, addEditResultState.result, noteListState
     ) { uiState, notesAsync, addEditResult, noteListState ->
         when(notesAsync) {
             AsyncResult.Loading -> {
-                // TODO
                 uiState.copy(addEditSnackbarResource = addEditResult.resource)
             }
             is AsyncResult.Error -> {
-                // TODO
                 uiState.copy(
                     loading = false,
-                    addEditSnackbarResource = addEditResult.resource
+                    addEditSnackbarResource = addEditResult.resource,
+                    selectionSnackbarResource = R.string.error_while_loading_notes
                 )
             }
             is AsyncResult.Success -> {
@@ -115,10 +118,16 @@ class ArchiveViewModel @Inject constructor(
     }
 
     fun noteClick(note: Note) {
-        if (_uiState.value.selectedNotes.isNotEmpty())
+        if (_uiState.value.selectedNotes.isNotEmpty()) {
             noteLongClick(note)
-        else
+        }
+        else if (note.pinHash.isNotEmpty()) {
+            lockedNote = note
+            openPinEntryDialog()
+        }
+        else {
             navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+        }
     }
 
     fun noteLongClick(note: Note) {
@@ -157,6 +166,12 @@ class ArchiveViewModel @Inject constructor(
     fun moveSelectedNotes(location: NoteLocation) {
         viewModelScope.launch {
             _uiState.value.selectedNotes.forEach { note ->
+                if (location == NoteLocation.TRASH) {
+                    if (note.pinned)
+                        noteRepository.updateNotePinned(note.id, false)
+                    if (note.pinHash.isNotEmpty())
+                        noteRepository.updateNotePinHash(note.id, "")
+                }
                 noteRepository.updateNoteLocation(note.id, location)
             }
             val single = _uiState.value.selectedNotes.size == 1
@@ -193,5 +208,25 @@ class ArchiveViewModel @Inject constructor(
                 it.copy(selectionSnackbarResource = resource)
             }
         }
+    }
+
+    private fun openPinEntryDialog() {
+        _uiState.update { it.copy(pinEntryDialogOpen = true) }
+    }
+    fun closePinEntryDialog() {
+        _uiState.update { it.copy(pinEntryDialogOpen = false) }
+        lockedNote = null
+    }
+    fun confirmPinEntry(pin: String): Boolean {
+        if (lockedNote == null) {
+            closePinEntryDialog()
+            return true
+        }
+        val hashResult = BCrypt.verifyer().verify(pin.toCharArray(), lockedNote!!.pinHash)
+        if (!hashResult.verified)
+            return false
+        _uiState.update { it.copy(pinEntryDialogOpen = false) }
+        navManager.navigateTo(NavActions.addEditNote(lockedNote!!.id.toString()))
+        return true
     }
 }

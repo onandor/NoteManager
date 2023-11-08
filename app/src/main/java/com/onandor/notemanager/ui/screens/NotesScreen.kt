@@ -40,6 +40,7 @@ import com.onandor.notemanager.ui.components.MainTopAppBar
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.PinButton
+import com.onandor.notemanager.ui.components.PinEntryDialog
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.viewmodels.NotesViewModel
 import kotlinx.coroutines.launch
@@ -174,6 +175,14 @@ fun NotesScreen(
             if (uiState.selectedNotes.isNotEmpty()) {
                 scrollBehavior.state.heightOffset = 0f
             }
+        }
+
+        if (uiState.pinEntryDialogOpen) {
+            PinEntryDialog(
+                onConfirmPin = viewModel::confirmPinEntry,
+                onDismissRequest = viewModel::closePinEntryDialog,
+                description = stringResource(id = R.string.dialog_pin_entry_locked_note_desc)
+            )
         }
     }
 }

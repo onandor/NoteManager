@@ -19,6 +19,7 @@ data class LocalNote(
     var content: String,
     var location: NoteLocation,
     var pinned: Boolean,
+    @ColumnInfo(name = "pin_hash") var pinHash: String,
     @ColumnInfo(name = "creation_date") var creationDate: LocalDateTime = LocalDateTime.now(),
     @ColumnInfo(name = "modification_date") var modificationDate: LocalDateTime = LocalDateTime.now()
 )

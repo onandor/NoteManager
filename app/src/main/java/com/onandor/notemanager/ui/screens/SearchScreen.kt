@@ -79,6 +79,7 @@ import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteItem
 import com.onandor.notemanager.ui.components.PinButton
+import com.onandor.notemanager.ui.components.PinEntryDialog
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.viewmodels.SearchViewModel
 import kotlinx.coroutines.launch
@@ -196,6 +197,14 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                 selectedText = stringResource(id = R.string.dialog_search_by_labels_selected),
                 unSelectedText = stringResource(id = R.string.dialog_search_by_labels_unselected),
                 onChangeLabelSelection = viewModel::addRemoveSearchLabel
+            )
+        }
+
+        if (uiState.pinEntryDialogOpen) {
+            PinEntryDialog(
+                onConfirmPin = viewModel::confirmPinEntry,
+                onDismissRequest = viewModel::closePinEntryDialog,
+                description = stringResource(id = R.string.dialog_pin_entry_locked_note_desc)
             )
         }
     }

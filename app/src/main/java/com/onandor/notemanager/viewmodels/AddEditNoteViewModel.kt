@@ -6,6 +6,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
@@ -39,10 +40,12 @@ data class AddEditNoteUiState(
     val location: NoteLocation = NoteLocation.NOTES,
     val modificationDate: String = "",
     val pinned: Boolean = false,
+    val pinHash: String = "",
     val addedLabels: List<Label> = emptyList(),
     val labels: List<Label> = emptyList(),
     val snackbarMessageResource: Int? = null,
     val editLabelsDialogOpen: Boolean = false,
+    val changePinDialogOpen: Boolean = false,
     val newNote: Boolean = false
 )
 
@@ -143,6 +146,7 @@ class AddEditNoteViewModel @Inject constructor(
                         location = note.location,
                         modificationDate = dtf.format(note.modificationDate),
                         pinned = note.pinned,
+                        pinHash = note.pinHash,
                         addedLabels = note.labels
                     )
                 }
@@ -190,7 +194,8 @@ class AddEditNoteViewModel @Inject constructor(
                 content = _uiState.value.content.text,
                 labels = _uiState.value.addedLabels,
                 location = NoteLocation.NOTES,
-                pinned = _uiState.value.pinned
+                pinned = _uiState.value.pinned,
+                pinHash = _uiState.value.pinHash
             )
         }
     }
@@ -200,14 +205,15 @@ class AddEditNoteViewModel @Inject constructor(
             throw RuntimeException("AddEditNoteViewModel.updateExistingNote(): cannot update nonexistent note")
         }
         viewModelScope.launch {
-            // TODO: do it in one action
-            noteRepository.updateNoteTitleAndContent(
+            noteRepository.updateNote(
                 noteId = noteId!!,
                 title = _uiState.value.title.text,
-                content = _uiState.value.content.text
+                content = _uiState.value.content.text,
+                labels = _uiState.value.addedLabels,
+                location = _uiState.value.location,
+                pinned = _uiState.value.pinned,
+                pinHash = _uiState.value.pinHash
             )
-            noteRepository.updateNoteLabels(noteId!!, _uiState.value.addedLabels)
-            noteRepository.updateNotePinned(noteId!!, _uiState.value.pinned)
         }
     }
 
@@ -218,7 +224,8 @@ class AddEditNoteViewModel @Inject constructor(
                 content = _uiState.value.content.text,
                 labels = listOf(),
                 location = NoteLocation.NOTES,
-                pinned = _uiState.value.pinned
+                pinned = _uiState.value.pinned,
+                pinHash = _uiState.value.pinHash
             )
             noteRepository.updateNoteLocation(
                 noteId = noteId,
@@ -351,5 +358,35 @@ class AddEditNoteViewModel @Inject constructor(
         modified = true
         _uiState.update { it.copy(pinned = pinned) }
         saveTimer.reset()
+    }
+
+    fun setPin(pin: String): Boolean {
+        if (pin.length < 4)
+            return false
+
+        modified = true
+        val pinHash = if (pin.isNotEmpty()) {
+            BCrypt
+                .withDefaults()
+                .hashToString(12, pin.toCharArray())
+        } else { "" }
+        _uiState.update { it.copy(pinHash = pinHash) }
+        closeChangePinDialog()
+        saveTimer.reset()
+        return true
+    }
+
+    fun removePin() {
+        modified = true
+        _uiState.update { it.copy(pinHash = "") }
+        saveTimer.reset()
+    }
+
+    fun openChangePinDialog() {
+        _uiState.update { it.copy(changePinDialogOpen = true) }
+    }
+
+    fun closeChangePinDialog() {
+        _uiState.update { it.copy(changePinDialogOpen = false) }
     }
 }
