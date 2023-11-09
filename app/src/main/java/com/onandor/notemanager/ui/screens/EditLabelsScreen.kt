@@ -62,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -76,6 +77,7 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.ui.components.SimpleConfirmationDialog
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.ui.components.ColoredStatusBarTopAppBar
+import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.ui.theme.LocalTheme
 import com.onandor.notemanager.utils.LabelColor
@@ -135,7 +137,10 @@ fun EditLabelsScreen(
                 .fillMaxSize()
         ) {
             if (uiState.labels.isEmpty()) {
-                Text(stringResource(id = R.string.edit_labels_no_labels))
+                EmptyContent(
+                    painter = painterResource(id = R.drawable.ic_label_filled),
+                    text = stringResource(id = R.string.edit_labels_no_labels)
+                )
             }
             else {
                 LazyColumn(
