@@ -184,6 +184,7 @@ fun EditLabelsScreen(
             AddEditLabelDialogContent(
                 title = uiState.addEditLabelForm.title,
                 color = uiState.addEditLabelForm.color,
+                titleValid = uiState.addEditLabelForm.titleValid,
                 onTitleChanged = viewModel::addEditLabelUpdateTitle,
                 onColorChanged = viewModel::addEditLabelUpdateColor,
                 onSubmitChange = { viewModel.saveLabel(); hideAddEditLabelDialog() },
@@ -245,6 +246,7 @@ private fun LabelItem(
 private fun AddEditLabelDialogContent(
     title: String,
     color: LabelColor,
+    titleValid: Boolean,
     onTitleChanged: (String) -> Unit,
     onColorChanged: (LabelColor) -> Unit,
     onSubmitChange: () -> Unit,
@@ -319,7 +321,10 @@ private fun AddEditLabelDialogContent(
                 .padding(end = 15.dp),
             horizontalArrangement = Arrangement.End
         ) {
-            Button(onClick = onSubmitChange) {
+            Button(
+                onClick = onSubmitChange,
+                enabled = titleValid
+            ) {
                 Text(text = stringResource(id = R.string.edit_labels_save))
             }
         }

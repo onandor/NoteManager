@@ -27,7 +27,7 @@ import javax.inject.Inject
 data class AddEditLabelForm(
     val id: UUID? = null,
     val title: String = "",
-    val titleValid: Boolean = true,
+    val titleValid: Boolean = false,
     val color: LabelColor = LabelColors.none
 )
 
@@ -98,7 +98,7 @@ class EditLabelsViewModel @Inject constructor(
             it.copy(
                 id = label.id,
                 title = label.title,
-                titleValid = label.title.length in 1 .. 30,
+                titleValid = label.title.isNotEmpty(),
                 color = label.color
             )
         }
@@ -115,17 +115,20 @@ class EditLabelsViewModel @Inject constructor(
             it.copy(
                 id = null,
                 title = "",
-                titleValid = true,
+                titleValid = false,
                 color = LabelColors.none
             )
         }
     }
 
     fun addEditLabelUpdateTitle(title: String) {
+        if (title.length > 30)
+            return
+
         addEditLabelForm.update {
             it.copy(
                 title = title,
-                titleValid = (title.length in 1..30)
+                titleValid = title.isNotEmpty()
             )
         }
     }
@@ -137,6 +140,9 @@ class EditLabelsViewModel @Inject constructor(
     }
 
     fun saveLabel() {
+        if (!addEditLabelForm.value.titleValid)
+            return
+
         if (addEditLabelForm.value.id == null) {
             viewModelScope.launch {
                 labelRepository.createLabel(
