@@ -66,6 +66,9 @@ object NavActions {
 
     fun addEditNote() = object : NavAction {
         override val destination: String = ADD_EDIT_NOTE_SCREEN
+        override val navOptions: NavOptions = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .build()
     }
 
     fun addEditNote(noteId: String) = object : NavAction {
