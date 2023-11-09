@@ -1,15 +1,16 @@
 package com.onandor.notemanager.ui.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
@@ -70,122 +71,124 @@ fun AppDrawer(
     onNavigateToEditLabels: () -> Unit
 ) {
     ModalDrawerSheet {
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            stringResource(R.string.note_manager),
-            fontSize = 22.sp,
-            modifier = Modifier.padding(start = 25.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        NavigationDrawerItem(
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_drawer_notes_filled),
-                    contentDescription = stringResource(id = R.string.drawer_notes)
-                )
-            },
-            label = { Text(stringResource(id = R.string.drawer_notes)) },
-            selected = currentRoute == NavDestinations.NOTES,
-            modifier = Modifier
-                .padding(NavigationDrawerItemDefaults.ItemPadding)
-                .height(50.dp)
-                .width(250.dp),
-            onClick = {
-                onNavigateToNotes()
-                closeDrawer()
-            }
-        )
-        NavigationDrawerItem(
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_drawer_archive_filled),
-                contentDescription = stringResource(id = R.string.drawer_archive)
-                )
-            },
-            label = { Text(stringResource(id = R.string.drawer_archive)) },
-            selected = currentRoute == NavDestinations.ARCHIVE,
-            modifier = Modifier
-                .padding(NavigationDrawerItemDefaults.ItemPadding)
-                .height(50.dp)
-                .width(250.dp),
-            onClick = {
-                onNavigateToArchive()
-                closeDrawer()
-            }
-        )
-        NavigationDrawerItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(id = R.string.drawer_trash)
-                )
-            },
-            label = { Text(stringResource(id = R.string.drawer_trash)) },
-            selected = currentRoute == NavDestinations.TRASH,
-            modifier = Modifier
-                .padding(NavigationDrawerItemDefaults.ItemPadding)
-                .height(50.dp)
-                .width(250.dp),
-            onClick = {
-                onNavigateToTrash()
-                closeDrawer()
-            }
-        )
-        NavigationDrawerItem(
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_label_filled),
-                    contentDescription = stringResource(id = R.string.drawer_labels)
-                )
-            },
-            label = { Text(stringResource(id = R.string.drawer_labels)) },
-            selected = currentRoute == NavDestinations.EDIT_LABELS,
-            modifier = Modifier
-                .padding(NavigationDrawerItemDefaults.ItemPadding)
-                .height(50.dp)
-                .width(250.dp),
-            onClick = {
-                onNavigateToEditLabels()
-                closeDrawer()
-            }
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        NavigationDrawerItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.AccountCircle,
-                    contentDescription = stringResource(id = R.string.drawer_account)
-                )
-            },
-            label = { Text(stringResource(id = R.string.drawer_account)) },
-            selected = currentRoute == NavDestinations.USER_DETAILS,
-            modifier = Modifier
-                .padding(NavigationDrawerItemDefaults.ItemPadding)
-                .height(50.dp)
-                .width(250.dp),
-            onClick = {
-                onNavigateToUserDetails()
-                closeDrawer()
-            }
-        )
-        NavigationDrawerItem(
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.Settings,
-                    contentDescription = stringResource(id = R.string.drawer_settings)
-                )
-            },
-            label = { Text(stringResource(id = R.string.drawer_settings)) },
-            selected = currentRoute == NavDestinations.SETTINGS,
-            modifier = Modifier
-                .padding(NavigationDrawerItemDefaults.ItemPadding)
-                .padding(bottom = 10.dp)
-                .height(50.dp)
-                .width(250.dp),
-            onClick = {
-                onNavigateToSettings()
-                closeDrawer()
-            }
-        )
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Text(
+                stringResource(R.string.note_manager),
+                fontSize = 22.sp,
+                modifier = Modifier.padding(start = 25.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_drawer_notes_filled),
+                        contentDescription = stringResource(id = R.string.drawer_notes)
+                    )
+                },
+                label = { Text(stringResource(id = R.string.drawer_notes)) },
+                selected = currentRoute == NavDestinations.NOTES,
+                modifier = Modifier
+                    .padding(NavigationDrawerItemDefaults.ItemPadding)
+                    .height(50.dp)
+                    .width(250.dp),
+                onClick = {
+                    onNavigateToNotes()
+                    closeDrawer()
+                }
+            )
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_drawer_archive_filled),
+                        contentDescription = stringResource(id = R.string.drawer_archive)
+                    )
+                },
+                label = { Text(stringResource(id = R.string.drawer_archive)) },
+                selected = currentRoute == NavDestinations.ARCHIVE,
+                modifier = Modifier
+                    .padding(NavigationDrawerItemDefaults.ItemPadding)
+                    .height(50.dp)
+                    .width(250.dp),
+                onClick = {
+                    onNavigateToArchive()
+                    closeDrawer()
+                }
+            )
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(id = R.string.drawer_trash)
+                    )
+                },
+                label = { Text(stringResource(id = R.string.drawer_trash)) },
+                selected = currentRoute == NavDestinations.TRASH,
+                modifier = Modifier
+                    .padding(NavigationDrawerItemDefaults.ItemPadding)
+                    .height(50.dp)
+                    .width(250.dp),
+                onClick = {
+                    onNavigateToTrash()
+                    closeDrawer()
+                }
+            )
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_label_filled),
+                        contentDescription = stringResource(id = R.string.drawer_edit_labels)
+                    )
+                },
+                label = { Text(stringResource(id = R.string.drawer_edit_labels)) },
+                selected = currentRoute == NavDestinations.EDIT_LABELS,
+                modifier = Modifier
+                    .padding(NavigationDrawerItemDefaults.ItemPadding)
+                    .height(50.dp)
+                    .width(250.dp),
+                onClick = {
+                    onNavigateToEditLabels()
+                    closeDrawer()
+                }
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = stringResource(id = R.string.drawer_account)
+                    )
+                },
+                label = { Text(stringResource(id = R.string.drawer_account)) },
+                selected = currentRoute == NavDestinations.USER_DETAILS,
+                modifier = Modifier
+                    .padding(NavigationDrawerItemDefaults.ItemPadding)
+                    .height(50.dp)
+                    .width(250.dp),
+                onClick = {
+                    onNavigateToUserDetails()
+                    closeDrawer()
+                }
+            )
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = stringResource(id = R.string.drawer_settings)
+                    )
+                },
+                label = { Text(stringResource(id = R.string.drawer_settings)) },
+                selected = currentRoute == NavDestinations.SETTINGS,
+                modifier = Modifier
+                    .padding(NavigationDrawerItemDefaults.ItemPadding)
+                    .padding(bottom = 10.dp)
+                    .height(50.dp)
+                    .width(250.dp),
+                onClick = {
+                    onNavigateToSettings()
+                    closeDrawer()
+                }
+            )
+        }
     }
 }

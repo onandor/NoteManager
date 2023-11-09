@@ -105,7 +105,7 @@ fun EditLabelsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             ColoredStatusBarTopAppBar(
-                title = { Text(stringResource(R.string.labels)) },
+                title = { Text(stringResource(R.string.edit_labels_title)) },
                 navigationIcon = {
                     IconButton(onClick = viewModel::navigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.edit_labels_go_back))
