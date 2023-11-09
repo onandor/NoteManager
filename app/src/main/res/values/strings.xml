@@ -40,6 +40,8 @@
     <string name="addeditnote_set_pin">Lock note with PIN</string>
     <string name="addeditnote_remove_pin">Remove PIN</string>
     <string name="addeditnote_note_locked">Note locked</string>
+    <string name="addeditnote_open_link">Open link</string>
+    <string name="addeditnote_open_link_confirmation">You are about to navigate to the following URL:</string>
     <string name="more_options">More options</string>
     <string name="dialog_edit_note_labels_added">Added</string>
     <string name="dialog_edit_note_labels_available">Available</string>

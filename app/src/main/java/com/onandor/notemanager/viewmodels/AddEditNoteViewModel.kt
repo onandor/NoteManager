@@ -2,7 +2,6 @@ package com.onandor.notemanager.viewmodels
 
 import android.os.CountDownTimer
 import android.util.Patterns
-import android.util.Range
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
@@ -50,7 +49,10 @@ data class AddEditNoteUiState(
     val editLabelsDialogOpen: Boolean = false,
     val changePinDialogOpen: Boolean = false,
     val newNote: Boolean = false,
-    val linkRanges: List<Range<Int>> = emptyList()
+    val titleLinkRanges: List<IntRange> = emptyList(),
+    val contentLinkRanges: List<IntRange> = emptyList(),
+    val clickedLink: String? = null,
+    val linkConfirmDialogOpen: Boolean = false
 )
 
 @HiltViewModel
@@ -137,11 +139,11 @@ class AddEditNoteViewModel @Inject constructor(
         saveTimer.cancel()
     }
 
-    private fun findLinkRanges(content: String): List<Range<Int>> {
-        val linkRanges = mutableListOf<Range<Int>>()
+    private fun findLinkRanges(content: String): List<IntRange> {
+        val linkRanges = mutableListOf<IntRange>()
         val matcher: Matcher = Patterns.WEB_URL.matcher(content)
         while (matcher.find()) {
-            linkRanges.add(Range(matcher.start(1), matcher.end()))
+            linkRanges.add(IntRange(matcher.start(1), matcher.end() - 1))
         }
         return linkRanges
     }
@@ -152,7 +154,8 @@ class AddEditNoteViewModel @Inject constructor(
                 if (note == null)
                     return@launch
 
-                val linkRanges = findLinkRanges(note.content)
+                val titleLinkRanges = findLinkRanges(note.title)
+                val contentLinkRanges = findLinkRanges(note.content)
                 _uiState.update {
                     it.copy(
                         title = TextFieldValue(note.title),
@@ -162,7 +165,8 @@ class AddEditNoteViewModel @Inject constructor(
                         pinned = note.pinned,
                         pinHash = note.pinHash,
                         addedLabels = note.labels,
-                        linkRanges = linkRanges
+                        titleLinkRanges = titleLinkRanges,
+                        contentLinkRanges = contentLinkRanges
                     )
                 }
             }
@@ -249,26 +253,72 @@ class AddEditNoteViewModel @Inject constructor(
         }
     }
 
+    private fun getNewLinkRanges(
+        linkRanges: List<IntRange>,
+        change: Int,
+        idx: Int
+    ): List<IntRange> {
+        if (linkRanges.isEmpty())
+            return linkRanges
+
+        val newLinkRanges: MutableList<IntRange> = mutableListOf()
+        linkRanges.forEach { range ->
+            val newRange = if (idx >= range.first && idx <= range.last) {
+                IntRange(range.first, range.last + change)
+            } else if (idx <= range.first) {
+                IntRange(range.first + change, range.last + change)
+            } else {
+                range
+            }
+            if (!newRange.isEmpty())
+                newLinkRanges.add(newRange)
+        }
+        return newLinkRanges
+    }
+
     fun updateTitle(newTitle: TextFieldValue) {
-        if (_uiState.value.title.text != newTitle.text) {
+        var titleLinkRanges = _uiState.value.titleLinkRanges
+        if (_uiState.value.title.text.length != newTitle.text.length) {
+            titleLinkRanges = getNewLinkRanges(
+                linkRanges = titleLinkRanges,
+                change = newTitle.text.length - _uiState.value.title.text.length,
+                idx = newTitle.selection.start
+            )
             modified = true
             saveTimer.reset()
         }
+        val linkRange: IntRange? = titleLinkRanges.find { newTitle.selection.start in it }
+        val clickedLink = if (linkRange != null) newTitle.text.substring(linkRange) else null
         _uiState.update {
             it.copy(
-                title = newTitle
+                title = newTitle,
+                clickedLink = clickedLink,
+                contentLinkRanges = titleLinkRanges
             )
         }
     }
 
     fun updateContent(newContent: TextFieldValue) {
-        if (_uiState.value.content.text != newContent.text) {
+        var contentLinkRanges = _uiState.value.contentLinkRanges
+        if (_uiState.value.content.text.length != newContent.text.length) {
+            contentLinkRanges = getNewLinkRanges(
+                linkRanges = contentLinkRanges,
+                change = newContent.text.length - _uiState.value.content.text.length,
+                idx = newContent.selection.start
+            )
             modified = true
             saveTimer.reset()
         }
+        val linkRange: IntRange? = contentLinkRanges.find { newContent.selection.start in it }
+        var clickedLink = if (linkRange != null) newContent.text.substring(linkRange) else null
+        if (clickedLink != null && clickedLink.take(8) != "https://" && clickedLink.take(7) != "http://") {
+            clickedLink = "https://$clickedLink"
+        }
         _uiState.update {
             it.copy(
-                content = newContent
+                content = newContent,
+                clickedLink = clickedLink,
+                contentLinkRanges = contentLinkRanges
             )
         }
     }
@@ -409,5 +459,13 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun closeChangePinDialog() {
         _uiState.update { it.copy(changePinDialogOpen = false) }
+    }
+
+    fun openLinkConfirmDialog() {
+        _uiState.update { it.copy(linkConfirmDialogOpen = true) }
+    }
+
+    fun closeLinkConfirmDialog() {
+        _uiState.update { it.copy(linkConfirmDialogOpen = false) }
     }
 }

@@ -1,8 +1,10 @@
 package com.onandor.notemanager.ui.screens
 
-import android.util.Range
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -21,7 +23,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +52,6 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +77,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -104,6 +106,7 @@ import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.LifecycleObserver
 import com.onandor.notemanager.ui.components.PinButton
 import com.onandor.notemanager.ui.components.PinEntryDialog
+import com.onandor.notemanager.ui.components.SimpleConfirmationDialog
 import com.onandor.notemanager.utils.indexOfDifference
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 import kotlinx.coroutines.launch
@@ -117,6 +120,7 @@ fun AddEditNoteScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val uriHandler = LocalUriHandler.current
 
     Scaffold(
         modifier = Modifier
@@ -139,6 +143,19 @@ fun AddEditNoteScreen(
                 locked = uiState.pinHash.isNotEmpty(),
                 scrollBehavior = scrollBehavior
             )
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = uiState.clickedLink != null,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = viewModel::openLinkConfirmDialog,
+                    text = { Text(stringResource(id = R.string.addeditnote_open_link)) },
+                    icon = { Icon(painterResource(id = R.drawable.ic_open_link), "") }
+                )
+            }
         }
     ) { innerPadding ->
         TitleAndContentEditor(
@@ -153,7 +170,8 @@ fun AddEditNoteScreen(
             focusManager = focusManager,
             newNote = uiState.newNote,
             editLabelsDialogOpen = uiState.editLabelsDialogOpen,
-            linkRanges = uiState.linkRanges
+            titleLinkRanges = uiState.titleLinkRanges,
+            contentLinkRanges = uiState.contentLinkRanges
         )
     }
 
@@ -187,6 +205,16 @@ fun AddEditNoteScreen(
             description = stringResource(id = R.string.dialog_pin_entry_set_pin_desc)
         )
     }
+    
+    if (uiState.linkConfirmDialogOpen) {
+        val confirmationText = stringResource(id = R.string.addeditnote_open_link_confirmation) +
+                "\n\n" + uiState.clickedLink
+        SimpleConfirmationDialog(
+            onDismissRequest = viewModel::closeLinkConfirmDialog,
+            onConfirmation = { viewModel.closeLinkConfirmDialog(); uriHandler.openUri(uiState.clickedLink!!) },
+            text = confirmationText
+        )
+    }
 
     LifecycleObserver { _, event ->
         if (event == Lifecycle.Event.ON_PAUSE) {
@@ -209,20 +237,18 @@ private fun TitleAndContentEditor(
     focusManager: FocusManager,
     newNote: Boolean,
     editLabelsDialogOpen: Boolean,
-    linkRanges: List<Range<Int>>
+    titleLinkRanges: List<IntRange>,
+    contentLinkRanges: List<IntRange>
 ) {
     val titleFocusRequester = remember { FocusRequester() }
     val contentFocusRequester = remember { FocusRequester() }
     var titleFocused by remember { mutableStateOf(false) }
     var contentFocused by remember { mutableStateOf(false) }
 
+    val density = LocalDensity.current
     var dateHeight by remember { mutableIntStateOf(0) }
     var titleHeight by remember { mutableIntStateOf(0) }
-    var editorViewportHeight by remember { mutableIntStateOf(0) }
-    val statusBarHeight = WindowInsets.statusBars.getTop(LocalDensity.current)
-    val contentHeight by remember {
-        derivedStateOf { editorViewportHeight - statusBarHeight }
-    }
+    var editorHeight by remember { mutableIntStateOf(0) }
 
     val scrollState = rememberScrollState()
     var scrollToEnd by remember { mutableStateOf(false) }
@@ -231,11 +257,11 @@ private fun TitleAndContentEditor(
     val interactionSource = remember { MutableInteractionSource() }
     val keyboard = LocalSoftwareKeyboardController.current
 
-    Box(modifier = Modifier
+    Box(modifier = modifier
         .fillMaxSize()
         .navigationBarsPadding()
         .onGloballyPositioned { coordinates ->
-            editorViewportHeight = coordinates.size.height
+            editorHeight = coordinates.size.height
         }
         .clickable(
             interactionSource = interactionSource,
@@ -251,7 +277,7 @@ private fun TitleAndContentEditor(
         }
     ) {}
 
-    Column (modifier = modifier.verticalScroll(scrollState)) {
+    Column(modifier = modifier.verticalScroll(scrollState)) {
         val textFieldColors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
@@ -286,7 +312,8 @@ private fun TitleAndContentEditor(
                     event.key == Key.Enter || event.key == Key.NumPadEnter
                 }
                 .onGloballyPositioned { coordinates ->
-                    titleHeight = coordinates.size.height
+                    titleHeight =
+                        coordinates.size.height + with(density) { 25.dp.toPx() }.roundToInt()
                 },
             value = title,
             onValueChange = onTitleChanged,
@@ -309,7 +336,8 @@ private fun TitleAndContentEditor(
                     scrollToEnd = true
                     contentFocusRequester.requestFocus()
                 }
-            )
+            ),
+            linkRanges = titleLinkRanges
         )
         EditorTextField(
             modifier = Modifier
@@ -327,35 +355,24 @@ private fun TitleAndContentEditor(
                 Text(stringResource(id = R.string.addeditnote_hint_content))
             },
             readOnly = editDisabled,
-            onCursorYCoordChanged = { cursorYTop, cursorYBottom, lineHeight ->
-                val topOffset = (1.3 * lineHeight).roundToInt()
-                val bottomOffset = contentHeight - (4.8 * lineHeight).roundToInt()
-                val lowerLimit = scrollState.value - topOffset
-                val upperLimit = scrollState.value + bottomOffset
-                val cursorYTopWithTitleOffset = cursorYTop + titleHeight + dateHeight
-                val cursorYBottomWithTitleOffset = cursorYBottom + titleHeight + dateHeight
-                /*
-                 * 1.3 and 4.8 are kinds of magic values, for some reason the calculation is always
-                 * off by those amount of line heights, but since it works on 3 different DPIs I can't
-                 * be bothered to check why. (Might have to do something with editorViewportHeight or
-                 * spaceAboveContent not being calculated right.)
-                */
-                if (cursorYTopWithTitleOffset < lowerLimit) {
+            onCursorYCoordChanged = { cursorYTop, cursorYBottom ->
+                val cursorYTopWithOffset = cursorYTop + titleHeight + dateHeight
+                val cursorYBottomWithOffset = cursorYBottom + titleHeight + dateHeight
+                if (cursorYTopWithOffset < scrollState.value) {
                     // the top of the cursor is out of the view on the top of the screen
-                    val scrollPosition = cursorYTopWithTitleOffset + topOffset
                     coroutineScope.launch {
-                        scrollState.animateScrollTo(scrollPosition)
+                        scrollState.animateScrollTo(cursorYTopWithOffset)
                     }
                 }
-                else if (cursorYBottomWithTitleOffset > upperLimit) {
+                else if (cursorYBottomWithOffset > scrollState.value + editorHeight) {
                     // the bottom of the cursor is out of the view on the bottom of the screen
-                    val scrollPosition = cursorYBottomWithTitleOffset - bottomOffset
+                    val scrollPosition = cursorYBottomWithOffset - editorHeight
                     coroutineScope.launch {
                         scrollState.animateScrollTo(scrollPosition)
                     }
                 }
             },
-            linkRanges = linkRanges
+            linkRanges = contentLinkRanges
         )
     }
 
@@ -383,7 +400,7 @@ private fun TitleAndContentEditor(
     }
 }
 
-private fun buildAnnotatedString(text: String, linkRanges: List<Range<Int>>): AnnotatedString {
+private fun buildAnnotatedString(text: String, linkRanges: List<IntRange>): AnnotatedString {
     if (linkRanges.isEmpty())
         return AnnotatedString.Builder(text).toAnnotatedString()
 
@@ -391,18 +408,18 @@ private fun buildAnnotatedString(text: String, linkRanges: List<Range<Int>>): An
     var rangeIdx = 0
     var currentRange = linkRanges[rangeIdx]
     for (charIdx in text.indices) {
-        if (charIdx >= currentRange.lower) {
+        if (charIdx >= currentRange.first) {
             builder.withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
                 append(text[charIdx])
             }
         } else {
             builder.append(text[charIdx])
         }
-        if (charIdx >= currentRange.upper) {
+        if (charIdx >= currentRange.last) {
             currentRange = if (rangeIdx < linkRanges.indices.last) {
                 linkRanges[++rangeIdx]
             } else {
-                Range(Int.MAX_VALUE, Int.MAX_VALUE)
+                IntRange(Int.MAX_VALUE, Int.MAX_VALUE)
             }
         }
     }
@@ -422,8 +439,8 @@ private fun EditorTextField(
     singleLine: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions(),
     keyboardActions: KeyboardActions = KeyboardActions(),
-    onCursorYCoordChanged: (Int, Int, Int) -> Unit = { _, _, _ -> },
-    linkRanges: List<Range<Int>> = emptyList()
+    onCursorYCoordChanged: (Int, Int) -> Unit = { _, _ -> },
+    linkRanges: List<IntRange> = emptyList()
 ) {
     val defaultTextSelectionColors = LocalTextSelectionColors.current
     val disabledHandleTextSelectionColors = TextSelectionColors(
@@ -482,7 +499,7 @@ private fun EditorTextField(
                             }
                         }
                     }
-                    onCursorYCoordChanged(cursorYTop, cursorYBottom, lineHeight)
+                    onCursorYCoordChanged(cursorYTop, cursorYBottom)
                 }
                 onValueChange(newValue)
             },
