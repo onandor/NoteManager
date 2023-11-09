@@ -2,6 +2,7 @@ package com.onandor.notemanager.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -71,7 +72,11 @@ fun AppDrawer(
     onNavigateToEditLabels: () -> Unit
 ) {
     ModalDrawerSheet {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .verticalScroll(rememberScrollState())
+        ) {
             Spacer(modifier = Modifier.height(20.dp))
             Text(
                 stringResource(R.string.note_manager),
