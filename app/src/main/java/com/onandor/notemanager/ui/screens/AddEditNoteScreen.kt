@@ -470,7 +470,7 @@ private fun EditorTextField(
                     */
                     // If a character was added and not removed
                     if (newValue.text.length > value.text.length) {
-                        // If we are at the end of the text and a new line was added
+                        // If we were at the end of the text and a new line was added
                         if (newValue.text.length == newValue.selection.start && newValue.text.last() == '\n') {
                             /*
                              * Manually add the height of a line, since at this stage we are still
@@ -491,7 +491,7 @@ private fun EditorTextField(
                              * character is a new line (because then textLayoutResult accidentally returns
                              * the right value), so we need to check for that.
                             */
-                            val diffIdx = value.text.indexOfDifference(newValue.text)
+                            val diffIdx = newValue.selection.start - 1
                             if (textLayoutResult?.getLineForOffset(value.selection.start) != cursorLine
                                 && diffIdx != -1 && newValue.text[diffIdx] != '\n') {
                                 cursorYTop -= lineHeight
