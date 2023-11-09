@@ -190,7 +190,7 @@ class SearchViewModel @Inject constructor(
             else {
                 newSearchLabels.remove(label)
             }
-            it.copy(searchLabels = newSearchLabels)
+            it.copy(searchLabels = newSearchLabels.sortedWith(compareBy(Label::title)))
         }
     }
 

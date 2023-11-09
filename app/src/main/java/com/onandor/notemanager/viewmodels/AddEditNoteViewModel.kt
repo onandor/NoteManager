@@ -327,7 +327,7 @@ class AddEditNoteViewModel @Inject constructor(
             else {
                 newLabels.remove(label)
             }
-            it.copy(addedLabels = newLabels)
+            it.copy(addedLabels = newLabels.sortedWith(compareBy(Label::title)))
         }
         saveTimer.reset()
     }
