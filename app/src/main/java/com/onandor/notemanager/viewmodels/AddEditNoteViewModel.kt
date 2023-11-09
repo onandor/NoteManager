@@ -1,6 +1,8 @@
 package com.onandor.notemanager.viewmodels
 
 import android.os.CountDownTimer
+import android.util.Patterns
+import android.util.Range
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
@@ -32,6 +34,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.UUID
+import java.util.regex.Matcher
 import javax.inject.Inject
 
 data class AddEditNoteUiState(
@@ -46,7 +49,8 @@ data class AddEditNoteUiState(
     val snackbarMessageResource: Int? = null,
     val editLabelsDialogOpen: Boolean = false,
     val changePinDialogOpen: Boolean = false,
-    val newNote: Boolean = false
+    val newNote: Boolean = false,
+    val linkRanges: List<Range<Int>> = emptyList()
 )
 
 @HiltViewModel
@@ -133,12 +137,22 @@ class AddEditNoteViewModel @Inject constructor(
         saveTimer.cancel()
     }
 
+    private fun findLinkRanges(content: String): List<Range<Int>> {
+        val linkRanges = mutableListOf<Range<Int>>()
+        val matcher: Matcher = Patterns.WEB_URL.matcher(content)
+        while (matcher.find()) {
+            linkRanges.add(Range(matcher.start(1), matcher.end()))
+        }
+        return linkRanges
+    }
+
     private fun loadNote(noteId: UUID) {
         viewModelScope.launch {
             noteRepository.getNote(noteId).let { note ->
                 if (note == null)
                     return@launch
 
+                val linkRanges = findLinkRanges(note.content)
                 _uiState.update {
                     it.copy(
                         title = TextFieldValue(note.title),
@@ -147,7 +161,8 @@ class AddEditNoteViewModel @Inject constructor(
                         modificationDate = dtf.format(note.modificationDate),
                         pinned = note.pinned,
                         pinHash = note.pinHash,
-                        addedLabels = note.labels
+                        addedLabels = note.labels,
+                        linkRanges = linkRanges
                     )
                 }
             }

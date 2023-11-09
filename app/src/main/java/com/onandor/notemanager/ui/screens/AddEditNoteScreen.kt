@@ -1,5 +1,6 @@
 package com.onandor.notemanager.ui.screens
 
+import android.util.Range
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
@@ -77,14 +78,20 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -145,7 +152,8 @@ fun AddEditNoteScreen(
             editDisabled = uiState.location == NoteLocation.TRASH,
             focusManager = focusManager,
             newNote = uiState.newNote,
-            editLabelsDialogOpen = uiState.editLabelsDialogOpen
+            editLabelsDialogOpen = uiState.editLabelsDialogOpen,
+            linkRanges = uiState.linkRanges
         )
     }
 
@@ -200,7 +208,8 @@ private fun TitleAndContentEditor(
     editDisabled: Boolean,
     focusManager: FocusManager,
     newNote: Boolean,
-    editLabelsDialogOpen: Boolean
+    editLabelsDialogOpen: Boolean,
+    linkRanges: List<Range<Int>>
 ) {
     val titleFocusRequester = remember { FocusRequester() }
     val contentFocusRequester = remember { FocusRequester() }
@@ -345,7 +354,8 @@ private fun TitleAndContentEditor(
                         scrollState.animateScrollTo(scrollPosition)
                     }
                 }
-            }
+            },
+            linkRanges = linkRanges
         )
     }
 
@@ -373,6 +383,32 @@ private fun TitleAndContentEditor(
     }
 }
 
+private fun buildAnnotatedString(text: String, linkRanges: List<Range<Int>>): AnnotatedString {
+    if (linkRanges.isEmpty())
+        return AnnotatedString.Builder(text).toAnnotatedString()
+
+    val builder = AnnotatedString.Builder()
+    var rangeIdx = 0
+    var currentRange = linkRanges[rangeIdx]
+    for (charIdx in text.indices) {
+        if (charIdx >= currentRange.lower) {
+            builder.withStyle(SpanStyle(textDecoration = TextDecoration.Underline)) {
+                append(text[charIdx])
+            }
+        } else {
+            builder.append(text[charIdx])
+        }
+        if (charIdx >= currentRange.upper) {
+            currentRange = if (rangeIdx < linkRanges.indices.last) {
+                linkRanges[++rangeIdx]
+            } else {
+                Range(Int.MAX_VALUE, Int.MAX_VALUE)
+            }
+        }
+    }
+    return builder.toAnnotatedString()
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EditorTextField(
@@ -386,7 +422,8 @@ private fun EditorTextField(
     singleLine: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions(),
     keyboardActions: KeyboardActions = KeyboardActions(),
-    onCursorYCoordChanged: (Int, Int, Int) -> Unit = { _, _, _ -> }
+    onCursorYCoordChanged: (Int, Int, Int) -> Unit = { _, _, _ -> },
+    linkRanges: List<Range<Int>> = emptyList()
 ) {
     val defaultTextSelectionColors = LocalTextSelectionColors.current
     val disabledHandleTextSelectionColors = TextSelectionColors(
@@ -467,6 +504,12 @@ private fun EditorTextField(
             keyboardActions = keyboardActions,
             onTextLayout = {
                 textLayoutResult = it
+            },
+            visualTransformation = {
+                TransformedText(
+                    text = buildAnnotatedString(value.text, linkRanges),
+                    offsetMapping = OffsetMapping.Identity
+                )
             },
             decorationBox = @Composable { innerTextField ->
                 TextFieldDefaults.DecorationBox(
