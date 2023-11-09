@@ -165,4 +165,8 @@
     <string name="dialog_pin_entry_locked_note_desc">This note is locked with a PIN. Enter it to unlock the note.</string>
     <string name="dialog_pin_entry_set_pin_desc">Enter new PIN:</string>
     <string name="error_while_loading_notes">Error while loading notes</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System</string>
 </resources>

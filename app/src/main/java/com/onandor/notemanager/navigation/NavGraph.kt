@@ -2,13 +2,10 @@ package com.onandor.notemanager.navigation
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -55,13 +52,6 @@ fun NavGraph(
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: startDestination
     val navManagerState by viewModel.navigationManager.navActions.collectAsState()
 
-    // Change theme smoothly
-    val animatedSurfaceColor = animateColorAsState(
-        targetValue = MaterialTheme.colorScheme.surface,
-        animationSpec = tween(500),
-        label = ""
-    )
-
     LaunchedEffect(navManagerState) {
         navManagerState?.let {
             try {
@@ -80,7 +70,6 @@ fun NavGraph(
 
     Surface(
         modifier = Modifier.windowInsetsPadding(WindowInsets(0, 0, 0, 0)),
-        color = animatedSurfaceColor.value
     ) {
         NavHost(
             navController = navController,
