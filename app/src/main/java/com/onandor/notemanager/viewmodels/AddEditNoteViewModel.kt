@@ -259,6 +259,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun archiveNote() {
+        savedByUser = true
         if (noteId == null) {
             if (_uiState.value.title.text.isEmpty() and _uiState.value.content.text.isEmpty()) {
                 addEditResultState.set(AddEditResults.DISCARDED)
@@ -275,6 +276,7 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun unArchiveNote() {
+        savedByUser = true
         if (noteId == null) {
             throw RuntimeException("AddEditNoteViewModel.unArchiveNote(): cannot unarchive nonexistent note")
         }
@@ -285,17 +287,21 @@ class AddEditNoteViewModel @Inject constructor(
     }
 
     fun trashNote() {
+        savedByUser = true
         if (noteId == null) {
             addEditResultState.set(AddEditResults.DISCARDED)
             return
         }
         viewModelScope.launch {
+            noteRepository.updateNotePinned(noteId!!, false)
+            noteRepository.updateNotePinHash(noteId!!, "")
             noteRepository.updateNoteLocation(noteId!!, NoteLocation.TRASH)
         }
         addEditResultState.set(AddEditResults.TRASHED)
     }
 
     fun deleteNote() {
+        savedByUser = true
         if (noteId == null) {
             throw RuntimeException("AddEditNoteViewModel.deleteNote(): cannot delete nonexistent note")
         }
