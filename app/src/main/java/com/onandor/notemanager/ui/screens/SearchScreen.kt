@@ -3,7 +3,6 @@ package com.onandor.notemanager.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -11,11 +10,9 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,9 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -68,7 +62,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
@@ -77,7 +70,7 @@ import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.LabelSelectionBottomDialog
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
-import com.onandor.notemanager.ui.components.NoteItem
+import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.PinButton
 import com.onandor.notemanager.ui.components.PinEntryDialog
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
@@ -176,13 +169,14 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                ResultList(
+                NoteList(
                     mainNotes = uiState.mainNotes,
                     archiveNotes = uiState.archiveNotes,
                     selectedNotes = uiState.selectedNotes,
                     onNoteClick = { note -> focusManager.clearFocus(); viewModel.noteClick(note) },
                     onNoteLongClick = { note -> focusManager.clearFocus(); viewModel.noteLongClick(note) },
-                    scrollState = scrollState
+                    scrollState = scrollState,
+                    topPadding = 8.dp
                 )
             }
         }
@@ -223,65 +217,6 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
 
     BackHandler {
         viewModel.navigateBack()
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ResultList(
-    mainNotes: List<Note>,
-    archiveNotes: List<Note>,
-    selectedNotes: List<Note>,
-    onNoteClick: (Note) -> Unit,
-    onNoteLongClick: (Note) -> Unit,
-    scrollState: LazyListState
-) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize(),
-        state = scrollState
-    ) {
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        itemsIndexed(
-            items = mainNotes,
-            key = { _, note -> note.id }
-        ) { _, note ->
-            NoteItem(
-                modifier = Modifier.animateItemPlacement(),
-                note = note,
-                selected = selectedNotes.contains(note),
-                collapsedView = false,
-                onNoteClick = onNoteClick,
-                onNoteLongClick = onNoteLongClick
-            )
-        }
-        item {
-            if (archiveNotes.isNotEmpty()) {
-                Text(
-                    modifier = Modifier
-                        .padding(start = 30.dp, top = 5.dp, bottom = 10.dp)
-                        .animateItemPlacement(),
-                    text = stringResource(id = R.string.search_archive),
-                    fontSize = 15.sp
-                )
-            }
-        }
-        itemsIndexed(
-            items = archiveNotes,
-            key = { _, note -> note.id }
-        ) { _, note ->
-            NoteItem(
-                modifier = Modifier.animateItemPlacement(),
-                note = note,
-                selected = selectedNotes.contains(note),
-                collapsedView = false,
-                onNoteClick = onNoteClick,
-                onNoteLongClick = onNoteLongClick
-            )
-        }
     }
 }
 

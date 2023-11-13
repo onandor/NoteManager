@@ -1,5 +1,6 @@
 package com.onandor.notemanager.ui.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -18,7 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -40,8 +43,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.onandor.notemanager.R
@@ -61,17 +66,20 @@ data class NoteListState(
     val sorting: NoteSorting = NoteSorting(NoteComparisonField.ModificationDate, Order.Descending)
 )
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteList(
-    notes: List<Note>,
+    modifier: Modifier = Modifier,
+    mainNotes: List<Note>,
+    archiveNotes: List<Note> = emptyList(),
     selectedNotes: List<Note>,
     onNoteClick: (Note) -> Unit,
     onNoteLongClick: (Note) -> Unit,
-    modifier: Modifier,
-    collapsedView: Boolean
+    collapsedView: Boolean = false,
+    scrollState: LazyListState = rememberLazyListState(),
+    topPadding: Dp = 0.dp
 ) {
     var _collapsedView by remember { mutableStateOf(collapsedView) }
+    var animationEnabled by remember { mutableStateOf(true) }
     var alpha by remember { mutableFloatStateOf(1f) }
     val animatedAlpha by animateFloatAsState(
         targetValue = alpha,
@@ -87,42 +95,91 @@ fun NoteList(
             return@LaunchedEffect
 
         alpha = 0f
+        animationEnabled = false
         delay(100)
         _collapsedView = collapsedView
         alpha = 1f
+        animationEnabled = true
     }
 
-    if (_collapsedView) {
-        LazyColumn(modifier = modifier.alpha(animatedAlpha)) {
-            itemsIndexed(
-                items = notes,
-                key = { _, note -> note.id }
-            ) { _, note ->
-                NoteItem(
-                    modifier = Modifier.animateItemPlacement(),
-                    note = note,
-                    selected = selectedNotes.contains(note),
-                    collapsedView = true,
-                    onNoteClick = onNoteClick,
-                    onNoteLongClick = onNoteLongClick
+    NoteListContent(
+        modifier = modifier.alpha(animatedAlpha),
+        mainNotes = mainNotes,
+        archiveNotes = archiveNotes,
+        selectedNotes = selectedNotes,
+        onNoteClick = onNoteClick,
+        onNoteLongClick = onNoteLongClick,
+        scrollState = scrollState,
+        collapsedView = _collapsedView,
+        animated = animationEnabled,
+        topPadding = topPadding
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun NoteListContent(
+    modifier: Modifier,
+    mainNotes: List<Note>,
+    archiveNotes: List<Note>,
+    selectedNotes: List<Note>,
+    onNoteClick: (Note) -> Unit,
+    onNoteLongClick: (Note) -> Unit,
+    scrollState: LazyListState,
+    collapsedView: Boolean,
+    animated: Boolean,
+    topPadding: Dp
+) {
+    val columnModifier = if (animated)
+        modifier.fillMaxWidth().animateContentSize()
+    else
+        modifier.fillMaxWidth()
+
+    LazyColumn(
+        modifier = columnModifier,
+        state = scrollState
+    ) {
+        item {
+            Spacer(modifier = Modifier.height(topPadding))
+        }
+        itemsIndexed(
+            items = mainNotes,
+            key = { _, note -> note.id }
+        ) { _, note ->
+            val itemModifier = if (animated) Modifier.animateItemPlacement() else Modifier
+            NoteItem(
+                modifier = itemModifier,
+                note = note,
+                selected = selectedNotes.contains(note),
+                collapsedView = collapsedView,
+                onNoteClick = onNoteClick,
+                onNoteLongClick = onNoteLongClick
+            )
+        }
+        item {
+            if (archiveNotes.isNotEmpty()) {
+                Text(
+                    modifier = Modifier
+                        .padding(start = 30.dp, top = 5.dp, bottom = 10.dp)
+                        .animateItemPlacement(),
+                    text = stringResource(id = R.string.search_archive),
+                    fontSize = 15.sp
                 )
             }
         }
-    } else {
-        LazyColumn(modifier = modifier.alpha(animatedAlpha)) {
-            itemsIndexed(
-                items = notes,
-                key = { _, note -> note.id }
-            ) { _, note ->
-                NoteItem(
-                    modifier = Modifier.animateItemPlacement(),
-                    note = note,
-                    selected = selectedNotes.contains(note),
-                    collapsedView = false,
-                    onNoteClick = onNoteClick,
-                    onNoteLongClick = onNoteLongClick
-                )
-            }
+        itemsIndexed(
+            items = archiveNotes,
+            key = { _, note -> note.id }
+        ) { _, note ->
+            val itemModifier = if (animated) Modifier.animateItemPlacement() else Modifier
+            NoteItem(
+                modifier = itemModifier,
+                note = note,
+                selected = selectedNotes.contains(note),
+                collapsedView = collapsedView,
+                onNoteClick = onNoteClick,
+                onNoteLongClick = onNoteLongClick
+            )
         }
     }
 }

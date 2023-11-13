@@ -146,7 +146,7 @@ fun NotesScreen(
             exit = fadeOut()
         ) {
             NoteList(
-                notes = uiState.notes,
+                mainNotes = uiState.notes,
                 selectedNotes = uiState.selectedNotes,
                 onNoteClick = viewModel::noteClick,
                 onNoteLongClick = viewModel::noteLongClick,
