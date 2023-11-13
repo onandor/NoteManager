@@ -69,7 +69,7 @@ class EditLabelsViewModel @Inject constructor(
             is AsyncResult.Error -> {
                 EditLabelsUiState(
                     loading = false,
-                    snackbarMessageResource = R.string.edit_labels_loading_error
+                    snackbarMessageResource = R.string.error_while_loading_labels
                 )
             }
             is AsyncResult.Success -> {
