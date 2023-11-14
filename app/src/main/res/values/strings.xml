@@ -136,7 +136,7 @@
     <string name="search_notes">Notes</string>
     <string name="search_archive">Archive</string>
     <string name="search_no_results">No notes are matching your criteria</string>
-    <string name="search_empty_search">Search your notes by their title and content or by applied labels</string>
+    <string name="search_empty_search">Search your notes by their title and content and applied labels</string>
     <string name="search_hint_search">Search</string>
     <string name="search_button_hint_go_back">Go back</string>
     <string name="search_hint_clear_search">Clear search</string>
@@ -172,4 +172,9 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_theme_system">System</string>
+    <string name="label_search_screen_expand_list_view">Expand list view</string>
+    <string name="label_search_screen_collapse_list_view">Collapse list view</string>
+    <string name="label_search_screen_delete_label">Delete label</string>
+    <string name="label_search_screen_edit_label">Edit label</string>
+    <string name="label_search_screen_empty">You don\'t have any notes with this label</string>
 </resources>

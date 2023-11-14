@@ -1,5 +1,6 @@
 package com.onandor.notemanager.ui.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -46,7 +48,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AppModalDrawer(
-    viewModel: DrawerViewModel = hiltViewModel(),
+    viewModel: DrawerViewModel,
     drawerState: DrawerState,
     currentRoute: String,
     coroutineScope: CoroutineScope = rememberCoroutineScope(),
@@ -54,6 +56,10 @@ fun AppModalDrawer(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(currentRoute) {
+        viewModel.changeCurrentRoute(currentRoute)
+    }
+    
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -68,7 +74,7 @@ fun AppModalDrawer(
                 onNavigateToSettings = viewModel::navigateToSettings,
                 onNavigateToUserDetails = viewModel::navigateToUserDetails,
                 onNavigateToEditLabels = viewModel::navigateToEditLabels,
-                onLabelClick = { /* TODO(drawer) */ }
+                onLabelClick = viewModel::navigateToLabelSearch
             )
         }
     ) {
@@ -193,9 +199,12 @@ fun AppDrawer(
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    selected = label.title == selectedLabel?.title,
+                    selected = label.title == selectedLabel?.title && currentRoute == NavDestinations.LABEL_SEARCH,
                     modifier = itemModifier,
-                    onClick = { /*TODO*/ }
+                    onClick = {
+                        onLabelClick(label)
+                        closeDrawer()
+                    }
                 )
             }
             Spacer(modifier = Modifier.weight(1f))

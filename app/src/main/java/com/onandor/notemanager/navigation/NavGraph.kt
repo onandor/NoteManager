@@ -27,6 +27,7 @@ import com.onandor.notemanager.viewmodels.NavigationViewModel
 import com.onandor.notemanager.ui.screens.AddEditNoteScreen
 import com.onandor.notemanager.ui.screens.ArchiveScreen
 import com.onandor.notemanager.ui.screens.EditLabelsScreen
+import com.onandor.notemanager.ui.screens.LabelSearchScreen
 import com.onandor.notemanager.ui.screens.NotesScreen
 import com.onandor.notemanager.ui.screens.OnboardingScreen
 import com.onandor.notemanager.ui.screens.SearchScreen
@@ -35,6 +36,7 @@ import com.onandor.notemanager.ui.screens.SignInRegisterScreen
 import com.onandor.notemanager.ui.screens.SignedOutScreen
 import com.onandor.notemanager.ui.screens.TrashScreen
 import com.onandor.notemanager.ui.screens.UserDetailsScreen
+import com.onandor.notemanager.viewmodels.DrawerViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
@@ -51,6 +53,7 @@ fun NavGraph(
     val currentNavBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentNavBackStackEntry?.destination?.route ?: startDestination
     val navManagerState by viewModel.navigationManager.navActions.collectAsState()
+    val drawerViewModel: DrawerViewModel = hiltViewModel()
 
     LaunchedEffect(navManagerState) {
         navManagerState?.let {
@@ -79,6 +82,7 @@ fun NavGraph(
                 AppModalDrawer(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
+                    viewModel = drawerViewModel
                 ) {
                     NotesScreen(
                         onOpenDrawer = { coroutineScope.launch { drawerState.open() } }
@@ -106,6 +110,7 @@ fun NavGraph(
                 AppModalDrawer(
                     drawerState = drawerState,
                     currentRoute = currentRoute,
+                    viewModel = drawerViewModel
                 ) {
                     ArchiveScreen(
                         onOpenDrawer = { coroutineScope.launch { drawerState.open() } }
@@ -135,6 +140,31 @@ fun NavGraph(
             }
             composable(NavDestinations.SEARCH) {
                 SearchScreen()
+            }
+            composable(
+                route = NavDestinations.LABEL_SEARCH,
+                arguments = listOf(
+                    navArgument(NavDestinationArgs.LABEL_ID_ARG) {
+                        type = NavType.StringType
+                        nullable = false
+                    }
+                )
+            ) {
+                AppModalDrawer(
+                    drawerState = drawerState,
+                    currentRoute = currentRoute,
+                    viewModel = drawerViewModel
+                ) {
+                    LabelSearchScreen(
+                        onOpenDrawer = { coroutineScope.launch { drawerState.open() } },
+                        onCloseDrawer = {
+                            coroutineScope.launch {
+                                drawerState.close()
+                            }
+                        },
+                        drawerOpen = drawerState.isOpen || drawerState.isAnimationRunning
+                    )
+                }
             }
         }
     }

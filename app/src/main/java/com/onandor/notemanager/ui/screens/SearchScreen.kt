@@ -113,7 +113,7 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
                         onBackClicked = { focusManager.clearFocus(); viewModel.navigateBack() }
                     )
                 } else {
-                    SelectionTopBar(
+                    SearchSelectionTopAppBar(
                         selectedNotes = uiState.selectedNotes,
                         onClearSelection = viewModel::clearSelection,
                         onMoveNotes = viewModel::moveSelectedNotes,
@@ -222,7 +222,7 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectionTopBar(
+fun SearchSelectionTopAppBar(
     selectedNotes: List<Note>,
     onClearSelection: () -> Unit,
     onMoveNotes: (NoteLocation) -> Unit,

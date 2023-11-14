@@ -1,10 +1,12 @@
 package com.onandor.notemanager.navigation
 
 import androidx.navigation.NavOptions
+import com.onandor.notemanager.navigation.NavDestinationArgs.LABEL_ID_ARG
 import com.onandor.notemanager.navigation.NavDestinationArgs.NOTE_ID_ARG
 import com.onandor.notemanager.navigation.Screens.ADD_EDIT_NOTE_SCREEN
 import com.onandor.notemanager.navigation.Screens.ARCHIVE_SCREEN
 import com.onandor.notemanager.navigation.Screens.EDIT_LABELS_SCREEN
+import com.onandor.notemanager.navigation.Screens.LABEL_SEARCH_SCREEN
 import com.onandor.notemanager.navigation.Screens.NOTES_SCREEN
 import com.onandor.notemanager.navigation.Screens.ONBOARDING_SCREEN
 import com.onandor.notemanager.navigation.Screens.SEARCH_SCREEN
@@ -26,6 +28,7 @@ private object Screens {
     const val SIGNED_OUT_SCREEN = "signedOut"
     const val EDIT_LABELS_SCREEN = "editLabels"
     const val SEARCH_SCREEN = "searchScreen"
+    const val LABEL_SEARCH_SCREEN = "labelSearchScreen"
 }
 
 object NavDestinations {
@@ -40,10 +43,12 @@ object NavDestinations {
     const val SIGNED_OUT = SIGNED_OUT_SCREEN
     const val EDIT_LABELS = EDIT_LABELS_SCREEN
     const val SEARCH = SEARCH_SCREEN
+    const val LABEL_SEARCH = "${LABEL_SEARCH_SCREEN}?$LABEL_ID_ARG={$LABEL_ID_ARG}"
 }
 
 object NavDestinationArgs {
     const val NOTE_ID_ARG = "noteId"
+    const val LABEL_ID_ARG = "labelId"
 }
 
 interface NavAction {
@@ -120,5 +125,13 @@ object NavActions {
 
     fun search() = object : NavAction {
         override val destination = NavDestinations.SEARCH
+    }
+
+    fun labelSearch(labelId: String) = object : NavAction {
+        override val destination: String = "${LABEL_SEARCH_SCREEN}?${LABEL_ID_ARG}=$labelId"
+        override val navOptions: NavOptions = NavOptions.Builder()
+            .setPopUpTo(0, false)
+            .setLaunchSingleTop(true)
+            .build()
     }
 }
