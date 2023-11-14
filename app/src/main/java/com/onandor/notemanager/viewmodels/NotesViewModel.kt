@@ -159,7 +159,7 @@ class NotesViewModel @Inject constructor(
         }
     }
 
-    fun showSearch() {
+    fun navigateToSearch() {
         navManager.navigateTo(NavActions.search())
     }
 

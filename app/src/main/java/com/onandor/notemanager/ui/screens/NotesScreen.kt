@@ -85,7 +85,7 @@ fun NotesScreen(
                         onToggleNoteListCollapsedView = viewModel::toggleNoteListCollapsedView,
                         onNoteSortingChanged = viewModel::changeSorting,
                         currentSorting = uiState.noteListState.sorting,
-                        onSearchClicked = viewModel::showSearch
+                        onSearchClicked = viewModel::navigateToSearch
                     )
                 } else {
                     MultiSelectTopAppBar(

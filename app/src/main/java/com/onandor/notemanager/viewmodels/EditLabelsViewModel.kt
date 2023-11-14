@@ -6,6 +6,7 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.navigation.INavigationManager
+import com.onandor.notemanager.utils.AddEditLabelForm
 import com.onandor.notemanager.utils.AsyncResult
 import com.onandor.notemanager.utils.LabelColor
 import com.onandor.notemanager.utils.LabelColorType
@@ -23,13 +24,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
-
-data class AddEditLabelForm(
-    val id: UUID? = null,
-    val title: String = "",
-    val titleValid: Boolean = false,
-    val color: LabelColor = LabelColors.none
-)
 
 data class EditLabelsUiState(
     val loading: Boolean = true,

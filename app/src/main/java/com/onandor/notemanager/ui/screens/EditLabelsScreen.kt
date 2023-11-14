@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,7 +49,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
@@ -96,7 +94,7 @@ fun EditLabelsScreen(
 ) {
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
     val labelDialogState = rememberModalBottomSheetState()
     val scrollState = rememberLazyListState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -165,7 +163,7 @@ fun EditLabelsScreen(
     }
 
     fun hideAddEditLabelDialog() {
-        scope.launch {
+        coroutineScope.launch {
             labelDialogState.hide()
             viewModel.hideAddEditLabelDialog()
         }
@@ -243,7 +241,7 @@ private fun LabelItem(
 }
 
 @Composable
-private fun AddEditLabelDialogContent(
+fun AddEditLabelDialogContent(
     title: String,
     color: LabelColor,
     titleValid: Boolean,

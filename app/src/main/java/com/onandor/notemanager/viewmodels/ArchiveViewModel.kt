@@ -155,7 +155,7 @@ class ArchiveViewModel @Inject constructor(
         }
     }
 
-    fun showSearch() {
+    fun navigateToSearch() {
         navManager.navigateTo(NavActions.search())
     }
 

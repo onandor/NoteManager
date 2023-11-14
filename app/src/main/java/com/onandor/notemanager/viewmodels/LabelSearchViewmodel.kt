@@ -16,13 +16,16 @@ import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavActions
 import com.onandor.notemanager.navigation.NavDestinationArgs
 import com.onandor.notemanager.ui.components.NoteListState
+import com.onandor.notemanager.utils.AddEditLabelForm
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AsyncResult
 import com.onandor.notemanager.utils.LabelColor
-import com.onandor.notemanager.utils.LabelColors
+import com.onandor.notemanager.utils.LabelColorType
 import com.onandor.notemanager.utils.NoteComparisonField
 import com.onandor.notemanager.utils.NoteSorting
 import com.onandor.notemanager.utils.Order
+import com.onandor.notemanager.utils.combine
+import com.onandor.notemanager.utils.labelColors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,22 +42,19 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
-data class SearchedLabel(
-    val id: UUID? = null,
-    val title: String = "",
-    val color: LabelColor = LabelColors.none
-)
-
 data class LabelSearchUiState(
     val loading: Boolean = true,
-    val searchedLabel: SearchedLabel = SearchedLabel(),
+    val searchedLabel: AddEditLabelForm = AddEditLabelForm(),
     val mainNotes: List<Note> = emptyList(),
     val archiveNotes: List<Note> = emptyList(),
     val selectedNotes: List<Note> = emptyList(),
     val noteListState: NoteListState = NoteListState(),
     val addEditSnackbarResource: Int = 0,
     val snackbarResource: Int = 0,
-    val pinEntryDialogOpen: Boolean = false
+    val pinEntryDialogOpen: Boolean = false,
+    val editLabelDialogOpen: Boolean = false,
+    val deleteDialogOpen: Boolean = false,
+    val editLabelForm: AddEditLabelForm = AddEditLabelForm()
 )
 
 @HiltViewModel
@@ -70,8 +70,14 @@ class LabelSearchViewmodel @Inject constructor(
     private val labelId = savedStateHandle
         .get<String>(NavDestinationArgs.LABEL_ID_ARG)
         .let { if (it != null) UUID.fromString(it) else null }
-    private val _searchedLabel = MutableStateFlow(SearchedLabel())
+    private val _searchedLabel = MutableStateFlow(AddEditLabelForm())
     private var lockedNote: Note? = null
+
+    private val _editLabelForm = MutableStateFlow(AddEditLabelForm())
+    val colorSelection = labelColors.toList()
+        .map { pair -> pair.second }
+        .filterNot { labelColor -> labelColor.type == LabelColorType.None }
+
     private val noteListState = combine(
         settings.observeBoolean(SettingsKeys.NOTE_LIST_COLLAPSED_VIEW, false),
         settings.observeInt(SettingsKeys.NOTE_LIST_SORT_BY),
@@ -117,8 +123,8 @@ class LabelSearchViewmodel @Inject constructor(
 
     private val _uiState = MutableStateFlow(LabelSearchUiState())
     val uiState = combine(
-        _uiState, _notesAsync, _searchedLabel, addEditResultState.result, noteListState
-    ) { uiState, notesAsync, searchedLabel, addEditResult, noteListState ->
+        _uiState, _notesAsync, _searchedLabel, addEditResultState.result, noteListState, _editLabelForm
+    ) { uiState, notesAsync, searchedLabel, addEditResult, noteListState, labelEditForm ->
         when(notesAsync) {
             AsyncResult.Loading -> {
                 uiState.copy(
@@ -141,7 +147,8 @@ class LabelSearchViewmodel @Inject constructor(
                     mainNotes = notesAsync.data.first,
                     archiveNotes = notesAsync.data.second,
                     addEditSnackbarResource = addEditResult.resource,
-                    noteListState = noteListState
+                    noteListState = noteListState,
+                    editLabelForm = labelEditForm
                 )
             }
         }
@@ -165,6 +172,14 @@ class LabelSearchViewmodel @Inject constructor(
                         it.copy(
                             id = label.id,
                             title = label.title,
+                            color = label.color
+                        )
+                    }
+                    _editLabelForm.update {
+                        it.copy(
+                            id = label.id,
+                            title = label.title,
+                            titleValid = true,
                             color = label.color
                         )
                     }
@@ -209,7 +224,7 @@ class LabelSearchViewmodel @Inject constructor(
         }
     }
 
-    fun showSearch() {
+    fun navigateToSearch() {
         navManager.navigateTo(NavActions.search())
     }
 
@@ -294,12 +309,66 @@ class LabelSearchViewmodel @Inject constructor(
         return true
     }
 
-    fun deleteLabel() {
-        // TODO(drawer)
+    fun updateLabelTitle(newTitle: String) {
+        if (newTitle.length > 30)
+            return
+
+        _editLabelForm.update {
+            it.copy(
+                title = newTitle,
+                titleValid = newTitle.isNotEmpty()
+            )
+        }
     }
 
-    fun editLabel() {
-        // TODO(drawer)
+    fun updateLabelColor(newColor: LabelColor) {
+        _editLabelForm.update { it.copy(color = newColor) }
+    }
+
+    fun saveLabel() {
+        if (_searchedLabel.value.id == null)
+            return
+
+        _searchedLabel.update {
+            it.copy(
+                title = _editLabelForm.value.title,
+                color = _editLabelForm.value.color
+            )
+        }
+        viewModelScope.launch {
+            labelRepository.updateLabel(
+                labelId = _editLabelForm.value.id!!,
+                title = _editLabelForm.value.title,
+                color = _editLabelForm.value.color
+            )
+        }
+    }
+
+    fun deleteLabel() {
+        _uiState.update { it.copy(deleteDialogOpen = false) }
+        if (labelId == null)
+            return
+
+        viewModelScope.launch {
+            labelRepository.deleteLabel(labelId)
+        }
+        navManager.navigateBack()
+    }
+
+    fun openEditLabelDialog() {
+        _uiState.update { it.copy(editLabelDialogOpen = true) }
+    }
+
+    fun closeEditLabelDialog() {
+        _uiState.update { it.copy(editLabelDialogOpen = false) }
+    }
+
+    fun openDeleteDialog() {
+        _uiState.update { it.copy(deleteDialogOpen = true) }
+    }
+
+    fun closeDeleteDialog() {
+        _uiState.update { it.copy(deleteDialogOpen = false) }
     }
 
     fun navigateBack() {

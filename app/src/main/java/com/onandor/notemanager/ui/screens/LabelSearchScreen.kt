@@ -9,9 +9,11 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
@@ -20,12 +22,14 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,17 +47,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.onandor.notemanager.R
-import com.onandor.notemanager.data.Note
-import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.ui.components.ColoredStatusBarTopAppBar
 import com.onandor.notemanager.ui.components.EmptyContent
-import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.NoteSortingMenu
-import com.onandor.notemanager.ui.components.PinButton
+import com.onandor.notemanager.ui.components.PinEntryDialog
+import com.onandor.notemanager.ui.components.SimpleConfirmationDialog
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.utils.NoteSorting
 import com.onandor.notemanager.viewmodels.LabelSearchViewmodel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +74,7 @@ fun LabelSearchScreen(
         TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
     else
         TopAppBarDefaults.pinnedScrollBehavior(topAppBarState)
+    val editLabelDialogState = rememberModalBottomSheetState()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -97,9 +101,9 @@ fun LabelSearchScreen(
                         onToggleNoteListCollapsedView = viewModel::toggleNoteListCollapsedView,
                         currentSorting = uiState.noteListState.sorting,
                         onNoteSortingChanged = viewModel::changeSorting,
-                        onSearchClicked = viewModel::showSearch,
-                        onDeleteLabel = viewModel::deleteLabel,
-                        onEditLabel = viewModel::editLabel
+                        onSearchClicked = viewModel::navigateToSearch,
+                        onDeleteLabel = viewModel::openDeleteDialog,
+                        onEditLabel = viewModel::openEditLabelDialog
                     )
                 } else {
                     SearchSelectionTopAppBar(
@@ -147,9 +151,55 @@ fun LabelSearchScreen(
         }
     }
 
+    fun hideEditLabelDialog() {
+        coroutineScope.launch {
+            editLabelDialogState.hide()
+            viewModel.closeEditLabelDialog()
+        }
+    }
+
+    if (uiState.editLabelDialogOpen) {
+        val navBarInsets = WindowInsets.navigationBars
+        ModalBottomSheet(
+            onDismissRequest = viewModel::closeEditLabelDialog,
+            sheetState = editLabelDialogState,
+            windowInsets = WindowInsets.ime,
+            dragHandle = { }
+        ) {
+            AddEditLabelDialogContent(
+                title = uiState.editLabelForm.title,
+                color = uiState.editLabelForm.color,
+                titleValid = uiState.editLabelForm.titleValid,
+                onTitleChanged = viewModel::updateLabelTitle,
+                onColorChanged = viewModel::updateLabelColor,
+                onSubmitChange = { viewModel.saveLabel(); hideEditLabelDialog() },
+                colorSelection = viewModel.colorSelection,
+                navBarInsets = navBarInsets
+            )
+        }
+    }
+
+    if (uiState.deleteDialogOpen) {
+        SimpleConfirmationDialog(
+            onDismissRequest = viewModel::closeDeleteDialog,
+            onConfirmation = viewModel::deleteLabel,
+            text = stringResource(id = R.string.edit_labels_delete_confirmation)
+        )
+    }
+
+    if (uiState.pinEntryDialogOpen) {
+        PinEntryDialog(
+            onConfirmPin = viewModel::confirmPinEntry,
+            onDismissRequest = viewModel::closePinEntryDialog,
+            description = stringResource(id = R.string.dialog_pin_entry_locked_note_desc)
+        )
+    }
+
     BackHandler {
         if (drawerOpen) {
             onCloseDrawer()
+        } else if (uiState.editLabelDialogOpen) {
+            viewModel.closeEditLabelDialog()
         } else {
             viewModel.navigateBack()
         }
