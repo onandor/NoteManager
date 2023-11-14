@@ -374,4 +374,16 @@ class LabelSearchViewmodel @Inject constructor(
     fun navigateBack() {
         navManager.navigateBack()
     }
+
+    fun addNote() {
+        navManager.navigateTo(NavActions.addEditNote())
+    }
+
+    fun snackbarShown() {
+        _uiState.update { it.copy(snackbarResource = 0) }
+    }
+
+    fun addEditResultSnackbarShown() {
+        addEditResultState.clear()
+    }
 }

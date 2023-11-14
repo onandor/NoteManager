@@ -5,6 +5,8 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -14,12 +16,14 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
@@ -32,6 +36,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -120,6 +125,17 @@ fun LabelSearchScreen(
             SwipeableSnackbarHost(hostState = snackbarHostState) {
                 SnackbarHost(hostState = snackbarHostState)
             }
+        },
+        floatingActionButton = {
+            AnimatedVisibility(
+                visible = scrollBehavior.state.collapsedFraction == 0.0f,
+                enter = scaleIn(),
+                exit = scaleOut()
+            ) {
+                FloatingActionButton(onClick = viewModel::addNote) {
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.notes_new_note))
+                }
+            }
         }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -193,6 +209,28 @@ fun LabelSearchScreen(
             onDismissRequest = viewModel::closePinEntryDialog,
             description = stringResource(id = R.string.dialog_pin_entry_locked_note_desc)
         )
+    }
+
+    if (uiState.snackbarResource != 0) {
+        val snackbarText = stringResource(id = uiState.snackbarResource)
+        LaunchedEffect(uiState.addEditSnackbarResource) {
+            coroutineScope.launch { snackbarHostState.showSnackbar(snackbarText) }
+            viewModel.snackbarShown()
+        }
+    }
+
+    if (uiState.addEditSnackbarResource != 0) {
+        val resultText = stringResource(id = uiState.addEditSnackbarResource)
+        LaunchedEffect(uiState.addEditSnackbarResource) {
+            coroutineScope.launch { snackbarHostState.showSnackbar(resultText) }
+            viewModel.addEditResultSnackbarShown()
+        }
+    }
+
+    LaunchedEffect(uiState.selectedNotes.size) {
+        if (uiState.selectedNotes.isNotEmpty()) {
+            scrollBehavior.state.heightOffset = 0f
+        }
     }
 
     BackHandler {
