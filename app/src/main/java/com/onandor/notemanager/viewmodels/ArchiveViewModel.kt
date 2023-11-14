@@ -126,7 +126,7 @@ class ArchiveViewModel @Inject constructor(
             openPinEntryDialog()
         }
         else {
-            navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+            navManager.navigateTo(NavActions.editNote(note.id.toString()))
         }
     }
 
@@ -226,7 +226,7 @@ class ArchiveViewModel @Inject constructor(
         if (!hashResult.verified)
             return false
         _uiState.update { it.copy(pinEntryDialogOpen = false) }
-        navManager.navigateTo(NavActions.addEditNote(lockedNote!!.id.toString()))
+        navManager.navigateTo(NavActions.editNote(lockedNote!!.id.toString()))
         return true
     }
 }

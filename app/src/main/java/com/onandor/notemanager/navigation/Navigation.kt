@@ -33,7 +33,7 @@ private object Screens {
 
 object NavDestinations {
     const val NOTES = NOTES_SCREEN
-    const val ADD_EDIT_NOTE = "${ADD_EDIT_NOTE_SCREEN}?$NOTE_ID_ARG={$NOTE_ID_ARG}"
+    const val ADD_EDIT_NOTE = "${ADD_EDIT_NOTE_SCREEN}?$NOTE_ID_ARG={$NOTE_ID_ARG}&$LABEL_ID_ARG={$LABEL_ID_ARG}"
     const val ARCHIVE = ARCHIVE_SCREEN
     const val TRASH = TRASH_SCREEN
     const val SETTINGS = SETTINGS_SCREEN
@@ -69,14 +69,21 @@ object NavActions {
             .build()
     }
 
-    fun addEditNote() = object : NavAction {
+    fun addNote() = object : NavAction {
         override val destination: String = ADD_EDIT_NOTE_SCREEN
         override val navOptions: NavOptions = NavOptions.Builder()
             .setLaunchSingleTop(true)
             .build()
     }
 
-    fun addEditNote(noteId: String) = object : NavAction {
+    fun addNote(labelId: String) = object : NavAction {
+        override val destination: String = "${ADD_EDIT_NOTE_SCREEN}?${LABEL_ID_ARG}=$labelId"
+        override val navOptions: NavOptions = NavOptions.Builder()
+            .setLaunchSingleTop(true)
+            .build()
+    }
+
+    fun editNote(noteId: String) = object : NavAction {
         override val destination: String = "${ADD_EDIT_NOTE_SCREEN}?${NOTE_ID_ARG}=$noteId"
         override val navOptions: NavOptions = NavOptions.Builder()
             .setLaunchSingleTop(true)

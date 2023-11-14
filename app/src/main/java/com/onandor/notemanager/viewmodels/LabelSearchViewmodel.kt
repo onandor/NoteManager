@@ -21,6 +21,7 @@ import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AsyncResult
 import com.onandor.notemanager.utils.LabelColor
 import com.onandor.notemanager.utils.LabelColorType
+import com.onandor.notemanager.utils.NoteComparison
 import com.onandor.notemanager.utils.NoteComparisonField
 import com.onandor.notemanager.utils.NoteSorting
 import com.onandor.notemanager.utils.Order
@@ -141,11 +142,18 @@ class LabelSearchViewmodel @Inject constructor(
                 )
             }
             is AsyncResult.Success -> {
+                val sortedMainNotes = notesAsync.data.first
+                    .sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
+                    .sortedWith(compareByDescending(Note::pinned))
+                val sortedArchiveNotes = notesAsync.data.second
+                    .sortedWith(NoteComparison.comparators[noteListState.sorting]!!)
+                    .sortedWith(compareByDescending(Note::pinned))
+
                 uiState.copy(
                     loading = false,
                     searchedLabel = searchedLabel,
-                    mainNotes = notesAsync.data.first,
-                    archiveNotes = notesAsync.data.second,
+                    mainNotes = sortedMainNotes,
+                    archiveNotes = sortedArchiveNotes,
                     addEditSnackbarResource = addEditResult.resource,
                     noteListState = noteListState,
                     editLabelForm = labelEditForm
@@ -195,7 +203,7 @@ class LabelSearchViewmodel @Inject constructor(
             lockedNote = note
             openPinEntryDialog()
         } else {
-            navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+            navManager.navigateTo(NavActions.editNote(note.id.toString()))
         }
     }
 
@@ -305,7 +313,7 @@ class LabelSearchViewmodel @Inject constructor(
             return false
 
         _uiState.update { it.copy(pinEntryDialogOpen = false) }
-        navManager.navigateTo(NavActions.addEditNote(lockedNote!!.id.toString()))
+        navManager.navigateTo(NavActions.editNote(lockedNote!!.id.toString()))
         return true
     }
 
@@ -376,7 +384,10 @@ class LabelSearchViewmodel @Inject constructor(
     }
 
     fun addNote() {
-        navManager.navigateTo(NavActions.addEditNote())
+        if (labelId == null)
+            return
+
+        navManager.navigateTo(NavActions.addNote(labelId.toString()))
     }
 
     fun snackbarShown() {

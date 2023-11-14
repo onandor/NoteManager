@@ -118,7 +118,7 @@ class NotesViewModel @Inject constructor(
     }
 
     fun addNote() {
-        navManager.navigateTo(NavActions.addEditNote())
+        navManager.navigateTo(NavActions.addNote())
     }
 
     fun noteClick(note: Note) {
@@ -130,7 +130,7 @@ class NotesViewModel @Inject constructor(
             openPinEntryDialog()
         }
         else {
-            navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+            navManager.navigateTo(NavActions.editNote(note.id.toString()))
         }
     }
 
@@ -240,7 +240,7 @@ class NotesViewModel @Inject constructor(
             return false
 
         _uiState.update { it.copy(pinEntryDialogOpen = false) }
-        navManager.navigateTo(NavActions.addEditNote(lockedNote!!.id.toString()))
+        navManager.navigateTo(NavActions.editNote(lockedNote!!.id.toString()))
         return true
     }
 }

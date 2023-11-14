@@ -8,9 +8,7 @@ import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.data.NoteRepository
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavActions
-import com.onandor.notemanager.utils.AddEditResult
 import com.onandor.notemanager.utils.AddEditResultState
-import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.utils.AsyncResult
 import com.onandor.notemanager.utils.NoteComparison
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -103,7 +101,7 @@ class TrashViewModel @Inject constructor(
         if (_uiState.value.selectedNotes.isNotEmpty())
             noteLongClick(note)
         else
-            navManager.navigateTo(NavActions.addEditNote(note.id.toString()))
+            navManager.navigateTo(NavActions.editNote(note.id.toString()))
     }
 
     fun noteLongClick(note: Note) {

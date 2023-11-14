@@ -65,8 +65,12 @@ class AddEditNoteViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.SHORT)
-    private val _noteId: String = savedStateHandle[NavDestinationArgs.NOTE_ID_ARG] ?: ""
-    private var noteId: UUID? = if (_noteId.isNotEmpty()) UUID.fromString(_noteId) else null
+    private var noteId = savedStateHandle
+        .get<String>(NavDestinationArgs.NOTE_ID_ARG)
+        .let { if (it != null) UUID.fromString(it) else null }
+    private val labelId = savedStateHandle
+        .get<String>(NavDestinationArgs.LABEL_ID_ARG)
+        .let { if (it != null) UUID.fromString(it) else null }
     private var modified: Boolean = false
     private var savedByUser: Boolean = false
 
@@ -130,6 +134,13 @@ class AddEditNoteViewModel @Inject constructor(
                     newNote = true,
                     modificationDate = dtf.format(LocalDateTime.now())
                 )
+            }
+            if (labelId != null) {
+                viewModelScope.launch {
+                    val startingLabel = labelRepository.getLabel(labelId) ?: return@launch
+                    val addedLabels = listOf(startingLabel)
+                    _uiState.update { it.copy(addedLabels = addedLabels) }
+                }
             }
         }
     }

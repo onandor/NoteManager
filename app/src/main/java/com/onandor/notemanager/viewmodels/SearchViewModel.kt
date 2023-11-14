@@ -154,15 +154,20 @@ class SearchViewModel @Inject constructor(
                     )
                 }
                 else {
-                    val emptyResult = !emptySearch && notesAndLabelsAsync.data.mainNotes.isEmpty()
-                            && notesAndLabelsAsync.data.archiveNotes.isEmpty()
+                    val sortedMainNotes = notesAndLabelsAsync.data.mainNotes
+                        .sortedWith(compareByDescending(Note::pinned))
+                    val sortedArchiveNotes = notesAndLabelsAsync.data.archiveNotes
+                        .sortedWith(compareByDescending(Note::pinned))
+                    val emptyResult = !emptySearch && sortedMainNotes.isEmpty()
+                            && sortedArchiveNotes.isEmpty()
+
                     uiState.copy(
                         loading = notesLoading,
                         emptySearch = false,
                         emptyResult = emptyResult,
                         searchForm = searchForm,
-                        mainNotes = notesAndLabelsAsync.data.mainNotes,
-                        archiveNotes = notesAndLabelsAsync.data.archiveNotes,
+                        mainNotes = sortedMainNotes,
+                        archiveNotes = sortedArchiveNotes,
                         labels = notesAndLabelsAsync.data.labels
                     )
                 }
@@ -208,7 +213,7 @@ class SearchViewModel @Inject constructor(
             openPinEntryDialog()
         }
         else {
-            navManager.navigateTo(NavActions.addEditNote(note.id.toString()), popCurrent = true)
+            navManager.navigateTo(NavActions.editNote(note.id.toString()), popCurrent = true)
         }
     }
 
@@ -317,7 +322,7 @@ class SearchViewModel @Inject constructor(
             return false
 
         _uiState.update { it.copy(pinEntryDialogOpen = false) }
-        navManager.navigateTo(NavActions.addEditNote(lockedNote!!.id.toString()), popCurrent = true)
+        navManager.navigateTo(NavActions.editNote(lockedNote!!.id.toString()), popCurrent = true)
         return true
     }
 }

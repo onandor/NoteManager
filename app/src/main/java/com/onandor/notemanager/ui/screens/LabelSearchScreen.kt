@@ -276,12 +276,12 @@ private fun MoreOptionsMenu(
                 )
             }
             DropdownMenuItem(
-                text = { Text(stringResource(id = R.string.label_search_screen_delete_label)) },
-                onClick = { onDeleteLabel(); expanded = false }
-            )
-            DropdownMenuItem(
                 text = { Text(stringResource(id = R.string.label_search_screen_edit_label)) },
                 onClick = { onEditLabel(); expanded = false }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(id = R.string.label_search_screen_delete_label)) },
+                onClick = { onDeleteLabel(); expanded = false }
             )
         }
     }
