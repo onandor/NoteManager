@@ -432,8 +432,16 @@ class AddEditNoteViewModel @Inject constructor(
          * the user simply navigates back to the previous screen, and in that case the note has
          * already been saved/deleted/whatever. So there needs to be a check for that.
          */
-        if (!savedByUser)
+        if (savedByUser)
+            return
+
+        if (_uiState.value.title.text.isNotEmpty() || _uiState.value.content.text.isNotEmpty()) {
             saveNote()
+        } else if (noteId != null) {
+            viewModelScope.launch {
+                noteRepository.deleteNote(noteId!!)
+            }
+        }
     }
 
     fun changePinned(pinned: Boolean) {
