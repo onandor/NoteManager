@@ -18,6 +18,10 @@ import com.onandor.notemanager.utils.NoteComparison
 import com.onandor.notemanager.utils.NoteComparisonField
 import com.onandor.notemanager.utils.NoteSorting
 import com.onandor.notemanager.utils.Order
+import com.onandor.notemanager.utils.undo.NoteMoveSnapshot
+import com.onandor.notemanager.utils.undo.UndoableAction
+import com.onandor.notemanager.utils.undo.UndoableActionHolder
+import com.onandor.notemanager.utils.undo.createNoteMoveSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -38,7 +42,9 @@ data class ArchiveUiState(
     val noteListState: NoteListState = NoteListState(),
     val addEditSnackbarResource: Int = 0,
     val selectionSnackbarResource: Int = 0,
-    val pinEntryDialogOpen: Boolean = false
+    val pinEntryDialogOpen: Boolean = false,
+    val showUndoableAddEditSnackbar: Boolean = false,
+    val showUndoableSelectionSnackbar: Boolean = false
 )
 
 @HiltViewModel
@@ -46,7 +52,8 @@ class ArchiveViewModel @Inject constructor(
     private val noteRepository: INoteRepository,
     private val addEditResultState: AddEditResultState,
     private val navManager: INavigationManager,
-    private val settings: ISettings
+    private val settings: ISettings,
+    private val undoableActionHolder: UndoableActionHolder
 ) : ViewModel() {
 
     private val noteListState = combine(
@@ -114,7 +121,7 @@ class ArchiveViewModel @Inject constructor(
     }
 
     fun selectionSnackbarShown() {
-        _uiState.update { it.copy(selectionSnackbarResource = 0) }
+        _uiState.update { it.copy(selectionSnackbarResource = 0, showUndoableSelectionSnackbar = false) }
     }
 
     fun noteClick(note: Note) {
@@ -165,7 +172,9 @@ class ArchiveViewModel @Inject constructor(
 
     fun moveSelectedNotes(location: NoteLocation) {
         viewModelScope.launch {
+            val noteMoveSnapshots: MutableList<NoteMoveSnapshot> = mutableListOf()
             _uiState.value.selectedNotes.forEach { note ->
+                noteMoveSnapshots.add(createNoteMoveSnapshot(note))
                 if (location == NoteLocation.TRASH) {
                     if (note.pinned)
                         noteRepository.updateNotePinned(note.id, false)
@@ -188,8 +197,9 @@ class ArchiveViewModel @Inject constructor(
                 else -> 0
             }
             _uiState.update {
-                it.copy(selectionSnackbarResource = resource)
+                it.copy(selectionSnackbarResource = resource, showUndoableSelectionSnackbar = true)
             }
+            undoableActionHolder.set(UndoableAction.NoteMove(noteMoveSnapshots))
         }
     }
 
@@ -228,5 +238,28 @@ class ArchiveViewModel @Inject constructor(
         _uiState.update { it.copy(pinEntryDialogOpen = false) }
         navManager.navigateTo(NavActions.editNote(lockedNote!!.id.toString()))
         return true
+    }
+
+    fun undoLastAction() {
+        val action = undoableActionHolder.action ?: return
+        when (action) {
+            is UndoableAction.NoteMove -> {
+                viewModelScope.launch {
+                    action.noteMoveSnapshots.forEach { (noteId, location, pinned, pinHash) ->
+                        noteRepository.updateNoteLocation(noteId, location)
+                        if (pinned)
+                            noteRepository.updateNotePinned(noteId, true)
+                        if (pinHash.isNotEmpty())
+                            noteRepository.updateNotePinHash(noteId, pinHash)
+                    }
+                }
+            }
+            /* It is not possible to delete notes here, only to move them into the trash */
+            is UndoableAction.NoteDelete -> {}
+        }
+    }
+
+    fun clearLastUndoableAction() {
+        undoableActionHolder.clear()
     }
 }

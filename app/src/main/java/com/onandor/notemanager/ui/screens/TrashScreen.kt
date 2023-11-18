@@ -29,8 +29,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -160,8 +162,27 @@ fun TrashScreen(
 
         if (uiState.snackbarResource != 0) {
             val snackbarText = stringResource(id = uiState.snackbarResource)
+            val undoText = stringResource(id = R.string.undo)
             LaunchedEffect(uiState.addEditSnackbarResource) {
-                scope.launch { snackbarHostState.showSnackbar(snackbarText) }
+                if (!uiState.showUndoableSnackbar) {
+                    scope.launch { snackbarHostState.showSnackbar(snackbarText) }
+                } else {
+                    scope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = snackbarText,
+                            actionLabel = undoText,
+                            duration = SnackbarDuration.Short
+                        )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> {
+                                viewModel.undoLastAction()
+                            }
+                            SnackbarResult.Dismissed -> {
+                                viewModel.clearLastUndoableAction()
+                            }
+                        }
+                    }
+                }
                 viewModel.snackbarShown()
             }
         }

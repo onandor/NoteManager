@@ -18,8 +18,10 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -165,8 +167,27 @@ fun NotesScreen(
 
         if (uiState.selectionSnackbarResource != 0) {
             val snackbarText = stringResource(id = uiState.selectionSnackbarResource)
-            LaunchedEffect(uiState.addEditSnackbarResource) {
-                coroutineScope.launch { snackbarHostState.showSnackbar(snackbarText) }
+            val undoText = stringResource(id = R.string.undo)
+            LaunchedEffect(uiState.selectionSnackbarResource) {
+                if (!uiState.showUndoableSelectionSnackbar) {
+                    coroutineScope.launch { snackbarHostState.showSnackbar(snackbarText) }
+                } else {
+                    coroutineScope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = snackbarText,
+                            actionLabel = undoText,
+                            duration = SnackbarDuration.Short
+                        )
+                        when(result) {
+                            SnackbarResult.ActionPerformed -> {
+                                viewModel.undoLastAction()
+                            }
+                            SnackbarResult.Dismissed -> {
+                                viewModel.clearLastUndoableAction()
+                            }
+                        }
+                    }
+                }
                 viewModel.selectionSnackbarShown()
             }
         }

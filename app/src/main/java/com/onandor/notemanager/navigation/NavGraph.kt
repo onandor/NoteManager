@@ -108,10 +108,6 @@ fun NavGraph(
                     slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right)
                 }
             ) { currentNavBackStackEntry ->
-                val labelId = currentNavBackStackEntry.arguments?.getString(NavDestinationArgs.LABEL_ID_ARG)
-                val noteId = currentNavBackStackEntry.arguments?.getString(NavDestinationArgs.NOTE_ID_ARG)
-                println("graph noteid: $noteId")
-                println("graph labelid: $labelId")
                 AddEditNoteScreen()
             }
             composable(NavDestinations.ARCHIVE) {

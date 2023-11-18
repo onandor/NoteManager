@@ -3,14 +3,18 @@ package com.onandor.notemanager.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.R
+import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
-import com.onandor.notemanager.data.NoteRepository
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavActions
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AsyncResult
 import com.onandor.notemanager.utils.NoteComparison
+import com.onandor.notemanager.utils.undo.NoteMoveSnapshot
+import com.onandor.notemanager.utils.undo.UndoableAction
+import com.onandor.notemanager.utils.undo.UndoableActionHolder
+import com.onandor.notemanager.utils.undo.createNoteMoveSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,13 +33,16 @@ data class TrashUiState(
     val selectedNotes: List<Note> = emptyList(),
     val confirmationDialogOpen: Boolean = false,
     val addEditSnackbarResource: Int = 0,
-    val snackbarResource: Int = 0
+    val snackbarResource: Int = 0,
+    val showUndoableAddEditSnackbar: Boolean = false,
+    val showUndoableSnackbar: Boolean = false
 )
 @HiltViewModel
 class TrashViewModel @Inject constructor(
-    private val noteRepository: NoteRepository,
+    private val noteRepository: INoteRepository,
     private val addEditResultState: AddEditResultState,
-    private val navManager: INavigationManager
+    private val navManager: INavigationManager,
+    private val undoableActionHolder: UndoableActionHolder
 ) : ViewModel() {
 
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.TRASH)
@@ -49,17 +56,16 @@ class TrashViewModel @Inject constructor(
     ) { uiState, notesAsync, addEditResult ->
         when(notesAsync) {
             AsyncResult.Loading -> {
-                // TODO
                 uiState.copy(addEditSnackbarResource = addEditResult.resource)
             }
             is AsyncResult.Error -> {
-                // TODO
                 uiState.copy(
                     loading = false,
                     addEditSnackbarResource = addEditResult.resource
                 )
             }
             is AsyncResult.Success -> {
+                println(notesAsync.data)
                 uiState.copy(
                     loading = false,
                     notes = notesAsync.data,
@@ -75,14 +81,16 @@ class TrashViewModel @Inject constructor(
         )
 
     private fun emptyTrash() {
+        val noteSnapshots: List<Note> = uiState.value.notes.toList()
         viewModelScope.launch {
             noteRepository.emptyTrash()
-            _uiState.update { it.copy(snackbarResource = R.string.trash_snackbar_trash_emptied) }
+            _uiState.update { it.copy(snackbarResource = R.string.trash_snackbar_trash_emptied, showUndoableSnackbar = true) }
         }
+        undoableActionHolder.set(UndoableAction.NoteDelete(noteSnapshots))
     }
 
     fun dialogConfirmed() {
-        if (_uiState.value.selectedNotes.isEmpty())
+        if (uiState.value.selectedNotes.isEmpty())
             emptyTrash()
         else
             deleteSelectedNotes()
@@ -94,7 +102,7 @@ class TrashViewModel @Inject constructor(
     }
 
     fun snackbarShown() {
-        _uiState.update { it.copy(snackbarResource = 0) }
+        _uiState.update { it.copy(snackbarResource = 0, showUndoableSnackbar = false) }
     }
 
     fun noteClick(note: Note) {
@@ -134,7 +142,9 @@ class TrashViewModel @Inject constructor(
 
     fun restoreSelectedNotes() {
         viewModelScope.launch {
+            val noteMoveSnapshots: MutableList<NoteMoveSnapshot> = mutableListOf()
             _uiState.value.selectedNotes.forEach { note ->
+                noteMoveSnapshots.add(createNoteMoveSnapshot(note))
                 noteRepository.updateNoteLocation(note.id, NoteLocation.NOTES)
             }
             val single = _uiState.value.selectedNotes.size == 1
@@ -143,13 +153,16 @@ class TrashViewModel @Inject constructor(
                 R.string.snackbar_selection_note_restored
             else
                 R.string.snackbar_selection_notes_restored
-            _uiState.update { it.copy(snackbarResource = resource) }
+            _uiState.update { it.copy(snackbarResource = resource, showUndoableSnackbar = true) }
+            undoableActionHolder.set(UndoableAction.NoteMove(noteMoveSnapshots))
         }
     }
 
     private fun deleteSelectedNotes() {
         viewModelScope.launch {
+            val noteSnapshots: MutableList<Note> = mutableListOf()
             _uiState.value.selectedNotes.forEach { note ->
+                noteSnapshots.add(note)
                 noteRepository.deleteNote(note.id)
             }
             val single = _uiState.value.selectedNotes.size == 1
@@ -158,7 +171,41 @@ class TrashViewModel @Inject constructor(
                 R.string.snackbar_selection_note_deleted
             else
                 R.string.snackbar_selection_notes_deleted
-            _uiState.update { it.copy(snackbarResource = resource) }
+            _uiState.update { it.copy(snackbarResource = resource, showUndoableSnackbar = true) }
+            undoableActionHolder.set(UndoableAction.NoteDelete(noteSnapshots))
         }
+    }
+
+    fun undoLastAction() {
+        val action = undoableActionHolder.action ?: return
+        when (action) {
+            is UndoableAction.NoteMove -> {
+                viewModelScope.launch {
+                    action.noteMoveSnapshots.forEach { (noteId, location, _, _) ->
+                        noteRepository.updateNoteLocation(noteId, location)
+                    }
+                }
+            }
+            is UndoableAction.NoteDelete -> {
+                viewModelScope.launch {
+                    action.notes.forEach { note ->
+                        noteRepository.createNote(
+                            title = note.title,
+                            content = note.content,
+                            labels = note.labels,
+                            location = note.location,
+                            pinned = note.pinned,
+                            pinHash = note.pinHash,
+                            creationDate = note.creationDate,
+                            modificationDate = note.modificationDate
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun clearLastUndoableAction() {
+        undoableActionHolder.clear()
     }
 }

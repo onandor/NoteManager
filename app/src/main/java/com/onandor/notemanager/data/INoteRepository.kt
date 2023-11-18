@@ -1,6 +1,7 @@
 package com.onandor.notemanager.data
 
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDateTime
 import java.util.UUID
 
 interface INoteRepository {
@@ -31,7 +32,9 @@ interface INoteRepository {
         labels: List<Label>,
         location: NoteLocation,
         pinned: Boolean,
-        pinHash: String
+        pinHash: String,
+        creationDate: LocalDateTime = LocalDateTime.now(),
+        modificationDate: LocalDateTime = LocalDateTime.now()
     ): UUID
 
     suspend fun updateNote(

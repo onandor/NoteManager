@@ -87,7 +87,9 @@ class NoteRepository @Inject constructor(
         labels: List<Label>,
         location: NoteLocation,
         pinned: Boolean,
-        pinHash: String
+        pinHash: String,
+        creationDate: LocalDateTime,
+        modificationDate: LocalDateTime
     ): UUID {
         val noteId = withContext(dispatcher) {
             UUID.randomUUID()
@@ -100,8 +102,8 @@ class NoteRepository @Inject constructor(
             location = location,
             pinned = pinned,
             pinHash = pinHash,
-            creationDate = LocalDateTime.now(),
-            modificationDate = LocalDateTime.now()
+            creationDate = creationDate,
+            modificationDate = modificationDate
         )
 
         noteDao.upsert(note.toLocal())
