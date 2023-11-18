@@ -58,7 +58,6 @@ import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
-import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.viewmodels.TrashViewModel
 import kotlinx.coroutines.launch
 
@@ -67,7 +66,7 @@ import kotlinx.coroutines.launch
 fun TrashScreen(
     viewModel: TrashViewModel = hiltViewModel()
 ) {
-    val scope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
     val snackbarHostState: SnackbarHostState = remember { SnackbarHostState() }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val topAppBarState = rememberTopAppBarState()
@@ -154,8 +153,27 @@ fun TrashScreen(
 
         if (uiState.addEditSnackbarResource != 0) {
             val resultText = stringResource(id = uiState.addEditSnackbarResource)
+            val undoText = stringResource(id = R.string.undo)
             LaunchedEffect(uiState.addEditSnackbarResource) {
-                scope.launch { snackbarHostState.showSnackbar(resultText) }
+                if (!uiState.showUndoableAddEditSnackbar) {
+                    coroutineScope.launch { snackbarHostState.showSnackbar(resultText) }
+                } else {
+                    coroutineScope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = resultText,
+                            actionLabel = undoText,
+                            duration = SnackbarDuration.Short
+                        )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> {
+                                viewModel.undoLastAction()
+                            }
+                            SnackbarResult.Dismissed -> {
+                                viewModel.clearLastUndoableAction()
+                            }
+                        }
+                    }
+                }
                 viewModel.addEditResultSnackbarShown()
             }
         }
@@ -165,9 +183,9 @@ fun TrashScreen(
             val undoText = stringResource(id = R.string.undo)
             LaunchedEffect(uiState.addEditSnackbarResource) {
                 if (!uiState.showUndoableSnackbar) {
-                    scope.launch { snackbarHostState.showSnackbar(snackbarText) }
+                    coroutineScope.launch { snackbarHostState.showSnackbar(snackbarText) }
                 } else {
-                    scope.launch {
+                    coroutineScope.launch {
                         val result = snackbarHostState.showSnackbar(
                             message = snackbarText,
                             actionLabel = undoText,

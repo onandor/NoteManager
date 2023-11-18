@@ -12,12 +12,16 @@ import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Label
+import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavDestinationArgs
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.utils.AsyncResult
+import com.onandor.notemanager.utils.undo.NoteMoveSnapshot
+import com.onandor.notemanager.utils.undo.UndoableAction
+import com.onandor.notemanager.utils.undo.UndoableActionHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +32,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.lang.RuntimeException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -40,7 +45,9 @@ data class AddEditNoteUiState(
     val title: TextFieldValue = TextFieldValue(""),
     val content: TextFieldValue = TextFieldValue(""),
     val location: NoteLocation = NoteLocation.NOTES,
-    val modificationDate: String = "",
+    val creationDate: LocalDateTime = LocalDateTime.now(),
+    val modificationDate: LocalDateTime = LocalDateTime.now(),
+    val modificationDateString: String = "",
     val pinned: Boolean = false,
     val pinHash: String = "",
     val addedLabels: List<Label> = emptyList(),
@@ -61,7 +68,8 @@ class AddEditNoteViewModel @Inject constructor(
     private val labelRepository: ILabelRepository,
     private val addEditResultState: AddEditResultState,
     private val savedStateHandle: SavedStateHandle,
-    private val navManager: INavigationManager
+    private val navManager: INavigationManager,
+    private val undoableActionHolder: UndoableActionHolder
 ) : ViewModel() {
 
     private val dtf = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.SHORT)
@@ -132,7 +140,7 @@ class AddEditNoteViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     newNote = true,
-                    modificationDate = dtf.format(LocalDateTime.now())
+                    modificationDateString = dtf.format(LocalDateTime.now())
                 )
             }
             if (labelId != null) {
@@ -172,7 +180,9 @@ class AddEditNoteViewModel @Inject constructor(
                         title = TextFieldValue(note.title),
                         content = TextFieldValue(note.content),
                         location = note.location,
-                        modificationDate = dtf.format(note.modificationDate),
+                        creationDate = note.creationDate,
+                        modificationDate = note.modificationDate,
+                        modificationDateString = dtf.format(note.modificationDate),
                         pinned = note.pinned,
                         pinHash = note.pinHash,
                         addedLabels = note.labels,
@@ -203,6 +213,7 @@ class AddEditNoteViewModel @Inject constructor(
 
         saveNote()
         addEditResultState.set(AddEditResults.SAVED)
+        undoableActionHolder.clear()
     }
 
     private fun saveNote() {
@@ -214,7 +225,12 @@ class AddEditNoteViewModel @Inject constructor(
                 updateExistingNote()
             }
         }
-        _uiState.update { it.copy(modificationDate = dtf.format(LocalDateTime.now())) }
+        _uiState.update {
+            it.copy(
+                modificationDate = LocalDateTime.now(),
+                modificationDateString = dtf.format(it.modificationDate)
+            )
+        }
     }
 
     private fun createNewNote() {
@@ -223,7 +239,7 @@ class AddEditNoteViewModel @Inject constructor(
                 title = _uiState.value.title.text,
                 content = _uiState.value.content.text,
                 labels = _uiState.value.addedLabels,
-                location = NoteLocation.NOTES,
+                location = _uiState.value.location,
                 pinned = _uiState.value.pinned,
                 pinHash = _uiState.value.pinHash
             )
@@ -243,23 +259,6 @@ class AddEditNoteViewModel @Inject constructor(
                 location = _uiState.value.location,
                 pinned = _uiState.value.pinned,
                 pinHash = _uiState.value.pinHash
-            )
-        }
-    }
-
-    private fun createAndArchiveNewNote() {
-        viewModelScope.launch {
-            val noteId = noteRepository.createNote(
-                title = _uiState.value.title.text,
-                content = _uiState.value.content.text,
-                labels = listOf(),
-                location = NoteLocation.NOTES,
-                pinned = _uiState.value.pinned,
-                pinHash = _uiState.value.pinHash
-            )
-            noteRepository.updateNoteLocation(
-                noteId = noteId,
-                location = NoteLocation.ARCHIVE
             )
         }
     }
@@ -336,16 +335,21 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun archiveNote() {
         savedByUser = true
-        if (noteId == null) {
-            if (_uiState.value.title.text.isEmpty() and _uiState.value.content.text.isEmpty()) {
-                addEditResultState.set(AddEditResults.DISCARDED)
-                return
-            }
-            createAndArchiveNewNote()
+        if (noteId == null && _uiState.value.title.text.isEmpty() && _uiState.value.content.text.isEmpty()) {
+            addEditResultState.set(AddEditResults.DISCARDED)
+            return
         }
         else {
             viewModelScope.launch {
-                noteRepository.updateNoteLocation(noteId!!, NoteLocation.ARCHIVE)
+                _uiState.update { it.copy(location = NoteLocation.ARCHIVE) }
+                runBlocking { saveNote() }
+                val noteMoveSnapshot = NoteMoveSnapshot(
+                    id = noteId!!,
+                    location = NoteLocation.NOTES,
+                    pinned = uiState.value.pinned,
+                    pinHash = uiState.value.pinHash
+                )
+                undoableActionHolder.set(UndoableAction.NoteMove(listOf(noteMoveSnapshot)))
             }
         }
         addEditResultState.set(AddEditResults.ARCHIVED)
@@ -357,7 +361,15 @@ class AddEditNoteViewModel @Inject constructor(
             throw RuntimeException("AddEditNoteViewModel.unArchiveNote(): cannot unarchive nonexistent note")
         }
         viewModelScope.launch {
-            noteRepository.updateNoteLocation(noteId!!, NoteLocation.NOTES)
+            _uiState.update { it.copy(location = NoteLocation.NOTES) }
+            runBlocking { saveNote() }
+            val noteMoveSnapshot = NoteMoveSnapshot(
+                id = noteId!!,
+                location = NoteLocation.ARCHIVE,
+                pinned = uiState.value.pinned,
+                pinHash = uiState.value.pinHash
+            )
+            undoableActionHolder.set(UndoableAction.NoteMove(listOf(noteMoveSnapshot)))
         }
         addEditResultState.set(AddEditResults.UNARCHIVED)
     }
@@ -369,9 +381,22 @@ class AddEditNoteViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            noteRepository.updateNotePinned(noteId!!, false)
-            noteRepository.updateNotePinHash(noteId!!, "")
-            noteRepository.updateNoteLocation(noteId!!, NoteLocation.TRASH)
+            val oldLocation = uiState.value.location
+            _uiState.update {
+                it.copy(
+                    location = NoteLocation.TRASH,
+                    pinned = false,
+                    pinHash = ""
+                )
+            }
+            runBlocking { saveNote() }
+            val noteMoveSnapshot = NoteMoveSnapshot(
+                id = noteId!!,
+                location = oldLocation,
+                pinned = false,
+                pinHash = ""
+            )
+            undoableActionHolder.set(UndoableAction.NoteMove(listOf(noteMoveSnapshot)))
         }
         addEditResultState.set(AddEditResults.TRASHED)
     }
@@ -384,6 +409,18 @@ class AddEditNoteViewModel @Inject constructor(
         viewModelScope.launch {
             noteRepository.deleteNote(noteId!!)
         }
+        val note = Note(
+            id = noteId!!,
+            title = uiState.value.title.text,
+            content = uiState.value.content.text,
+            labels = uiState.value.addedLabels,
+            location = uiState.value.location,
+            pinned = uiState.value.pinned,
+            pinHash = uiState.value.pinHash,
+            creationDate = uiState.value.creationDate,
+            modificationDate = uiState.value.modificationDate
+        )
+        undoableActionHolder.set(UndoableAction.NoteDelete(listOf(note)))
         addEditResultState.set(AddEditResults.DELETED)
     }
 

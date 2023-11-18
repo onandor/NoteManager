@@ -159,8 +159,27 @@ fun NotesScreen(
 
         if (uiState.addEditSnackbarResource != 0) {
             val resultText = stringResource(id = uiState.addEditSnackbarResource)
+            val undoText = stringResource(id = R.string.undo)
             LaunchedEffect(uiState.addEditSnackbarResource) {
-                coroutineScope.launch { snackbarHostState.showSnackbar(resultText) }
+                if (!uiState.showUndoableAddEditSnackbar) {
+                    coroutineScope.launch { snackbarHostState.showSnackbar(resultText) }
+                } else {
+                    coroutineScope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = resultText,
+                            actionLabel = undoText,
+                            duration = SnackbarDuration.Short
+                        )
+                        when (result) {
+                            SnackbarResult.ActionPerformed -> {
+                                viewModel.undoLastAction()
+                            }
+                            SnackbarResult.Dismissed -> {
+                                viewModel.clearLastUndoableAction()
+                            }
+                        }
+                    }
+                }
                 viewModel.addEditResultSnackbarShown()
             }
         }

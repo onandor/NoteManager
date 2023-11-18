@@ -107,7 +107,6 @@ import com.onandor.notemanager.ui.components.LifecycleObserver
 import com.onandor.notemanager.ui.components.PinButton
 import com.onandor.notemanager.ui.components.PinEntryDialog
 import com.onandor.notemanager.ui.components.SimpleConfirmationDialog
-import com.onandor.notemanager.utils.indexOfDifference
 import com.onandor.notemanager.viewmodels.AddEditNoteViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -162,7 +161,7 @@ fun AddEditNoteScreen(
             modifier = Modifier.padding(innerPadding),
             title = uiState.title,
             content = uiState.content,
-            modificationDate = uiState.modificationDate,
+            modificationDate = uiState.modificationDateString,
             onTitleChanged = viewModel::updateTitle,
             onContentChanged = viewModel::updateContent,
             onMoveCursor = viewModel::moveCursor,
@@ -656,12 +655,6 @@ private fun AddEditNoteTopAppBar(
                     Icon(
                         painter = painterResource(id = R.drawable.ic_note_unarchive_filled),
                         contentDescription = stringResource(id = R.string.addeditnote_archive_note)
-                    )
-                }
-                IconButton(onClick = { onTrashNote(); onNavigateBack() }) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(id = R.string.addeditnote_trash_note)
                     )
                 }
                 MoreOptionsMenu(

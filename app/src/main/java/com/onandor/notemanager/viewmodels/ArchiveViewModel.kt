@@ -105,6 +105,7 @@ class ArchiveViewModel @Inject constructor(
                     loading = false,
                     notes = sortedNotes,
                     addEditSnackbarResource = addEditResult.resource,
+                    showUndoableAddEditSnackbar = undoableActionHolder.action != null,
                     noteListState = noteListState
                 )
             }
@@ -210,10 +211,16 @@ class ArchiveViewModel @Inject constructor(
             }
             val single = _uiState.value.selectedNotes.size == 1
             clearSelection()
-            val resource = if (single)
-                R.string.snackbar_selection_note_pinned
-            else
-                R.string.snackbar_selection_notes_pinned
+            val resource = when (pinned) {
+                true -> {
+                    if (single) R.string.snackbar_selection_note_pinned
+                    else R.string.snackbar_selection_notes_pinned
+                }
+                false -> {
+                    if (single) R.string.snackbar_selection_note_unpinned
+                    else R.string.snackbar_selection_notes_unpinned
+                }
+            }
             _uiState.update {
                 it.copy(selectionSnackbarResource = resource)
             }
@@ -241,7 +248,7 @@ class ArchiveViewModel @Inject constructor(
     }
 
     fun undoLastAction() {
-        val action = undoableActionHolder.action ?: return
+        val action = undoableActionHolder.pop() ?: return
         when (action) {
             is UndoableAction.NoteMove -> {
                 viewModelScope.launch {

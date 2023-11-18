@@ -65,11 +65,11 @@ class TrashViewModel @Inject constructor(
                 )
             }
             is AsyncResult.Success -> {
-                println(notesAsync.data)
                 uiState.copy(
                     loading = false,
                     notes = notesAsync.data,
-                    addEditSnackbarResource = addEditResult.resource
+                    addEditSnackbarResource = addEditResult.resource,
+                    showUndoableAddEditSnackbar = undoableActionHolder.action != null
                 )
             }
         }
@@ -177,7 +177,7 @@ class TrashViewModel @Inject constructor(
     }
 
     fun undoLastAction() {
-        val action = undoableActionHolder.action ?: return
+        val action = undoableActionHolder.pop() ?: return
         when (action) {
             is UndoableAction.NoteMove -> {
                 viewModelScope.launch {

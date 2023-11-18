@@ -105,6 +105,7 @@ class NotesViewModel @Inject constructor(
                     loading = false,
                     notes = sortedNotes,
                     addEditSnackbarResource = addEditResult.resource,
+                    showUndoableAddEditSnackbar = undoableActionHolder.action != null,
                     noteListState = noteListState
                 )
             }
@@ -255,7 +256,7 @@ class NotesViewModel @Inject constructor(
     }
 
     fun undoLastAction() {
-        val action = undoableActionHolder.action ?: return
+        val action = undoableActionHolder.pop() ?: return
         when(action) {
             is UndoableAction.NoteMove -> {
                 viewModelScope.launch {

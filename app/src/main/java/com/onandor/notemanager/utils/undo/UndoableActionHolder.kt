@@ -13,6 +13,12 @@ class UndoableActionHolder @Inject constructor() {
         action = newAction
     }
 
+    fun pop(): UndoableAction? {
+        val _action = action
+        action = null
+        return _action
+    }
+
     fun clear() {
         action = null
     }
