@@ -133,6 +133,7 @@ fun AddEditNoteScreen(
     val focusManager = LocalFocusManager.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val uriHandler = LocalUriHandler.current
+    var bottomRowHeight by remember { mutableIntStateOf(0) }
 
     Scaffold(
         modifier = Modifier
@@ -188,10 +189,15 @@ fun AddEditNoteScreen(
                 newNote = uiState.newNote,
                 editLabelsDialogOpen = uiState.editLabelsDialogOpen,
                 titleLinkRanges = uiState.titleLinkRanges,
-                contentLinkRanges = uiState.contentLinkRanges
+                contentLinkRanges = uiState.contentLinkRanges,
+                bottomRowHeight = bottomRowHeight
             )
             BottomRow(
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .onGloballyPositioned { coordinates ->
+                        bottomRowHeight = coordinates.size.height
+                    },
                 scrolled = scrollBehavior.state.overlappedFraction <= 0.01f,
                 onUndo = { },
                 onRedo = { },
@@ -347,7 +353,8 @@ private fun TitleAndContentEditor(
     newNote: Boolean,
     editLabelsDialogOpen: Boolean,
     titleLinkRanges: List<IntRange>,
-    contentLinkRanges: List<IntRange>
+    contentLinkRanges: List<IntRange>,
+    bottomRowHeight: Int
 ) {
     val titleFocusRequester = remember { FocusRequester() }
     val contentFocusRequester = remember { FocusRequester() }
@@ -369,7 +376,7 @@ private fun TitleAndContentEditor(
     Box(modifier = modifier
         .fillMaxSize()
         .onGloballyPositioned { coordinates ->
-            editorHeight = coordinates.size.height
+            editorHeight = coordinates.size.height - bottomRowHeight
         }
         .clickable(
             interactionSource = interactionSource,
@@ -482,6 +489,7 @@ private fun TitleAndContentEditor(
             },
             linkRanges = contentLinkRanges
         )
+        Spacer(modifier = Modifier.height(with(density) { bottomRowHeight.toDp() }))
     }
 
     LaunchedEffect(key1 = editLabelsDialogOpen, key2 = newNote) {
