@@ -178,4 +178,5 @@
     <string name="label_search_screen_edit_label">Edit label</string>
     <string name="label_search_screen_empty">You don\'t have any notes with this label</string>
     <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
 </resources>

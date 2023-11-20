@@ -67,6 +67,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.4")
     implementation("androidx.compose.runtime:runtime-livedata:1.5.3")
     implementation("androidx.compose.foundation:foundation:1.6.0-alpha07")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.0-alpha13")
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0-alpha13")
 
     // Serialization
     implementation("com.google.code.gson:gson:2.10.1")

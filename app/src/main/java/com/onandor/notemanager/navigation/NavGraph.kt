@@ -107,7 +107,7 @@ fun NavGraph(
                 exitTransition = {
                     slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.Right)
                 }
-            ) { currentNavBackStackEntry ->
+            ) {
                 AddEditNoteScreen()
             }
             composable(NavDestinations.ARCHIVE) {

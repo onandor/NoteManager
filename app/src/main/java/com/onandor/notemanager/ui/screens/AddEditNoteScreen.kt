@@ -2,9 +2,15 @@ package com.onandor.notemanager.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -16,14 +22,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -44,6 +54,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
@@ -61,6 +72,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -96,6 +108,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -145,7 +158,7 @@ fun AddEditNoteScreen(
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = uiState.clickedLink != null,
+                visible = false,
                 enter = scaleIn(),
                 exit = scaleOut()
             ) {
@@ -157,21 +170,35 @@ fun AddEditNoteScreen(
             }
         }
     ) { innerPadding ->
-        TitleAndContentEditor(
-            modifier = Modifier.padding(innerPadding),
-            title = uiState.title,
-            content = uiState.content,
-            modificationDate = uiState.modificationDateString,
-            onTitleChanged = viewModel::updateTitle,
-            onContentChanged = viewModel::updateContent,
-            onMoveCursor = viewModel::moveCursor,
-            editDisabled = uiState.location == NoteLocation.TRASH,
-            focusManager = focusManager,
-            newNote = uiState.newNote,
-            editLabelsDialogOpen = uiState.editLabelsDialogOpen,
-            titleLinkRanges = uiState.titleLinkRanges,
-            contentLinkRanges = uiState.contentLinkRanges
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            TitleAndContentEditor(
+                modifier = Modifier,
+                title = uiState.title,
+                content = uiState.content,
+                modificationDate = uiState.modificationDateString,
+                onTitleChanged = viewModel::updateTitle,
+                onContentChanged = viewModel::updateContent,
+                onMoveCursor = viewModel::moveCursor,
+                editDisabled = uiState.location == NoteLocation.TRASH,
+                focusManager = focusManager,
+                newNote = uiState.newNote,
+                editLabelsDialogOpen = uiState.editLabelsDialogOpen,
+                titleLinkRanges = uiState.titleLinkRanges,
+                contentLinkRanges = uiState.contentLinkRanges
+            )
+            BottomRow(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                scrolled = scrollBehavior.state.overlappedFraction <= 0.01f,
+                onUndo = { },
+                onRedo = { },
+                clickedLink = uiState.clickedLink,
+                onLinkClicked = viewModel::openLinkConfirmDialog
+            )
+        }
     }
 
     BackHandler {
@@ -222,6 +249,89 @@ fun AddEditNoteScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BottomRow(
+    modifier: Modifier,
+    scrolled: Boolean,
+    onUndo: () -> Unit,
+    onRedo: () -> Unit,
+    clickedLink: String?,
+    onLinkClicked: () -> Unit
+) {
+    val color = if (scrolled) MaterialTheme.colorScheme.surface
+    else TopAppBarDefaults.topAppBarColors().scrolledContainerColor
+
+    val animatedColor = animateColorAsState(
+        targetValue = color,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = ""
+    )
+
+    ConstraintLayout(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(animatedColor.value),
+    ) {
+        val (undoRedoBtn, linkBtn) = createRefs()
+
+        Row(
+            modifier = Modifier
+                .padding(top = 5.dp, bottom = 5.dp)
+                .constrainAs(undoRedoBtn) {
+                    centerHorizontallyTo(parent)
+                }
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .clickable { onUndo() }
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(3.dp),
+                    painter = painterResource(id = R.drawable.ic_undo),
+                    contentDescription = stringResource(id = R.string.undo)
+                )
+            }
+            Spacer(modifier = Modifier.width(5.dp))
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(5.dp))
+                    .clickable { onRedo() }
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(3.dp),
+                    painter = painterResource(id = R.drawable.ic_redo),
+                    contentDescription = stringResource(id = R.string.redo)
+                )
+            }
+        }
+        AnimatedVisibility(
+            modifier = Modifier.constrainAs(linkBtn) {
+                end.linkTo(parent.end, margin = 15.dp)
+                centerVerticallyTo(parent)
+            },
+            visible = clickedLink != null,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            TextButton(
+                modifier = Modifier.height(30.dp),
+                onClick = onLinkClicked,
+                contentPadding = PaddingValues(5.dp)
+            ) {
+                Icon(painterResource(id = R.drawable.ic_open_link), "")
+                Spacer(modifier = Modifier.width(5.dp))
+                Text(stringResource(id = R.string.addeditnote_open_link))
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun TitleAndContentEditor(
@@ -258,7 +368,6 @@ private fun TitleAndContentEditor(
 
     Box(modifier = modifier
         .fillMaxSize()
-        .navigationBarsPadding()
         .onGloballyPositioned { coordinates ->
             editorHeight = coordinates.size.height
         }
