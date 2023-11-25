@@ -216,7 +216,11 @@ fun SearchScreen(viewModel: SearchViewModel = hiltViewModel()) {
     }
 
     BackHandler {
-        viewModel.navigateBack()
+        if (uiState.selectedNotes.isNotEmpty()) {
+            viewModel.clearSelection()
+        } else {
+            viewModel.navigateBack()
+        }
     }
 }
 

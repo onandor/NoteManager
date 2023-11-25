@@ -1,5 +1,6 @@
 package com.onandor.notemanager.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -208,6 +209,10 @@ fun ArchiveScreen(
                 onDismissRequest = viewModel::closePinEntryDialog,
                 description = stringResource(id = R.string.dialog_pin_entry_locked_note_desc)
             )
+        }
+
+        BackHandler(enabled = uiState.selectedNotes.isNotEmpty()) {
+            viewModel.clearSelection()
         }
     }
 }

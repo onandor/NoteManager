@@ -214,7 +214,11 @@ fun TrashScreen(
         }
 
         BackHandler {
-            viewModel.navigateBack()
+            if (uiState.selectedNotes.isNotEmpty()) {
+                viewModel.clearSelection()
+            } else {
+                viewModel.navigateBack()
+            }
         }
 
         LaunchedEffect(uiState.selectedNotes.size) {
