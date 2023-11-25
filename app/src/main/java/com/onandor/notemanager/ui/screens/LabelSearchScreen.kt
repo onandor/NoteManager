@@ -238,6 +238,8 @@ fun LabelSearchScreen(
             onCloseDrawer()
         } else if (uiState.editLabelDialogOpen) {
             viewModel.closeEditLabelDialog()
+        } else if (uiState.selectedNotes.isNotEmpty()) {
+            viewModel.clearSelection()
         } else {
             viewModel.navigateBack()
         }
