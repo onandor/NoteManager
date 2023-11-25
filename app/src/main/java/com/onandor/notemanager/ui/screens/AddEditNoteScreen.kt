@@ -199,8 +199,10 @@ fun AddEditNoteScreen(
                         bottomRowHeight = coordinates.size.height
                     },
                 scrolled = scrollBehavior.state.overlappedFraction <= 0.01f,
-                onUndo = { },
-                onRedo = { },
+                canUndo = uiState.canUndo,
+                canRedo = uiState.canRedo,
+                onUndo = viewModel::undo,
+                onRedo = viewModel::redo,
                 clickedLink = uiState.clickedLink,
                 onLinkClicked = viewModel::openLinkConfirmDialog
             )
@@ -260,6 +262,8 @@ fun AddEditNoteScreen(
 private fun BottomRow(
     modifier: Modifier,
     scrolled: Boolean,
+    canUndo: Boolean,
+    canRedo: Boolean,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
     clickedLink: String?,
@@ -273,13 +277,21 @@ private fun BottomRow(
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = ""
     )
+    val interactionSource = remember { MutableInteractionSource() }
 
     ConstraintLayout(
         modifier = modifier
             .fillMaxWidth()
-            .background(animatedColor.value),
+            .background(animatedColor.value)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {},
     ) {
         val (undoRedoBtn, linkBtn) = createRefs()
+        val clipModifier = Modifier.clip(RoundedCornerShape(5.dp))
+        val undoBoxModifier = if (canUndo) clipModifier.clickable { onUndo() } else clipModifier
+        val redoBoxModifier = if (canRedo) clipModifier.clickable { onRedo() } else clipModifier
 
         Row(
             modifier = Modifier
@@ -288,31 +300,34 @@ private fun BottomRow(
                     centerHorizontallyTo(parent)
                 }
         ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(5.dp))
-                    .clickable { onUndo() }
-            ) {
+            Box(modifier = undoBoxModifier.clip(RoundedCornerShape(5.dp))) {
+                val tint = if (canUndo)
+                    MaterialTheme.colorScheme.onSurface
+                else
+                    MaterialTheme.colorScheme.surfaceVariant
                 Icon(
                     modifier = Modifier
                         .size(30.dp)
                         .padding(3.dp),
                     painter = painterResource(id = R.drawable.ic_undo),
-                    contentDescription = stringResource(id = R.string.undo)
+                    contentDescription = stringResource(id = R.string.undo),
+                    tint = tint
                 )
             }
             Spacer(modifier = Modifier.width(5.dp))
             Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(5.dp))
-                    .clickable { onRedo() }
-            ) {
+                modifier = redoBoxModifier.clip(RoundedCornerShape(5.dp))) {
+                val tint = if (canRedo)
+                    MaterialTheme.colorScheme.onSurface
+                else
+                    MaterialTheme.colorScheme.surfaceVariant
                 Icon(
                     modifier = Modifier
                         .size(30.dp)
                         .padding(3.dp),
                     painter = painterResource(id = R.drawable.ic_redo),
-                    contentDescription = stringResource(id = R.string.redo)
+                    contentDescription = stringResource(id = R.string.redo),
+                    tint = tint
                 )
             }
         }
@@ -370,7 +385,6 @@ private fun TitleAndContentEditor(
     var scrollToEnd by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
-    val interactionSource = remember { MutableInteractionSource() }
     val keyboard = LocalSoftwareKeyboardController.current
 
     Box(modifier = modifier
@@ -379,7 +393,7 @@ private fun TitleAndContentEditor(
             editorHeight = coordinates.size.height - bottomRowHeight
         }
         .clickable(
-            interactionSource = interactionSource,
+            interactionSource = remember { MutableInteractionSource() },
             indication = null
         ) {
             if (editDisabled)
@@ -489,7 +503,23 @@ private fun TitleAndContentEditor(
             },
             linkRanges = contentLinkRanges
         )
-        Spacer(modifier = Modifier.height(with(density) { bottomRowHeight.toDp() }))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(with(density) { bottomRowHeight.toDp() })
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (editDisabled)
+                        return@clickable
+
+                    onMoveCursor(TextRange(content.text.length))
+                    scrollToEnd = true
+                    contentFocusRequester.requestFocus()
+                    keyboard?.show()
+                }
+        )
     }
 
     LaunchedEffect(key1 = editLabelsDialogOpen, key2 = newNote) {

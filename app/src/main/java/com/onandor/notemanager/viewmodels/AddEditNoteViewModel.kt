@@ -19,6 +19,10 @@ import com.onandor.notemanager.navigation.NavDestinationArgs
 import com.onandor.notemanager.utils.AddEditResultState
 import com.onandor.notemanager.utils.AddEditResults
 import com.onandor.notemanager.utils.AsyncResult
+import com.onandor.notemanager.utils.undo.EditHistory
+import com.onandor.notemanager.utils.undo.EditHistoryEntry
+import com.onandor.notemanager.utils.undo.EditHistoryLocation
+import com.onandor.notemanager.utils.undo.EditHistoryType
 import com.onandor.notemanager.utils.undo.NoteMoveSnapshot
 import com.onandor.notemanager.utils.undo.UndoableAction
 import com.onandor.notemanager.utils.undo.UndoableActionHolder
@@ -40,6 +44,7 @@ import java.time.format.FormatStyle
 import java.util.UUID
 import java.util.regex.Matcher
 import javax.inject.Inject
+import kotlin.math.abs
 
 data class AddEditNoteUiState(
     val title: TextFieldValue = TextFieldValue(""),
@@ -59,7 +64,9 @@ data class AddEditNoteUiState(
     val titleLinkRanges: List<IntRange> = emptyList(),
     val contentLinkRanges: List<IntRange> = emptyList(),
     val clickedLink: String? = null,
-    val linkConfirmDialogOpen: Boolean = false
+    val linkConfirmDialogOpen: Boolean = false,
+    val canUndo: Boolean = false,
+    val canRedo: Boolean = false
 )
 
 @HiltViewModel
@@ -81,6 +88,8 @@ class AddEditNoteViewModel @Inject constructor(
         .let { if (it != null) UUID.fromString(it) else null }
     private var modified: Boolean = false
     private var savedByUser: Boolean = false
+    private val editHistory: EditHistory = EditHistory()
+    private var selectedRange: TextRange? = null
 
     private val _labelsAsync = labelRepository.getLabelsStream()
         .map { AsyncResult.Success(it) }
@@ -286,49 +295,179 @@ class AddEditNoteViewModel @Inject constructor(
         return newLinkRanges
     }
 
-    fun updateTitle(newTitle: TextFieldValue) {
-        var titleLinkRanges = _uiState.value.titleLinkRanges
-        if (_uiState.value.title.text.length != newTitle.text.length) {
-            titleLinkRanges = getNewLinkRanges(
-                linkRanges = titleLinkRanges,
-                change = newTitle.text.length - _uiState.value.title.text.length,
-                idx = newTitle.selection.start
-            )
-            modified = true
-            saveTimer.reset()
+    private fun getClickedLink(linkRanges: List<IntRange>, pos: Int, text: String): String? {
+        val linkRange: IntRange? = linkRanges.find { pos in it }
+        var clickedLink = if (linkRange != null) text.substring(linkRange) else null
+        if (clickedLink != null && clickedLink.take(8) != "https://" && clickedLink.take(7) != "http://") {
+            clickedLink = "https://$clickedLink"
         }
-        val linkRange: IntRange? = titleLinkRanges.find { newTitle.selection.start in it }
-        val clickedLink = if (linkRange != null) newTitle.text.substring(linkRange) else null
-        _uiState.update {
-            it.copy(
-                title = newTitle,
-                clickedLink = clickedLink,
-                contentLinkRanges = titleLinkRanges
+        return clickedLink
+    }
+
+    private fun saveSelectedRangeEditToHistory(
+        oldText: String,
+        newText: String,
+        newSelection: TextRange,
+        location: EditHistoryLocation
+    ) {
+        if (selectedRange == null)
+            return
+
+        // Delete the selected text
+        editHistory.delete(
+            pos = selectedRange!!.max - 1,
+            text = oldText.substring(
+                startIndex = selectedRange!!.min,
+                endIndex = selectedRange!!.max
+            ).reversed(),
+            location = location
+        )
+        val change = newText.length - oldText.length
+        if (abs(change) != selectedRange!!.length || change >= 0) {
+            // Selected text was replaced with new text, add itt in place
+            editHistory.insert(
+                pos = selectedRange!!.min,
+                text = newText.substring(
+                    startIndex = selectedRange!!.min,
+                    endIndex = newSelection.start
+                ),
+                location = location
             )
         }
     }
 
-    fun updateContent(newContent: TextFieldValue) {
-        var contentLinkRanges = _uiState.value.contentLinkRanges
-        if (_uiState.value.content.text.length != newContent.text.length) {
-            contentLinkRanges = getNewLinkRanges(
-                linkRanges = contentLinkRanges,
-                change = newContent.text.length - _uiState.value.content.text.length,
-                idx = newContent.selection.start
+    private fun saveEditToHistory(
+        oldText: String,
+        newText: String,
+        newSelection: TextRange,
+        location: EditHistoryLocation
+    ) {
+        val changeLength = abs(newText.length - oldText.length)
+        if (newText.length > oldText.length) {
+            editHistory.insert(
+                pos = newSelection.start - changeLength,
+                text = newText.substring(
+                    startIndex = newSelection.start - changeLength,
+                    endIndex = newSelection.start
+                ),
+                location = location
             )
+        } else {
+            editHistory.delete(
+                pos = newSelection.start,
+                text = oldText.substring(
+                    startIndex = newSelection.start,
+                    endIndex = newSelection.start + changeLength
+                ),
+                location = location
+            )
+        }
+    }
+
+    fun updateTitle(newTitle: TextFieldValue, isUndoRedo: Boolean = false) {
+        var titleLinkRanges = _uiState.value.titleLinkRanges
+        val oldTitle = _uiState.value.title
+
+        if (oldTitle.text.length != newTitle.text.length) {
             modified = true
             saveTimer.reset()
+
+            val changeSize = abs(newTitle.text.length - oldTitle.text.length)
+            titleLinkRanges = getNewLinkRanges(
+                linkRanges = titleLinkRanges,
+                change = newTitle.text.length - oldTitle.text.length,
+                idx = newTitle.selection.start - changeSize
+            )
+
+            if (!isUndoRedo) {
+                if (selectedRange != null) {
+                    saveSelectedRangeEditToHistory(
+                        oldText = oldTitle.text,
+                        newText = newTitle.text,
+                        newSelection = newTitle.selection,
+                        location = EditHistoryLocation.Title
+                    )
+                } else {
+                    saveEditToHistory(
+                        oldText = oldTitle.text,
+                        newText = newTitle.text,
+                        newSelection = newTitle.selection,
+                        location = EditHistoryLocation.Title
+                    )
+                }
+                selectedRange = null
+            }
+        } else if (!isUndoRedo && (oldTitle.selection.start != newTitle.selection.start
+                    || oldTitle.selection.end != newTitle.selection.end)) {
+            editHistory.cursorMoved()
+            selectedRange = if (newTitle.selection.length > 0) newTitle.selection else null
         }
-        val linkRange: IntRange? = contentLinkRanges.find { newContent.selection.start in it }
-        var clickedLink = if (linkRange != null) newContent.text.substring(linkRange) else null
-        if (clickedLink != null && clickedLink.take(8) != "https://" && clickedLink.take(7) != "http://") {
-            clickedLink = "https://$clickedLink"
+        val clickedLink = getClickedLink(
+            linkRanges = titleLinkRanges,
+            pos = newTitle.selection.start,
+            text = newTitle.text
+        )
+        _uiState.update {
+            it.copy(
+                title = newTitle,
+                clickedLink = clickedLink,
+                titleLinkRanges = titleLinkRanges,
+                canUndo = editHistory.canUndo(),
+                canRedo = editHistory.canRedo()
+            )
         }
+    }
+
+    fun updateContent(newContent: TextFieldValue, isUndoRedo: Boolean = false) {
+        var contentLinkRanges = _uiState.value.contentLinkRanges
+        val oldContent = _uiState.value.content
+
+        if (oldContent.text.length != newContent.text.length) {
+            modified = true
+            saveTimer.reset()
+
+            val changeSize = abs(newContent.text.length - oldContent.text.length)
+            contentLinkRanges = getNewLinkRanges(
+                linkRanges = contentLinkRanges,
+                change = newContent.text.length - oldContent.text.length,
+                idx = newContent.selection.start - changeSize
+            )
+
+            if (!isUndoRedo) {
+                if (selectedRange != null) {
+                    saveSelectedRangeEditToHistory(
+                        oldText = oldContent.text,
+                        newText = newContent.text,
+                        newSelection = newContent.selection,
+                        location = EditHistoryLocation.Content
+                    )
+                } else {
+                    saveEditToHistory(
+                        oldText = oldContent.text,
+                        newText = newContent.text,
+                        newSelection = newContent.selection,
+                        location = EditHistoryLocation.Content
+                    )
+                }
+                selectedRange = null
+            }
+        } else if (!isUndoRedo && (oldContent.selection.start != newContent.selection.start
+                    || oldContent.selection.end != newContent.selection.end)) {
+            editHistory.cursorMoved()
+            selectedRange = if (newContent.selection.length > 0) newContent.selection else null
+        }
+        val clickedLink = getClickedLink(
+            linkRanges = contentLinkRanges,
+            pos = newContent.selection.start,
+            text = newContent.text
+        )
         _uiState.update {
             it.copy(
                 content = newContent,
                 clickedLink = clickedLink,
-                contentLinkRanges = contentLinkRanges
+                contentLinkRanges = contentLinkRanges,
+                canUndo = editHistory.canUndo(),
+                canRedo = editHistory.canRedo()
             )
         }
     }
@@ -523,5 +662,69 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun closeLinkConfirmDialog() {
         _uiState.update { it.copy(linkConfirmDialogOpen = false) }
+    }
+
+    private fun getUndoTFV(entry: EditHistoryEntry, textFieldValue: TextFieldValue): TextFieldValue {
+        val textToUndo: String
+        val pos: Int
+        val text: String
+        val selection: TextRange
+        if (entry.type == EditHistoryType.Delete) {
+            textToUndo = entry.text.reversed()
+            pos = entry.startIdx - (textToUndo.length - 1)
+            text = StringBuilder(textFieldValue.text).insert(pos, textToUndo).toString()
+            selection = TextRange(pos + textToUndo.length)
+        } else {
+            textToUndo = entry.text
+            pos = entry.startIdx
+            text = StringBuilder(textFieldValue.text)
+                .removeRange(pos, pos + textToUndo.length)
+                .toString()
+            selection = TextRange(pos)
+        }
+        return TextFieldValue(
+            text = text,
+            selection = selection
+        )
+    }
+
+    private fun getRedoTFV(entry: EditHistoryEntry, textFieldValue: TextFieldValue): TextFieldValue {
+        val text: String
+        val selection: TextRange
+        if (entry.type == EditHistoryType.Insert) {
+            text = StringBuilder(textFieldValue.text).insert(entry.startIdx, entry.text).toString()
+            selection = TextRange(entry.startIdx + entry.text.length)
+        } else {
+            text = StringBuilder(textFieldValue.text)
+                .removeRange(entry.startIdx - (entry.text.length - 1), entry.startIdx + 1)
+                .toString()
+            selection = TextRange(entry.startIdx - (entry.text.length - 1))
+        }
+        return TextFieldValue(
+            text = text,
+            selection = selection
+        )
+    }
+
+    fun undo() {
+        val entry = editHistory.undo() ?: return
+        if (entry.location == EditHistoryLocation.Title) {
+            val newTitle = getUndoTFV(entry, _uiState.value.title)
+            updateTitle(newTitle, isUndoRedo = true)
+        } else {
+            val newContent = getUndoTFV(entry, _uiState.value.content)
+            updateContent(newContent, isUndoRedo = true)
+        }
+    }
+
+    fun redo() {
+        val entry = editHistory.redo() ?: return
+        if (entry.location == EditHistoryLocation.Title) {
+            val newTitle = getRedoTFV(entry, _uiState.value.title)
+            updateTitle(newTitle, isUndoRedo = true)
+        } else {
+            val newContent = getRedoTFV(entry, _uiState.value.content)
+            updateContent(newContent, isUndoRedo = true)
+        }
     }
 }
