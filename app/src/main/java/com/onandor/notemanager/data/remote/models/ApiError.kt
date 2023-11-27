@@ -18,6 +18,9 @@ object LoggedOut: ApiError(R.string.apierror_logged_out)
 // Notes
 object NoteNotFound: ApiError(R.string.apierror_note_not_found)
 
+// Labels
+object LabelNotFound: ApiError(R.string.apierror_label_not_found)
+
 // Server
 object ServerError : ApiError(R.string.apierror_server_error)
 object ServerUnreachable : ApiError(R.string.apierror_server_unreachable)

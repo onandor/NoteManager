@@ -40,7 +40,7 @@ class NoteApiService @Inject constructor(
     }
 
     override suspend fun delete(noteId: UUID) {
-        httpClient.delete("$NOTES_ROUTE$DELETE$noteId")
+        httpClient.delete("$NOTES_ROUTE$DELETE/$noteId")
     }
 
     override suspend fun deleteMultiple(noteIds: List<UUID>) {

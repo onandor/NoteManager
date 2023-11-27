@@ -8,6 +8,7 @@ import java.util.UUID
 interface INoteDataSource {
 
     suspend fun getAll(): Result<List<RemoteNote>, ApiError>
+
     suspend fun getById(noteId: UUID): Result<RemoteNote, ApiError>
 
     suspend fun create(remoteNote: RemoteNote): Result<Unit, ApiError>

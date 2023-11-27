@@ -6,11 +6,15 @@ import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.remote.models.InvalidRefreshTokenException
 import com.onandor.notemanager.data.remote.services.AuthApiService
 import com.onandor.notemanager.data.remote.services.IAuthApiService
+import com.onandor.notemanager.data.remote.services.ILabelApiService
 import com.onandor.notemanager.data.remote.services.INoteApiService
+import com.onandor.notemanager.data.remote.services.LabelApiService
 import com.onandor.notemanager.data.remote.services.NoteApiService
 import com.onandor.notemanager.data.remote.sources.AuthDataSource
 import com.onandor.notemanager.data.remote.sources.IAuthDataSource
+import com.onandor.notemanager.data.remote.sources.ILabelDataSource
 import com.onandor.notemanager.data.remote.sources.INoteDataSource
+import com.onandor.notemanager.data.remote.sources.LabelDataSource
 import com.onandor.notemanager.data.remote.sources.NoteDataSource
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.navigation.NavActions
@@ -119,4 +123,15 @@ abstract class NoteNetworkModule {
 
     @Binds
     abstract fun bindNoteDataSource(noteDataSource: NoteDataSource): INoteDataSource
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class LabelNetworkModule {
+
+    @Binds
+    abstract fun bindLabelApiService(labelApiService: LabelApiService): ILabelApiService
+
+    @Binds
+    abstract fun bindLabelDataSource(labelDataSource: LabelDataSource): ILabelDataSource
 }
