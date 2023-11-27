@@ -85,6 +85,7 @@ import com.onandor.notemanager.utils.getAccentColor
 import com.onandor.notemanager.utils.getColor
 import com.onandor.notemanager.viewmodels.EditLabelsViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -371,7 +372,13 @@ private fun ColorChoice(
 @Preview
 @Composable
 private fun LabelItemPreview() {
-    val label = Label(UUID.randomUUID(), "Very long test label", LabelColors.green)
+    val label = Label(
+        id = UUID.randomUUID(),
+        title = "Very long test label",
+        color = LabelColors.green,
+        creationDate = LocalDateTime.now(),
+        modificationDate = LocalDateTime.now()
+    )
     LabelItem(
         modifier = Modifier,
         label = label,

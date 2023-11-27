@@ -22,6 +22,7 @@ import com.onandor.notemanager.utils.LabelColorType
 import com.onandor.notemanager.utils.LabelColors
 import com.onandor.notemanager.utils.getAccentColor
 import com.onandor.notemanager.utils.getColor
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Composable
@@ -81,7 +82,13 @@ fun LabelComponent(
 @Preview
 @Composable
 fun LabelComponentPreview() {
-    val label = Label(UUID.randomUUID(), "Very long test label wow", LabelColors.green)
+    val label = Label(
+        id = UUID.randomUUID(),
+        title = "Very long test label wow",
+        color = LabelColors.green,
+        creationDate = LocalDateTime.now(),
+        modificationDate = LocalDateTime.now()
+    )
     LabelComponent(
         label = label,
         clickable = false,

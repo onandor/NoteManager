@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
@@ -49,7 +50,9 @@ class LabelRepository @Inject constructor(
         val label = Label(
             id = labelId,
             title = title,
-            color = color
+            color = color,
+            creationDate = LocalDateTime.now(),
+            modificationDate = LocalDateTime.now()
         )
         localDataSource.upsert(label.toLocal())
         return labelId
@@ -58,7 +61,8 @@ class LabelRepository @Inject constructor(
     override suspend fun updateLabel(labelId: UUID, title: String, color: LabelColor) {
         val label = getLabel(labelId)?.copy(
             title = title,
-            color = color
+            color = color,
+            modificationDate = LocalDateTime.now()
         ) ?: throw Exception("Label (id $labelId) not found in local database")
         localDataSource.upsert(label.toLocal())
     }

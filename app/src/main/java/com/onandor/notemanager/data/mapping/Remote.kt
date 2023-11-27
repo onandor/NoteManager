@@ -14,13 +14,29 @@ fun Label.toRemote(userId: Int) = RemoteLabel(
     id = id,
     userId = userId,
     title = title,
-    color = color.type.value
+    color = color.type.value,
+    creationDate = creationDate
+        .atZone(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli(),
+    modificationDate = modificationDate
+        .atZone(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli()
 )
 
 fun RemoteLabel.toExternal() = Label(
     id = id,
     title = title,
-    color = labelColors[LabelColorType.fromInt(color)]!!
+    color = labelColors[LabelColorType.fromInt(color)]!!,
+    creationDate = Instant
+        .ofEpochMilli(creationDate)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDateTime(),
+    modificationDate = Instant
+        .ofEpochMilli(modificationDate)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDateTime()
 )
 
 @JvmName("externalToRemoteLabelList")

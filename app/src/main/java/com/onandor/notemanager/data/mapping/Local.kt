@@ -10,13 +10,17 @@ import com.onandor.notemanager.utils.labelColors
 fun Label.toLocal() = LocalLabel(
     id = id,
     title = title,
-    color = color.type
+    color = color.type,
+    creationDate = creationDate,
+    modificationDate = modificationDate
 )
 
 fun LocalLabel.toExternal() = Label(
     id = id,
     title = title,
-    color = labelColors[color]!!
+    color = labelColors[color]!!,
+    creationDate = creationDate,
+    modificationDate = modificationDate
 )
 
 @JvmName("localToExternalLabelList")

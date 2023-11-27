@@ -336,7 +336,9 @@ fun PreviewNoteItem() {
     val label = Label(
         id = UUID.randomUUID(),
         title = "Test label",
-        color = LabelColors.green
+        color = LabelColors.green,
+        creationDate = LocalDateTime.now(),
+        modificationDate = LocalDateTime.now()
     )
     val note = Note(
         id = UUID.randomUUID(),

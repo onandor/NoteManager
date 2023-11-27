@@ -108,7 +108,9 @@ class LabelSearchViewmodel @Inject constructor(
                 val label = Label(
                     id = searchedLabel.id,
                     title = searchedLabel.title,
-                    color = searchedLabel.color
+                    color = searchedLabel.color,
+                    creationDate = searchedLabel.creationDate,
+                    modificationDate = searchedLabel.modificationDate
                 )
                 noteRepository.getSearchedNotesStream(
                     locations = listOf(NoteLocation.NOTES, NoteLocation.ARCHIVE),
@@ -180,7 +182,9 @@ class LabelSearchViewmodel @Inject constructor(
                         it.copy(
                             id = label.id,
                             title = label.title,
-                            color = label.color
+                            color = label.color,
+                            creationDate = label.creationDate,
+                            modificationDate = label.modificationDate
                         )
                     }
                     _editLabelForm.update {
@@ -188,7 +192,9 @@ class LabelSearchViewmodel @Inject constructor(
                             id = label.id,
                             title = label.title,
                             titleValid = true,
-                            color = label.color
+                            color = label.color,
+                            creationDate = label.creationDate,
+                            modificationDate = label.modificationDate
                         )
                     }
                 }
