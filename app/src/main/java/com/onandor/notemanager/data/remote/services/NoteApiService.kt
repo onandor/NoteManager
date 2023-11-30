@@ -24,7 +24,7 @@ class NoteApiService @Inject constructor(
     }
 
     override suspend fun getById(noteId: UUID): RemoteNote {
-        return httpClient.get("$NOTES_ROUTE$noteId").body()
+        return httpClient.get("$NOTES_ROUTE/$noteId").body()
     }
 
     override suspend fun create(remoteNote: RemoteNote) {

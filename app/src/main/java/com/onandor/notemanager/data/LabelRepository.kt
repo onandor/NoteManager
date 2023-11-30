@@ -1,8 +1,12 @@
 package com.onandor.notemanager.data
 
+import com.onandor.notemanager.data.local.datastore.ISettings
+import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.data.local.db.LabelDao
 import com.onandor.notemanager.data.mapping.toExternal
 import com.onandor.notemanager.data.mapping.toLocal
+import com.onandor.notemanager.data.mapping.toRemote
+import com.onandor.notemanager.data.remote.sources.ILabelDataSource
 import com.onandor.notemanager.di.ApplicationScope
 import com.onandor.notemanager.di.DefaultDispatcher
 import com.onandor.notemanager.utils.LabelColor
@@ -17,8 +21,10 @@ import javax.inject.Inject
 
 class LabelRepository @Inject constructor(
     private val localDataSource: LabelDao,
+    private val remoteDataSource: ILabelDataSource,
     @DefaultDispatcher private val dispatcher: CoroutineDispatcher,
-    @ApplicationScope private val scope: CoroutineScope
+    @ApplicationScope private val scope: CoroutineScope,
+    private val settings: ISettings
 ) : ILabelRepository {
 
     override fun getLabelStream(labelId: UUID): Flow<Label?> {
@@ -55,6 +61,10 @@ class LabelRepository @Inject constructor(
             modificationDate = LocalDateTime.now()
         )
         localDataSource.upsert(label.toLocal())
+
+        val userId = settings.getInt(SettingsKeys.USER_ID)
+        if (userId > 0)
+            remoteDataSource.create(label.toRemote(userId))
         return labelId
     }
 
@@ -65,15 +75,20 @@ class LabelRepository @Inject constructor(
             modificationDate = LocalDateTime.now()
         ) ?: throw Exception("Label (id $labelId) not found in local database")
         localDataSource.upsert(label.toLocal())
+
+        val userId = settings.getInt(SettingsKeys.USER_ID)
+        if (userId > 0)
+            remoteDataSource.update(label.toRemote(userId))
     }
 
     override suspend fun deleteLabel(labelId: UUID) {
         localDataSource.deleteById(labelId)
+        val userId = settings.getInt(SettingsKeys.USER_ID)
+        if (userId > 0)
+            remoteDataSource.delete(labelId)
     }
 
     override suspend fun deleteAllLocal() {
         localDataSource.deleteAll()
     }
-
-
 }
