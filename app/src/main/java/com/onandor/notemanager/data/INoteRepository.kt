@@ -1,5 +1,7 @@
 package com.onandor.notemanager.data
 
+import com.github.michaelbull.result.Result
+import com.onandor.notemanager.data.remote.models.ApiError
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 import java.util.UUID
@@ -25,6 +27,8 @@ interface INoteRepository {
     suspend fun getNote(noteId: UUID): Note?
 
     suspend fun getNotes(): List<Note>
+
+    suspend fun synchronize(): Result<Unit, ApiError>
 
     suspend fun createNote(
         title: String,

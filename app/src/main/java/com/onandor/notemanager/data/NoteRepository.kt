@@ -1,5 +1,8 @@
 package com.onandor.notemanager.data
 
+import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.data.local.datastore.ISettings
@@ -9,6 +12,9 @@ import com.onandor.notemanager.data.local.db.NoteLabelDao
 import com.onandor.notemanager.data.mapping.toExternal
 import com.onandor.notemanager.data.mapping.toLocal
 import com.onandor.notemanager.data.mapping.toRemote
+import com.onandor.notemanager.data.remote.models.ApiError
+import com.onandor.notemanager.data.remote.models.NotLoggedIn
+import com.onandor.notemanager.data.remote.models.RemoteNote
 import com.onandor.notemanager.data.remote.sources.INoteDataSource
 import com.onandor.notemanager.di.ApplicationScope
 import com.onandor.notemanager.di.DefaultDispatcher
@@ -79,6 +85,38 @@ class NoteRepository @Inject constructor(
         return withContext(dispatcher) {
             noteDao.getAll().toExternal()
         }
+    }
+
+    override suspend fun synchronize(): Result<Unit, ApiError> {
+        val userId = settings.getInt(SettingsKeys.USER_ID)
+        if (userId <= 0)
+            return Err(NotLoggedIn)
+
+        val localNotes = noteDao.getAll().toExternal().toRemote(userId)
+        remoteDataSource.synchronize(localNotes)
+        lateinit var remoteNotes: List<RemoteNote>
+        remoteDataSource.getAll()
+            .onSuccess { _remoteNotes ->
+                remoteNotes = _remoteNotes
+            }
+            .onFailure { apiError ->
+                return Err(apiError)
+            }
+        val modifiedNotes = remoteNotes.filterNot { remoteNote ->
+            localNotes.any { localNote ->
+                remoteNote.id == localNote.id
+                        && remoteNote.modificationDate == localNote.modificationDate
+            }
+        }
+        noteDao.upsertAll(modifiedNotes.toExternal().toLocal())
+        modifiedNotes.forEach { note ->
+            val labels = note.labels.toExternal().toLocal()
+            noteLabelDao.deleteByNoteIdIfLabelIdNotInList(note.id, labels.map { label -> label.id })
+            labels.forEach { label ->
+                noteLabelDao.insertOrIgnore(note.id, label.id)
+            }
+        }
+        return Ok(Unit)
     }
 
     override suspend fun createNote(

@@ -12,6 +12,8 @@ interface INoteApiService {
 
     suspend fun update(remoteNote: RemoteNote)
 
+    suspend fun synchronize(remoteNotes: List<RemoteNote>)
+
     suspend fun delete(noteId: UUID)
 
     suspend fun deleteMultiple(noteIds: List<UUID>)
