@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -139,8 +140,12 @@ fun NotesScreen(
             exit = fadeOut()
         ) {
             EmptyContent(
+                modifier = Modifier.padding(innerPadding),
                 painter = painterResource(id = R.drawable.ic_drawer_notes_filled),
-                text = stringResource(id = R.string.notes_empty)
+                text = stringResource(id = R.string.notes_empty),
+                refreshable = true,
+                refreshing = uiState.synchronizing,
+                onStartRefresh = viewModel::synchronize
             )
         }
         AnimatedVisibility(
@@ -154,7 +159,10 @@ fun NotesScreen(
                 onNoteClick = viewModel::noteClick,
                 onNoteLongClick = viewModel::noteLongClick,
                 modifier = Modifier.padding(innerPadding),
-                collapsedView = uiState.noteListState.collapsed
+                collapsedView = uiState.noteListState.collapsed,
+                refreshable = true,
+                refreshing = uiState.synchronizing,
+                onStartRefresh = viewModel::synchronize
             )
         }
 

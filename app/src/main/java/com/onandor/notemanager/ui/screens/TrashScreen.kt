@@ -132,8 +132,12 @@ fun TrashScreen(
             exit = fadeOut()
         ) {
             EmptyContent(
+                modifier = Modifier.padding(innerPadding),
                 painter = painterResource(id = R.drawable.ic_trash_empty),
-                text = stringResource(id = R.string.trash_empty)
+                text = stringResource(id = R.string.trash_empty),
+                refreshable = true,
+                refreshing = uiState.synchronizing,
+                onStartRefresh = viewModel::synchronize
             )
         }
         AnimatedVisibility(
@@ -147,7 +151,10 @@ fun TrashScreen(
                 onNoteClick = viewModel::noteClick,
                 onNoteLongClick = viewModel::noteLongClick,
                 modifier = Modifier.padding(innerPadding),
-                collapsedView = false
+                collapsedView = false,
+                refreshable = true,
+                refreshing = uiState.synchronizing,
+                onStartRefresh = viewModel::synchronize
             )
         }
 

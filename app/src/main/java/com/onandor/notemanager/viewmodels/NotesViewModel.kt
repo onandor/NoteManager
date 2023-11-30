@@ -3,7 +3,10 @@ package com.onandor.notemanager.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.favre.lib.crypto.bcrypt.BCrypt
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.R
+import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Note
 import com.onandor.notemanager.data.NoteLocation
@@ -23,6 +26,7 @@ import com.onandor.notemanager.utils.undo.UndoableAction
 import com.onandor.notemanager.utils.undo.UndoableActionHolder
 import com.onandor.notemanager.utils.undo.createNoteMoveSnapshot
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +41,7 @@ import javax.inject.Inject
 
 data class NotesUiState(
     val loading: Boolean = true,
+    val synchronizing: Boolean = false,
     val notes: List<Note> = emptyList(),
     val selectedNotes: List<Note> = emptyList(),
     val noteListState: NoteListState = NoteListState(),
@@ -50,6 +55,7 @@ data class NotesUiState(
 @HiltViewModel
 class NotesViewModel @Inject constructor(
     private val noteRepository: INoteRepository,
+    private val labelRepository: ILabelRepository,
     private val addEditResultState: AddEditResultState,
     private val navManager: INavigationManager,
     private val settings: ISettings,
@@ -276,5 +282,24 @@ class NotesViewModel @Inject constructor(
 
     fun clearLastUndoableAction() {
         undoableActionHolder.clear()
+    }
+
+    fun synchronize() {
+        _uiState.update { it.copy(synchronizing = true) }
+        viewModelScope.launch {
+            labelRepository.synchronize()
+                .onFailure {
+                    // TODO: toast
+                    delay(200)
+                    _uiState.update { it.copy(synchronizing = false) }
+                    return@launch
+                }
+            noteRepository.synchronize()
+                .onFailure {
+                    // TODO: toast
+                }
+            delay(200)
+            _uiState.update { it.copy(synchronizing = false) }
+        }
     }
 }

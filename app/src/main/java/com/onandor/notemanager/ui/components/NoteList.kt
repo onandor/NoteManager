@@ -8,6 +8,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -25,10 +26,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshState
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -66,6 +72,7 @@ data class NoteListState(
     val sorting: NoteSorting = NoteSorting(NoteComparisonField.ModificationDate, Order.Descending)
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteList(
     modifier: Modifier = Modifier,
@@ -76,7 +83,10 @@ fun NoteList(
     onNoteLongClick: (Note) -> Unit,
     collapsedView: Boolean = false,
     scrollState: LazyListState = rememberLazyListState(),
-    topPadding: Dp = 0.dp
+    topPadding: Dp = 0.dp,
+    refreshable: Boolean = false,
+    refreshing: Boolean = false,
+    onStartRefresh: () -> Unit = { },
 ) {
     var _collapsedView by remember { mutableStateOf(collapsedView) }
     var animationEnabled by remember { mutableStateOf(true) }
@@ -89,6 +99,18 @@ fun NoteList(
             easing = FastOutSlowInEasing
         )
     )
+    val pullToRefreshState = rememberPullToRefreshState()
+    
+    if (pullToRefreshState.isRefreshing) {
+        LaunchedEffect(true) {
+            onStartRefresh()
+        }
+    }
+    if (!refreshing) {
+        LaunchedEffect(true) {
+            pullToRefreshState.endRefresh()
+        }
+    }
 
     LaunchedEffect(collapsedView) {
         if (collapsedView == _collapsedView)
@@ -112,11 +134,13 @@ fun NoteList(
         scrollState = scrollState,
         collapsedView = _collapsedView,
         animated = animationEnabled,
-        topPadding = topPadding
+        topPadding = topPadding,
+        refreshable = refreshable,
+        pullToRefreshState = pullToRefreshState
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun NoteListContent(
     modifier: Modifier,
@@ -128,57 +152,70 @@ private fun NoteListContent(
     scrollState: LazyListState,
     collapsedView: Boolean,
     animated: Boolean,
-    topPadding: Dp
+    topPadding: Dp,
+    refreshable: Boolean,
+    pullToRefreshState: PullToRefreshState
+
 ) {
     val columnModifier = if (animated)
-        modifier.fillMaxWidth().animateContentSize()
+        modifier
+            .fillMaxWidth()
+            .animateContentSize()
     else
         modifier.fillMaxWidth()
 
-    LazyColumn(
-        modifier = columnModifier,
-        state = scrollState
-    ) {
-        item {
-            Spacer(modifier = Modifier.height(topPadding))
-        }
-        itemsIndexed(
-            items = mainNotes,
-            key = { _, note -> note.id }
-        ) { _, note ->
-            val itemModifier = if (animated) Modifier.animateItemPlacement() else Modifier
-            NoteItem(
-                modifier = itemModifier,
-                note = note,
-                selected = selectedNotes.contains(note),
-                collapsedView = collapsedView,
-                onNoteClick = onNoteClick,
-                onNoteLongClick = onNoteLongClick
-            )
-        }
-        item {
-            if (archiveNotes.isNotEmpty()) {
-                Text(
-                    modifier = Modifier
-                        .padding(start = 30.dp, top = 5.dp, bottom = 10.dp)
-                        .animateItemPlacement(),
-                    text = stringResource(id = R.string.search_archive),
-                    fontSize = 15.sp
+    Box(modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection)) {
+        LazyColumn(
+            modifier = columnModifier,
+            state = scrollState
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(topPadding))
+            }
+            itemsIndexed(
+                items = mainNotes,
+                key = { _, note -> note.id }
+            ) { _, note ->
+                val itemModifier = if (animated) Modifier.animateItemPlacement() else Modifier
+                NoteItem(
+                    modifier = itemModifier,
+                    note = note,
+                    selected = selectedNotes.contains(note),
+                    collapsedView = collapsedView,
+                    onNoteClick = onNoteClick,
+                    onNoteLongClick = onNoteLongClick
+                )
+            }
+            item {
+                if (archiveNotes.isNotEmpty()) {
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 30.dp, top = 5.dp, bottom = 10.dp)
+                            .animateItemPlacement(),
+                        text = stringResource(id = R.string.search_archive),
+                        fontSize = 15.sp
+                    )
+                }
+            }
+            itemsIndexed(
+                items = archiveNotes,
+                key = { _, note -> note.id }
+            ) { _, note ->
+                val itemModifier = if (animated) Modifier.animateItemPlacement() else Modifier
+                NoteItem(
+                    modifier = itemModifier,
+                    note = note,
+                    selected = selectedNotes.contains(note),
+                    collapsedView = collapsedView,
+                    onNoteClick = onNoteClick,
+                    onNoteLongClick = onNoteLongClick
                 )
             }
         }
-        itemsIndexed(
-            items = archiveNotes,
-            key = { _, note -> note.id }
-        ) { _, note ->
-            val itemModifier = if (animated) Modifier.animateItemPlacement() else Modifier
-            NoteItem(
-                modifier = itemModifier,
-                note = note,
-                selected = selectedNotes.contains(note),
-                collapsedView = collapsedView,
-                onNoteClick = onNoteClick,
-                onNoteLongClick = onNoteLongClick
+        if (refreshable) {
+            PullToRefreshContainer(
+                modifier = modifier.align(Alignment.TopCenter),
+                state = pullToRefreshState
             )
         }
     }

@@ -124,8 +124,12 @@ fun ArchiveScreen(
             exit = fadeOut()
         ) {
             EmptyContent(
+                modifier = Modifier.padding(innerPadding),
                 painter = painterResource(id = R.drawable.ic_archive_outlined),
-                text = stringResource(id = R.string.archive_empty)
+                text = stringResource(id = R.string.archive_empty),
+                refreshable = true,
+                refreshing = uiState.synchronizing,
+                onStartRefresh = viewModel::synchronize
             )
         }
         AnimatedVisibility(
@@ -139,7 +143,10 @@ fun ArchiveScreen(
                 onNoteClick = viewModel::noteClick,
                 onNoteLongClick = viewModel::noteLongClick,
                 modifier = Modifier.padding(innerPadding),
-                collapsedView = uiState.noteListState.collapsed
+                collapsedView = uiState.noteListState.collapsed,
+                refreshable = true,
+                refreshing = uiState.synchronizing,
+                onStartRefresh = viewModel::synchronize
             )
         }
 

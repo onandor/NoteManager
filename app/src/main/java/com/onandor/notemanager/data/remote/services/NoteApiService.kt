@@ -41,7 +41,7 @@ class NoteApiService @Inject constructor(
     }
 
     override suspend fun synchronize(remoteNotes: List<RemoteNote>) {
-        httpClient.put("$NOTES_ROUTE/$SYNC") {
+        httpClient.put("$NOTES_ROUTE$SYNC") {
             setBody(remoteNotes)
         }
     }
