@@ -39,5 +39,5 @@ interface LabelDao {
     suspend fun deleteAll()
 
     @Query("DELETE FROM labels WHERE deleted")
-    suspend fun deleteAllSoftDeleted(): List<LocalLabel>
+    suspend fun deleteAllSoftDeleted()
 }
