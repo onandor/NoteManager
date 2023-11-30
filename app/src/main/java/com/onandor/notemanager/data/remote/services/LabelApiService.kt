@@ -12,6 +12,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 private const val LABELS_ROUTE = "labels"
+private const val SYNC = "sync"
 
 class LabelApiService @Inject constructor(
     private val httpClient: HttpClient
@@ -30,6 +31,12 @@ class LabelApiService @Inject constructor(
     override suspend fun update(remoteLabel: RemoteLabel) {
         httpClient.put(LABELS_ROUTE) {
             setBody(remoteLabel)
+        }
+    }
+
+    override suspend fun synchronize(remoteLabels: List<RemoteLabel>) {
+        httpClient.put("$LABELS_ROUTE/$SYNC") {
+            setBody(remoteLabels)
         }
     }
 

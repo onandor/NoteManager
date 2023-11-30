@@ -1,5 +1,7 @@
 package com.onandor.notemanager.data
 
+import com.github.michaelbull.result.Result
+import com.onandor.notemanager.data.remote.models.ApiError
 import com.onandor.notemanager.utils.LabelColor
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
@@ -13,6 +15,8 @@ interface ILabelRepository {
     suspend fun getLabel(labelId: UUID): Label?
 
     suspend fun getLabels(): List<Label>
+
+    suspend fun synchronize(): Result<Unit, ApiError>
 
     suspend fun createLabel(title: String, color: LabelColor): UUID
 

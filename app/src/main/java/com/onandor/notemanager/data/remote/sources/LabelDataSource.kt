@@ -42,6 +42,14 @@ class LabelDataSource @Inject constructor(
         }
     }
 
+    override suspend fun synchronize(remoteLabels: List<RemoteLabel>): Result<Unit, ApiError> {
+        return try {
+            Ok(labelApiService.synchronize(remoteLabels))
+        } catch (e: Exception) {
+            Err(e.getApiError())
+        }
+    }
+
     override suspend fun delete(labelId: UUID): Result<Unit, ApiError> {
         return try {
             Ok(labelApiService.delete(labelId))

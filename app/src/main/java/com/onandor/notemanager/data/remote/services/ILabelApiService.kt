@@ -11,5 +11,7 @@ interface ILabelApiService {
 
     suspend fun update(remoteLabel: RemoteLabel)
 
+    suspend fun synchronize(remoteLabels: List<RemoteLabel>)
+
     suspend fun delete(labelId: UUID)
 }

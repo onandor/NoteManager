@@ -15,6 +15,9 @@ object InvalidPassword : ApiError(R.string.apierror_invalid_password)
 object EmailTaken : ApiError(R.string.apierror_email_taken)
 object LoggedOut: ApiError(R.string.apierror_logged_out)
 
+// Sync
+object NotLoggedIn: ApiError(0)
+
 // Notes
 object NoteNotFound: ApiError(R.string.apierror_note_not_found)
 

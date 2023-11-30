@@ -13,5 +13,7 @@ interface ILabelDataSource {
 
     suspend fun update(remoteLabel: RemoteLabel): Result<Unit, ApiError>
 
+    suspend fun synchronize(remoteLabels: List<RemoteLabel>): Result<Unit, ApiError>
+
     suspend fun delete(labelId: UUID): Result<Unit, ApiError>
 }
