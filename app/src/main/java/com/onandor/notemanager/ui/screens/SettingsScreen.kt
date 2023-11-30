@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -146,6 +147,21 @@ fun SettingsScreen(
                     textToTheLeft = { Text(text = currentThemeString) },
                     items = themeItems
                 )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Delete local data",
+                    fontSize = 20.sp
+                )
+                Button(onClick = viewModel::deleteAllLocalData) {
+                    Text(text = "Delete")
+                }
             }
             /*
             Button(onClick = { viewModel.resetFirstLaunch() }) {
