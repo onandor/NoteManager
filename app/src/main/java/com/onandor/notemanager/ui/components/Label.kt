@@ -86,6 +86,7 @@ fun LabelComponentPreview() {
         id = UUID.randomUUID(),
         title = "Very long test label wow",
         color = LabelColors.green,
+        deleted = false,
         creationDate = LocalDateTime.now(),
         modificationDate = LocalDateTime.now()
     )

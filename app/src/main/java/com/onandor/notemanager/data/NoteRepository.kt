@@ -108,6 +108,7 @@ class NoteRepository @Inject constructor(
                         && remoteNote.modificationDate == localNote.modificationDate
             }
         }
+        noteDao.deleteAllSoftDeleted()
         noteDao.upsertAll(modifiedNotes.toExternal().toLocal())
         modifiedNotes.forEach { note ->
             val labels = note.labels.toExternal().toLocal()
@@ -140,6 +141,7 @@ class NoteRepository @Inject constructor(
             location = location,
             pinned = pinned,
             pinHash = pinHash,
+            deleted = false,
             creationDate = creationDate,
             modificationDate = modificationDate
         )
@@ -171,25 +173,11 @@ class NoteRepository @Inject constructor(
             location = location,
             pinned = pinned,
             pinHash = pinHash,
+            deleted = false,
             modificationDate = LocalDateTime.now()
         ) ?: throw Exception("Note (id $noteId) not found in local database")
 
         updateNoteLabels(noteId, labels)
-        noteDao.upsert(note.toLocal())
-        updateRemoteNote(note)
-    }
-
-    override suspend fun updateNoteTitleAndContent(
-        noteId: UUID,
-        title: String,
-        content: String
-    ) {
-        val note = getNote(noteId)?.copy(
-            title = title,
-            content = content,
-            modificationDate = LocalDateTime.now()
-        ) ?: throw Exception("Note (id $noteId) not found in local database")
-
         noteDao.upsert(note.toLocal())
         updateRemoteNote(note)
     }
@@ -243,24 +231,50 @@ class NoteRepository @Inject constructor(
     }
 
     override suspend fun deleteNote(noteId: UUID) {
-        noteDao.deleteById(noteId)
         noteLabelDao.deleteByNoteId(noteId)
 
+        var remoteDeleteFailed = false
         val userId = settings.getInt(SettingsKeys.USER_ID)
-        if (userId > 0)
+        if (userId > 0) {
             remoteDataSource.delete(noteId)
+                .onSuccess {
+                    noteDao.deleteById(noteId)
+                }
+                .onFailure {
+                    remoteDeleteFailed = true
+                }
+        } else if (userId <= 0 || remoteDeleteFailed) {
+            var note = noteDao.getById(noteId)?.note ?: return
+            note = note.copy(deleted = true)
+            noteDao.upsert(note)
+        }
     }
 
     override suspend fun emptyTrash() {
         val notesWithLabels = noteDao.getAllByLocation(NoteLocation.TRASH)
         notesWithLabels.forEach { noteWithLabel ->
-            deleteNote(noteWithLabel.note.id)
+            noteLabelDao.deleteByNoteId(noteWithLabel.note.id)
         }
 
         val userId = settings.getInt(SettingsKeys.USER_ID)
+        var remoteDeleteFailed = false
         if (userId > 0) {
             remoteDataSource.deleteMultiple(
                 notesWithLabels.map { noteWithLabels -> noteWithLabels.note.id }
+            )
+                .onSuccess {
+                    notesWithLabels.forEach { noteWithLabel ->
+                        noteDao.deleteById(noteWithLabel.note.id)
+                    }
+                }
+                .onFailure {
+                    remoteDeleteFailed = true
+                }
+        } else if (userId <= 0 || remoteDeleteFailed) {
+            noteDao.upsertAll(
+                notesWithLabels.map { noteWithLabel ->
+                    noteWithLabel.note.copy(deleted = true)
+                }
             )
         }
     }

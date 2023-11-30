@@ -80,6 +80,7 @@ class LabelRepository @Inject constructor(
             }
         }
         localDataSource.upsertAll(modifiedLabels.toExternal().toLocal())
+        localDataSource.deleteAllSoftDeleted()
         return Ok(Unit)
     }
 
@@ -91,6 +92,7 @@ class LabelRepository @Inject constructor(
             id = labelId,
             title = title,
             color = color,
+            deleted = false,
             creationDate = LocalDateTime.now(),
             modificationDate = LocalDateTime.now()
         )
@@ -106,6 +108,7 @@ class LabelRepository @Inject constructor(
         val label = getLabel(labelId)?.copy(
             title = title,
             color = color,
+            deleted = false,
             modificationDate = LocalDateTime.now()
         ) ?: throw Exception("Label (id $labelId) not found in local database")
         localDataSource.upsert(label.toLocal())
@@ -116,10 +119,21 @@ class LabelRepository @Inject constructor(
     }
 
     override suspend fun deleteLabel(labelId: UUID) {
-        localDataSource.deleteById(labelId)
         val userId = settings.getInt(SettingsKeys.USER_ID)
-        if (userId > 0)
+        var remoteDeleteFailed = false
+        if (userId > 0) {
             remoteDataSource.delete(labelId)
+                .onSuccess {
+                    localDataSource.deleteById(labelId)
+                }
+                .onFailure {
+                    remoteDeleteFailed = true
+                }
+        } else if (userId <= 0 || remoteDeleteFailed) {
+            var label = localDataSource.getById(labelId) ?: return
+            label = label.copy(deleted = true)
+            localDataSource.upsert(label)
+        }
     }
 
     override suspend fun deleteAllLocal() {

@@ -374,6 +374,7 @@ fun PreviewNoteItem() {
         id = UUID.randomUUID(),
         title = "Test label",
         color = LabelColors.green,
+        deleted = false,
         creationDate = LocalDateTime.now(),
         modificationDate = LocalDateTime.now()
     )
@@ -385,6 +386,7 @@ fun PreviewNoteItem() {
         location = NoteLocation.NOTES,
         pinned = true,
         pinHash = "asd",
+        deleted = false,
         creationDate = LocalDateTime.now(),
         modificationDate = LocalDateTime.now()
     )

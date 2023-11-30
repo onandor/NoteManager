@@ -14,6 +14,7 @@ data class LocalLabel(
     @PrimaryKey var id: UUID,
     var title: String,
     var color: LabelColorType,
+    var deleted: Boolean,
     @ColumnInfo(name="creation_date") var creationDate: LocalDateTime = LocalDateTime.now(),
     @ColumnInfo(name="modification_date") var modificationDate: LocalDateTime = LocalDateTime.now()
 )

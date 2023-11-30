@@ -109,6 +109,7 @@ class LabelSearchViewmodel @Inject constructor(
                     id = searchedLabel.id,
                     title = searchedLabel.title,
                     color = searchedLabel.color,
+                    deleted = false,
                     creationDate = searchedLabel.creationDate,
                     modificationDate = searchedLabel.modificationDate
                 )

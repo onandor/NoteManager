@@ -12,6 +12,7 @@ data class RemoteNote(
     val location: Int,
     val pinned: Boolean,
     val pinHash: String,
+    val deleted: Boolean,
     val creationDate: Long,
     val modificationDate: Long
 )

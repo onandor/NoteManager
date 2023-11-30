@@ -15,6 +15,7 @@ fun Label.toRemote(userId: Int) = RemoteLabel(
     userId = userId,
     title = title,
     color = color.type.value,
+    deleted = deleted,
     creationDate = creationDate
         .atZone(ZoneId.systemDefault())
         .toInstant()
@@ -29,6 +30,7 @@ fun RemoteLabel.toExternal() = Label(
     id = id,
     title = title,
     color = labelColors[LabelColorType.fromInt(color)]!!,
+    deleted = deleted,
     creationDate = Instant
         .ofEpochMilli(creationDate)
         .atZone(ZoneId.systemDefault())
@@ -54,6 +56,7 @@ fun Note.toRemote(userId: Int) = RemoteNote(
     location = location.value,
     pinned = pinned,
     pinHash = pinHash,
+    deleted = deleted,
     creationDate = creationDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
     modificationDate = modificationDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 )
@@ -66,6 +69,7 @@ fun RemoteNote.toExternal() = Note(
     location = NoteLocation.fromInt(location),
     pinned = pinned,
     pinHash = pinHash,
+    deleted = deleted,
     creationDate = Instant
         .ofEpochMilli(creationDate)
         .atZone(ZoneId.systemDefault())

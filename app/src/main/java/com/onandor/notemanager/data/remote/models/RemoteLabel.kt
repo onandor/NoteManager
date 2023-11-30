@@ -7,6 +7,7 @@ data class RemoteLabel(
     val userId: Int,
     val title: String,
     val color: Int,
+    val deleted: Boolean,
     val creationDate: Long,
     val modificationDate: Long
 )

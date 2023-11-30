@@ -376,6 +376,7 @@ private fun LabelItemPreview() {
         id = UUID.randomUUID(),
         title = "Very long test label",
         color = LabelColors.green,
+        deleted = false,
         creationDate = LocalDateTime.now(),
         modificationDate = LocalDateTime.now()
     )

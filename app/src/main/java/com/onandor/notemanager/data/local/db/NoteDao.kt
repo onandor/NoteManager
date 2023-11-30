@@ -71,4 +71,7 @@ interface NoteDao {
 
     @Query("DELETE FROM notes")
     suspend fun deleteAll()
+
+    @Query("DELETE FROM notes WHERE deleted")
+    suspend fun deleteAllSoftDeleted()
 }

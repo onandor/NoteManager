@@ -8,6 +8,7 @@ data class Label (
     val id: UUID,
     val title: String,
     val color: LabelColor,
+    val deleted: Boolean,
     val creationDate: LocalDateTime,
     val modificationDate: LocalDateTime
 )

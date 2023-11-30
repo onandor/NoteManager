@@ -11,6 +11,7 @@ fun Label.toLocal() = LocalLabel(
     id = id,
     title = title,
     color = color.type,
+    deleted = deleted,
     creationDate = creationDate,
     modificationDate = modificationDate
 )
@@ -19,6 +20,7 @@ fun LocalLabel.toExternal() = Label(
     id = id,
     title = title,
     color = labelColors[color]!!,
+    deleted = deleted,
     creationDate = creationDate,
     modificationDate = modificationDate
 )
@@ -36,6 +38,7 @@ fun Note.toLocal() = LocalNote(
     location = location,
     pinned = pinned,
     pinHash = pinHash,
+    deleted = deleted,
     creationDate = creationDate,
     modificationDate = modificationDate
 )
@@ -59,6 +62,7 @@ fun LocalNote.toExternal() = Note(
     location = location,
     pinned = pinned,
     pinHash = pinHash,
+    deleted = deleted,
     creationDate = creationDate,
     modificationDate = modificationDate
 )

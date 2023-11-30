@@ -11,6 +11,7 @@ data class Note(
     val location: NoteLocation,
     val pinned: Boolean,
     val pinHash: String,
+    val deleted: Boolean,
     val creationDate: LocalDateTime,
     val modificationDate: LocalDateTime
 )

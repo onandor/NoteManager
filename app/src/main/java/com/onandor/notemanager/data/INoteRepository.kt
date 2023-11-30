@@ -51,12 +51,6 @@ interface INoteRepository {
         pinHash: String
     )
 
-    suspend fun updateNoteTitleAndContent(
-        noteId: UUID,
-        title: String,
-        content: String
-    )
-
     suspend fun updateNoteLabels(noteId: UUID, labels: List<Label>)
 
     suspend fun updateNoteLocation(noteId: UUID, location: NoteLocation)

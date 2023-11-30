@@ -556,6 +556,7 @@ class AddEditNoteViewModel @Inject constructor(
             location = uiState.value.location,
             pinned = uiState.value.pinned,
             pinHash = uiState.value.pinHash,
+            deleted = false,
             creationDate = uiState.value.creationDate,
             modificationDate = uiState.value.modificationDate
         )
