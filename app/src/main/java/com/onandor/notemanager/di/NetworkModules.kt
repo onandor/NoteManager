@@ -73,7 +73,7 @@ object HttpClientModule {
                         val refreshToken = settings.getString(SettingsKeys.REFRESH_TOKEN)
                         lateinit var tokenPair: TokenPair
                         try {
-                            client.get {
+                            tokenPair = client.get {
                                 markAsRefreshTokenRequest()
                                 url("auth/refresh")
                                 parameter("refreshToken", refreshToken)
