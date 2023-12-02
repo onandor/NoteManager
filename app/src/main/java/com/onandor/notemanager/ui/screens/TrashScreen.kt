@@ -59,6 +59,7 @@ import com.onandor.notemanager.ui.components.ColoredStatusBarTopAppBar
 import com.onandor.notemanager.ui.components.EmptyContent
 import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
+import com.onandor.notemanager.ui.components.SimpleConfirmationDialog
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.viewmodels.TrashViewModel
 import kotlinx.coroutines.launch
@@ -224,10 +225,14 @@ fun TrashScreen(
         }
 
         if (uiState.confirmationDialogOpen) {
-            ConfirmationDialog(
-                onConfirmation = viewModel::dialogConfirmed,
+            val dialogText = if (uiState.selectedNotes.isNotEmpty())
+                stringResource(id = R.string.dialog_trash_confirmation_delete_selected)
+            else
+                stringResource(id = R.string.dialog_trash_confirmation_empty_trash)
+            SimpleConfirmationDialog(
                 onDismissRequest = viewModel::closeConfirmationDialog,
-                deleteSelection = uiState.selectedNotes.isNotEmpty()
+                onConfirmation = viewModel::dialogConfirmed,
+                text = dialogText
             )
         }
 
@@ -242,55 +247,6 @@ fun TrashScreen(
         LaunchedEffect(uiState.selectedNotes.size) {
             if (uiState.selectedNotes.isNotEmpty()) {
                 scrollBehavior.state.heightOffset = 0f
-            }
-        }
-    }
-}
-
-@Composable
-private fun ConfirmationDialog(
-    onConfirmation: () -> Unit,
-    onDismissRequest: () -> Unit,
-    deleteSelection: Boolean
-) {
-    Dialog(onDismissRequest = onDismissRequest) {
-        Card(shape = RoundedCornerShape(16.dp)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(all = 15.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Icon(
-                    modifier = Modifier.size(35.dp),
-                    imageVector = Icons.Filled.Warning,
-                    contentDescription = ""
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                if (deleteSelection)
-                    Text(stringResource(id = R.string.dialog_trash_confirmation_delete_selected))
-                else
-                    Text(stringResource(id = R.string.dialog_trash_confirmation_empty_trash))
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    TextButton(onClick = onDismissRequest) {
-                        Text(stringResource(id = R.string.dialog_empty_trash_button_cancel))
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Button(
-                        onClick = onConfirmation,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Text(stringResource(id = R.string.dialog_empty_trash_button_confirm))
-                    }
-                }
             }
         }
     }
