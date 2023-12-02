@@ -24,6 +24,9 @@ object NoteNotFound: ApiError(R.string.apierror_note_not_found)
 // Labels
 object LabelNotFound: ApiError(R.string.apierror_label_not_found)
 
+// Client
+object NoInternetConnection: ApiError(R.string.apierror_no_internet_connection)
+
 // Server
 object ServerError : ApiError(R.string.apierror_server_error)
 object ServerUnreachable : ApiError(R.string.apierror_server_unreachable)
