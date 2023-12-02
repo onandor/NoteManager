@@ -162,6 +162,17 @@ class AddEditNoteViewModel @Inject constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            labelRepository.synchronize()
+                .onSuccess {
+                    if (labelId == null) {
+                        return@launch
+                    }
+                    val startingLabel = labelRepository.getLabel(labelId) ?: return@launch
+                    val addedLabels = listOf(startingLabel)
+                    _uiState.update { it.copy(addedLabels = addedLabels) }
+                }
+        }
     }
 
     override fun onCleared() {
