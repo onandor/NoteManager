@@ -11,6 +11,7 @@ object AddEditResultTypes {
     const val TRASHED = 4
     const val DELETED = 5
     const val DISCARDED = 6
+    const val DELETED_AFTER_SYNC = 7
 }
 
 data class AddEditResult(
@@ -26,5 +27,6 @@ object AddEditResults {
     val TRASHED = AddEditResult(AddEditResultTypes.TRASHED, R.string.addeditresult_trashed)
     val DELETED = AddEditResult(AddEditResultTypes.DELETED, R.string.addeditresult_deleted)
     val DISCARDED = AddEditResult(AddEditResultTypes.DISCARDED, R.string.addeditresult_discarded)
+    val DELETED_AFTER_SYNC = AddEditResult(AddEditResultTypes.DELETED_AFTER_SYNC, R.string.addeditresult_deleted_after_sync)
 }
 

@@ -56,6 +56,7 @@
     <string name="addeditresult_trashed">Note trashed</string>
     <string name="addeditresult_deleted">Note deleted</string>
     <string name="addeditresult_discarded">Empty note discarded</string>
+    <string name="addeditresult_deleted_after_sync">Note was deleted after last sync</string>
     <string name="onboarding_title_1">Welcome to</string>
     <string name="onboarding_title_2">Note Manager</string>
     <string name="onboarding_account_description">You can back up and synchronize your notes across multiple devices by signing into your account.\nIf you don\'t care about that, you can also use the app without an account.</string>

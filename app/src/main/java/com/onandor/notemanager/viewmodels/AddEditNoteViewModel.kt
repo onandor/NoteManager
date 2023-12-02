@@ -220,7 +220,8 @@ class AddEditNoteViewModel @Inject constructor(
                     }
                 }
                 .onFailure {
-                    // TODO: set addeditresult to deleted, navigate back
+                    addEditResultState.set(AddEditResults.DELETED_AFTER_SYNC)
+                    navManager.navigateBack()
                 }
         }
     }
