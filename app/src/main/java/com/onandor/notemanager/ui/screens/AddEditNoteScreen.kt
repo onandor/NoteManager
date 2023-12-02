@@ -148,7 +148,7 @@ fun AddEditNoteScreen(
                 onArchiveNote = viewModel::archiveNote,
                 onUnArchiveNote = viewModel::unArchiveNote,
                 onTrashNote = viewModel::trashNote,
-                onDeleteNote = viewModel::deleteNote,
+                onDeleteNote = viewModel::openDeleteConfirmDialog,
                 onAddLabels = viewModel::showEditLabelsDialog,
                 onChangePinned = viewModel::changePinned,
                 onSetPin = viewModel::openChangePinDialog,
@@ -247,6 +247,15 @@ fun AddEditNoteScreen(
             onDismissRequest = viewModel::closeLinkConfirmDialog,
             onConfirmation = { viewModel.closeLinkConfirmDialog(); uriHandler.openUri(uiState.clickedLink!!) },
             text = confirmationText
+        )
+    }
+    
+    if (uiState.deleteConfirmDialogOpen) {
+        val dialogText = stringResource(id = R.string.addeditnote_delete_confirmation)
+        SimpleConfirmationDialog(
+            onDismissRequest = viewModel::closeDeleteConfirmDialog,
+            onConfirmation = viewModel::confirmDelete,
+            text = dialogText
         )
     }
 
@@ -814,7 +823,7 @@ private fun AddEditNoteTopAppBar(
         }
         NoteLocation.TRASH -> {
             {
-                IconButton(onClick = { onDeleteNote(); onNavigateBack() }) {
+                IconButton(onClick = { onDeleteNote() }) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
                         contentDescription = stringResource(id = R.string.addeditnote_trash_note)

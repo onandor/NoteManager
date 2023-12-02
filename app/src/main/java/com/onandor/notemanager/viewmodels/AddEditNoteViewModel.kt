@@ -68,7 +68,8 @@ data class AddEditNoteUiState(
     val clickedLink: String? = null,
     val linkConfirmDialogOpen: Boolean = false,
     val canUndo: Boolean = false,
-    val canRedo: Boolean = false
+    val canRedo: Boolean = false,
+    val deleteConfirmDialogOpen: Boolean = false
 )
 
 @HiltViewModel
@@ -765,5 +766,19 @@ class AddEditNoteViewModel @Inject constructor(
             val newContent = getRedoTFV(entry, _uiState.value.content)
             updateContent(newContent, isUndoRedo = true)
         }
+    }
+
+    fun openDeleteConfirmDialog() {
+        _uiState.update { it.copy(deleteConfirmDialogOpen = true) }
+    }
+
+    fun closeDeleteConfirmDialog() {
+        _uiState.update { it.copy(deleteConfirmDialogOpen = false) }
+    }
+
+    fun confirmDelete() {
+        closeDeleteConfirmDialog()
+        deleteNote()
+        navManager.navigateBack()
     }
 }
