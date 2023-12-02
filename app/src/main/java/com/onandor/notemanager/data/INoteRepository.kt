@@ -59,8 +59,6 @@ interface INoteRepository {
 
     suspend fun updateNotePinHash(noteId: UUID, pinHash: String)
 
-    suspend fun refreshNotes()
-
     suspend fun deleteNote(noteId: UUID)
 
     suspend fun emptyTrash()

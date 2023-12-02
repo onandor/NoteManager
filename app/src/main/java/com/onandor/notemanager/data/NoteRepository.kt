@@ -225,18 +225,6 @@ class NoteRepository @Inject constructor(
         updateRemoteNote(note)
     }
 
-    override suspend fun refreshNotes() {
-        remoteDataSource.getAll()
-            .onSuccess { remoteNotes ->
-                noteDao.upsertAll(
-                    remoteNotes.map { remoteNote -> remoteNote.toExternal().toLocal() }
-                )
-            }
-            .onFailure {
-                // TODO: do something
-            }
-    }
-
     override suspend fun deleteNote(noteId: UUID) {
         noteLabelDao.deleteByNoteId(noteId)
 

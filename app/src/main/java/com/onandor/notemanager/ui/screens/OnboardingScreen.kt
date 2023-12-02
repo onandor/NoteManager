@@ -95,5 +95,5 @@ private fun OnboardingContent(
 @Preview
 @Composable
 private fun OnboardingScreenPreview() {
-    OnboardingContent(onSkip = { /*TODO*/ }, onSignIn = { })
+    OnboardingContent(onSkip = { }, onSignIn = { })
 }

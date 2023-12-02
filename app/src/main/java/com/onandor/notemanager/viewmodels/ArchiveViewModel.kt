@@ -84,7 +84,7 @@ class ArchiveViewModel @Inject constructor(
 
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.ARCHIVE)
         .map { AsyncResult.Success(it) }
-        .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
+        .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("")) }
 
     private var lockedNote: Note? = null
 

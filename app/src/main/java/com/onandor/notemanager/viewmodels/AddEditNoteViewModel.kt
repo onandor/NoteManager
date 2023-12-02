@@ -93,7 +93,7 @@ class AddEditNoteViewModel @Inject constructor(
 
     private val _labelsAsync = labelRepository.getLabelsStream()
         .map { AsyncResult.Success(it) }
-        .catch<AsyncResult<List<Label>>> { emit(AsyncResult.Error("Error while loading labels.")) } // TODO: resource
+        .catch<AsyncResult<List<Label>>> { emit(AsyncResult.Error("")) }
 
     private val _uiState = MutableStateFlow(AddEditNoteUiState())
     val uiState: StateFlow<AddEditNoteUiState> = combine(

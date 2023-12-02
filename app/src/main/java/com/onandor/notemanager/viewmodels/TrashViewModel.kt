@@ -54,7 +54,7 @@ class TrashViewModel @Inject constructor(
     private val _notesAsync = noteRepository.getNotesStream(NoteLocation.TRASH)
         .map { it.sortedWith(NoteComparison.comparators[NoteComparison.modificationDateDescending]!!) }
         .map { AsyncResult.Success(it) }
-        .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("Error while loading notes.")) } // TODO: resource
+        .catch<AsyncResult<List<Note>>> { emit(AsyncResult.Error("")) }
 
     private val _uiState = MutableStateFlow(TrashUiState())
     val uiState: StateFlow<TrashUiState> = combine(
