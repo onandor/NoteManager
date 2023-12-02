@@ -168,7 +168,11 @@ class AddEditNoteViewModel @Inject constructor(
                     if (labelId == null) {
                         return@launch
                     }
-                    val startingLabel = labelRepository.getLabel(labelId) ?: return@launch
+                    val startingLabel = labelRepository.getLabel(labelId)
+                    if (startingLabel == null) {
+                        navManager.navigateBack()
+                        return@launch
+                    }
                     val addedLabels = listOf(startingLabel)
                     _uiState.update { it.copy(addedLabels = addedLabels) }
                 }
