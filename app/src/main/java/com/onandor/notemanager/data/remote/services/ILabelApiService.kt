@@ -7,9 +7,13 @@ interface ILabelApiService {
 
     suspend fun getAll(): List<RemoteLabel>
 
+    suspend fun getById(labelId: UUID): RemoteLabel
+
     suspend fun create(remoteLabel: RemoteLabel)
 
     suspend fun update(remoteLabel: RemoteLabel)
+
+    suspend fun synchronize(remoteLabel: RemoteLabel)
 
     suspend fun synchronize(remoteLabels: List<RemoteLabel>)
 

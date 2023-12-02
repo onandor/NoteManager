@@ -13,6 +13,7 @@ import javax.inject.Inject
 
 private const val LABELS_ROUTE = "labels"
 private const val SYNC = "/sync"
+private const val SINGLE = "/single"
 
 class LabelApiService @Inject constructor(
     private val httpClient: HttpClient
@@ -20,6 +21,10 @@ class LabelApiService @Inject constructor(
 
     override suspend fun getAll(): List<RemoteLabel> {
         return httpClient.get(LABELS_ROUTE).body()
+    }
+
+    override suspend fun getById(labelId: UUID): RemoteLabel {
+        return httpClient.get("$LABELS_ROUTE/$labelId").body()
     }
 
     override suspend fun create(remoteLabel: RemoteLabel) {
@@ -30,6 +35,12 @@ class LabelApiService @Inject constructor(
 
     override suspend fun update(remoteLabel: RemoteLabel) {
         httpClient.put(LABELS_ROUTE) {
+            setBody(remoteLabel)
+        }
+    }
+
+    override suspend fun synchronize(remoteLabel: RemoteLabel) {
+        httpClient.put("$LABELS_ROUTE$SYNC$SINGLE") {
             setBody(remoteLabel)
         }
     }

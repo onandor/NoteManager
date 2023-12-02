@@ -16,6 +16,8 @@ interface ILabelRepository {
 
     suspend fun getLabels(): List<Label>
 
+    suspend fun synchronizeSingle(labelId: UUID): Result<Unit, ApiError>
+
     suspend fun synchronize(): Result<Unit, ApiError>
 
     suspend fun createLabel(title: String, color: LabelColor): UUID

@@ -9,9 +9,13 @@ interface ILabelDataSource {
 
     suspend fun getAll(): Result<List<RemoteLabel>, ApiError>
 
+    suspend fun getById(labelId: UUID): Result<RemoteLabel, ApiError>
+
     suspend fun create(remoteLabel: RemoteLabel): Result<Unit, ApiError>
 
     suspend fun update(remoteLabel: RemoteLabel): Result<Unit, ApiError>
+
+    suspend fun synchronize(remoteLabel: RemoteLabel): Result<Unit, ApiError>
 
     suspend fun synchronize(remoteLabels: List<RemoteLabel>): Result<Unit, ApiError>
 

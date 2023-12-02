@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.favre.lib.crypto.bcrypt.BCrypt
+import com.github.michaelbull.result.onFailure
 import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
@@ -204,6 +205,10 @@ class AddEditNoteViewModel @Inject constructor(
                     return@launch
                 updateFullUiState(note)
             }
+            labelRepository.synchronize()
+                .onFailure {
+                    return@launch
+                }
             noteRepository.synchronizeSingle(noteId)
                 .onSuccess {
                     noteRepository.getNote(noteId).let { note ->
@@ -213,6 +218,9 @@ class AddEditNoteViewModel @Inject constructor(
                             return@launch
                         updateFullUiState(note)
                     }
+                }
+                .onFailure {
+                    // TODO: set addeditresult to deleted, navigate back
                 }
         }
     }

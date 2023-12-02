@@ -6,6 +6,7 @@ import com.github.michaelbull.result.Result
 import com.onandor.notemanager.data.remote.models.ApiError
 import com.onandor.notemanager.data.remote.models.DefaultRequest
 import com.onandor.notemanager.data.remote.models.LabelNotFound
+import com.onandor.notemanager.data.remote.models.NoteNotFound
 import com.onandor.notemanager.data.remote.models.RemoteLabel
 import com.onandor.notemanager.data.remote.services.ILabelApiService
 import com.onandor.notemanager.utils.getApiError
@@ -26,6 +27,19 @@ class LabelDataSource @Inject constructor(
         }
     }
 
+    override suspend fun getById(labelId: UUID): Result<RemoteLabel, ApiError> {
+        return try {
+            Ok(labelApiService.getById(labelId))
+        } catch (e: ClientRequestException) {
+            if (e.response.status == HttpStatusCode.NotFound)
+                Err(NoteNotFound)
+            else
+                Err(DefaultRequest)
+        } catch (e: Exception) {
+            Err(e.getApiError())
+        }
+    }
+
     override suspend fun create(remoteLabel: RemoteLabel): Result<Unit, ApiError> {
         return try {
             Ok(labelApiService.create(remoteLabel))
@@ -37,6 +51,14 @@ class LabelDataSource @Inject constructor(
     override suspend fun update(remoteLabel: RemoteLabel): Result<Unit, ApiError> {
         return try {
             Ok(labelApiService.update(remoteLabel))
+        } catch (e: Exception) {
+            Err(e.getApiError())
+        }
+    }
+
+    override suspend fun synchronize(remoteLabel: RemoteLabel): Result<Unit, ApiError> {
+        return try {
+            Ok(labelApiService.synchronize(remoteLabel))
         } catch (e: Exception) {
             Err(e.getApiError())
         }

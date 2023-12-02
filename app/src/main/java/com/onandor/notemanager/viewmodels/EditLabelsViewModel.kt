@@ -2,6 +2,8 @@ package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
@@ -43,7 +45,7 @@ class EditLabelsViewModel @Inject constructor(
 
     private val _labelsAsync = labelRepository.getLabelsStream()
         .map { AsyncResult.Success(it) }
-        .catch<AsyncResult<List<Label>>> { emit(AsyncResult.Error("Error while loading labels.")) }
+        .catch<AsyncResult<List<Label>>> { emit(AsyncResult.Error("")) }
 
     private val addEditLabelDialogOpen = MutableStateFlow(false)
     private val addEditLabelForm = MutableStateFlow(AddEditLabelForm())
@@ -54,21 +56,22 @@ class EditLabelsViewModel @Inject constructor(
         .map { pair -> pair.second }
         .filterNot { labelColor -> labelColor.type == LabelColorType.None }
 
+    private val _uiState = MutableStateFlow(EditLabelsUiState())
     val uiState: StateFlow<EditLabelsUiState> = combine(
-        _labelsAsync, addEditLabelDialogOpen, addEditLabelForm, deleteDialogOpen
-    ) { labelsAsync, editLabelDialogOpen, addEditLabelForm, deleteDialogOpen ->
+        _uiState, _labelsAsync, addEditLabelDialogOpen, addEditLabelForm, deleteDialogOpen
+    ) { uiState, labelsAsync, editLabelDialogOpen, addEditLabelForm, deleteDialogOpen ->
         when(labelsAsync) {
             AsyncResult.Loading -> {
-                EditLabelsUiState()
+                uiState
             }
             is AsyncResult.Error -> {
-                EditLabelsUiState(
+                uiState.copy(
                     loading = false,
                     snackbarMessageResource = R.string.error_while_loading_labels
                 )
             }
             is AsyncResult.Success -> {
-                EditLabelsUiState(
+                uiState.copy(
                     loading = false,
                     labels = labelsAsync.data,
                     addEditLabelDialogOpen = editLabelDialogOpen,
@@ -102,6 +105,27 @@ class EditLabelsViewModel @Inject constructor(
                 titleValid = label.title.isNotEmpty(),
                 color = label.color
             )
+        }
+        viewModelScope.launch {
+            labelRepository.synchronizeSingle(label.id)
+                .onSuccess {
+                    val updatedLabel = labelRepository.getLabel(label.id) ?: return@launch
+                    if (label.modificationDate == updatedLabel.modificationDate)
+                        return@launch
+                    addEditLabelForm.update {
+                        it.copy(
+                            title = updatedLabel.title,
+                            titleValid = updatedLabel.title.isNotEmpty(),
+                            color = updatedLabel.color
+                        )
+                    }
+                }
+                .onFailure {
+                    _uiState.update { it.copy(snackbarMessageResource = R.string.apierror_label_not_found) }
+                    hideAddEditLabelDialog()
+                    labelRepository.synchronize()
+                    return@launch
+                }
         }
         showAddEditLabelDialog()
     }
@@ -182,5 +206,9 @@ class EditLabelsViewModel @Inject constructor(
             labelToDelete = null
             deleteDialogOpen.update { false }
         }
+    }
+
+    fun snackbarShown() {
+        _uiState.update { it.copy(snackbarMessageResource = null) }
     }
 }

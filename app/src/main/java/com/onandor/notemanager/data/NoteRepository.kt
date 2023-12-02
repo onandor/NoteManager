@@ -103,6 +103,10 @@ class NoteRepository @Inject constructor(
                 remoteNote = _remoteNote
             }
             .onFailure { apiError ->
+                if (apiError == NoteNotFound) {
+                    noteLabelDao.deleteByNoteId(noteId)
+                    noteDao.deleteById(noteId)
+                }
                 return Err(apiError)
             }
         if (localNote.modificationDate == remoteNote.modificationDate) {
