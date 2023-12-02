@@ -14,15 +14,16 @@ import java.util.UUID
 @Dao
 interface NoteDao {
 
-    @Query("SELECT * FROM notes")
+    @Query("SELECT * FROM notes WHERE NOT deleted")
     fun observeAll(): Flow<List<LocalNoteWithLabels>>
 
-    @Query("SELECT * FROM notes WHERE location = :noteLocation")
+    @Query("SELECT * FROM notes WHERE NOT deleted AND location = :noteLocation")
     fun observeAllByLocation(noteLocation: NoteLocation): Flow<List<LocalNoteWithLabels>>
 
     @Query("""
         SELECT * FROM notes
-        WHERE (location = :noteLocation
+        WHERE NOT deleted
+        AND (location = :noteLocation
         AND (:searchString LIKE ""
             OR (title LIKE '%' || :searchString || '%'
             OR content LIKE '%' || :searchString || '%')))
@@ -32,7 +33,8 @@ interface NoteDao {
 
     @Query("""
         SELECT * FROM notes
-        WHERE (location IN (:noteLocations)
+        WHERE NOT deleted
+        AND (location IN (:noteLocations)
         AND (:searchString LIKE ""
             OR (title LIKE '%' || :searchString || '%'
             OR content LIKE '%' || :searchString || '%')))
@@ -40,16 +42,16 @@ interface NoteDao {
     fun observeAllByMultipleLocationsAndSearchString(noteLocations: List<NoteLocation>, searchString: String):
             Flow<List<LocalNoteWithLabels>>
 
-    @Query("SELECT * FROM notes WHERE id = :noteId")
+    @Query("SELECT * FROM notes WHERE NOT deleted AND id = :noteId")
     fun observeById(noteId: UUID): Flow<LocalNoteWithLabels?>
 
-    @Query("SELECT * FROM notes")
+    @Query("SELECT * FROM notes WHERE NOT deleted")
     suspend fun getAll(): List<LocalNoteWithLabels>
 
-    @Query("SELECT * FROM notes WHERE location = :noteLocation")
+    @Query("SELECT * FROM notes WHERE NOT deleted AND location = :noteLocation")
     suspend fun getAllByLocation(noteLocation: NoteLocation): List<LocalNoteWithLabels>
 
-    @Query("SELECT * FROM notes WHERE id = :noteId")
+    @Query("SELECT * FROM notes WHERE NOT deleted AND id = :noteId")
     suspend fun getById(noteId: UUID): LocalNoteWithLabels?
 
     @Upsert

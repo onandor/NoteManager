@@ -10,19 +10,19 @@ import java.util.UUID
 @Dao
 interface LabelDao {
 
-    @Query("SELECT * FROM labels WHERE id = :labelId")
+    @Query("SELECT * FROM labels WHERE NOT deleted AND id = :labelId")
     fun observeById(labelId: UUID): Flow<LocalLabel?>
 
-    @Query("SELECT * FROM labels")
+    @Query("SELECT * FROM labels WHERE NOT deleted")
     fun observeAll(): Flow<List<LocalLabel>>
 
-    @Query("SELECT * FROM labels")
+    @Query("SELECT * FROM labels WHERE NOT deleted")
     suspend fun getAll(): List<LocalLabel>
 
-    @Query("SELECT * FROM labels WHERE id = :labelId")
+    @Query("SELECT * FROM labels WHERE NOT deleted AND id = :labelId")
     suspend fun getById(labelId: UUID): LocalLabel?
 
-    @Query("SELECT * FROM labels WHERE title = :labelTitle")
+    @Query("SELECT * FROM labels WHERE NOT deleted AND title = :labelTitle")
     suspend fun getByTitle(labelTitle: String): LocalLabel?
 
     @Upsert
