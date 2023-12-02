@@ -19,7 +19,6 @@ interface LabelDao {
     @Query("SELECT * FROM labels")
     suspend fun getAll(): List<LocalLabel>
 
-
     @Query("SELECT * FROM labels WHERE id = :labelId")
     suspend fun getById(labelId: UUID): LocalLabel?
 

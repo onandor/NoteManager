@@ -96,6 +96,13 @@ class SearchViewModel @Inject constructor(
         }
         .onEach { _notesLoading.update { false } }
 
+    init {
+        viewModelScope.launch {
+            labelRepository.synchronize()
+            noteRepository.synchronize()
+        }
+    }
+
     private val _labelsAsync = labelRepository.getLabelsStream()
         .map { AsyncResult.Success(it) }
         .catch<AsyncResult<List<Label>>> { emit(AsyncResult.Error("Error while loading labels.")) }

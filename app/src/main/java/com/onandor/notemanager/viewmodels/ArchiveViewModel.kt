@@ -122,6 +122,13 @@ class ArchiveViewModel @Inject constructor(
             initialValue = ArchiveUiState()
         )
 
+    init {
+        viewModelScope.launch {
+            labelRepository.synchronize()
+            noteRepository.synchronize()
+        }
+    }
+
     fun addEditResultSnackbarShown() {
         addEditResultState.clear()
     }

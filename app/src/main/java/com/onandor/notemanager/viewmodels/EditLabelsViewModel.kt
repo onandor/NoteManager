@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
+import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.Label
 import com.onandor.notemanager.navigation.INavigationManager
 import com.onandor.notemanager.utils.AddEditLabelForm
@@ -82,6 +83,12 @@ class EditLabelsViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = EditLabelsUiState()
         )
+
+    init {
+        viewModelScope.launch {
+            labelRepository.synchronize()
+        }
+    }
 
     fun navigateBack() {
         navManager.navigateBack()

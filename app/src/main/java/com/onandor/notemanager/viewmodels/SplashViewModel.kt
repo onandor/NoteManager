@@ -2,6 +2,8 @@ package com.onandor.notemanager.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.onandor.notemanager.data.ILabelRepository
+import com.onandor.notemanager.data.INoteRepository
 import com.onandor.notemanager.data.local.datastore.ISettings
 import com.onandor.notemanager.data.local.datastore.SettingsKeys
 import com.onandor.notemanager.navigation.INavigationManager
@@ -26,7 +28,9 @@ data class SplashUiState(
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val settings: ISettings,
-    private val navManager: INavigationManager
+    private val navManager: INavigationManager,
+    private val noteRepository: INoteRepository,
+    private val labelRepository: ILabelRepository
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<SplashUiState> = MutableStateFlow(SplashUiState())
@@ -42,6 +46,8 @@ class SplashViewModel @Inject constructor(
                 navManager.setInitialBackStackAction(NavActions.onboarding())
             }
             else {
+                labelRepository.synchronize()
+                noteRepository.synchronize()
                 startDestination = NavDestinations.NOTES
                 navManager.setInitialBackStackAction(NavActions.notes())
             }

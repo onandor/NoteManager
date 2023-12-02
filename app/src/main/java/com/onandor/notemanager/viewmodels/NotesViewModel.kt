@@ -123,6 +123,13 @@ class NotesViewModel @Inject constructor(
             initialValue = NotesUiState()
         )
 
+    init {
+        viewModelScope.launch {
+            labelRepository.synchronize()
+            noteRepository.synchronize()
+        }
+    }
+
     fun addEditResultSnackbarShown() {
         addEditResultState.clear()
     }

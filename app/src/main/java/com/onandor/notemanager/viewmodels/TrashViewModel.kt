@@ -85,6 +85,13 @@ class TrashViewModel @Inject constructor(
             initialValue = TrashUiState()
         )
 
+    init {
+        viewModelScope.launch {
+            labelRepository.synchronize()
+            noteRepository.synchronize()
+        }
+    }
+
     private fun emptyTrash() {
         val noteSnapshots: List<Note> = uiState.value.notes.toList()
         viewModelScope.launch {
