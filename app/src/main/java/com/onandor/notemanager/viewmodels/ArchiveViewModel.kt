@@ -48,7 +48,8 @@ data class ArchiveUiState(
     val selectionSnackbarResource: Int = 0,
     val pinEntryDialogOpen: Boolean = false,
     val showUndoableAddEditSnackbar: Boolean = false,
-    val showUndoableSelectionSnackbar: Boolean = false
+    val showUndoableSelectionSnackbar: Boolean = false,
+    val syncToastResource: Int = 0
 )
 
 @HiltViewModel
@@ -286,18 +287,26 @@ class ArchiveViewModel @Inject constructor(
         _uiState.update { it.copy(synchronizing = true) }
         viewModelScope.launch {
             labelRepository.synchronize()
-                .onFailure {
-                    // TODO: toast
+                .onFailure { apiError ->
                     delay(200)
-                    _uiState.update { it.copy(synchronizing = false) }
+                    _uiState.update {
+                        it.copy(
+                            synchronizing = false,
+                            syncToastResource = apiError.messageResource
+                        )
+                    }
                     return@launch
                 }
             noteRepository.synchronize()
-                .onFailure {
-                    // TODO: toast
+                .onFailure { apiError ->
+                    _uiState.update { it.copy(syncToastResource = apiError.messageResource) }
                 }
             delay(200)
             _uiState.update { it.copy(synchronizing = false) }
         }
+    }
+
+    fun syncToastShown() {
+        _uiState.update { it.copy(syncToastResource = 0) }
     }
 }

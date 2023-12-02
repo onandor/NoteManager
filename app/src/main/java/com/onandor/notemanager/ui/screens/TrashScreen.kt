@@ -1,5 +1,6 @@
 package com.onandor.notemanager.ui.screens
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -46,6 +47,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -209,6 +211,15 @@ fun TrashScreen(
                     }
                 }
                 viewModel.snackbarShown()
+            }
+        }
+
+        if (uiState.syncToastResource != 0) {
+            val context = LocalContext.current
+            val text = stringResource(id = uiState.syncToastResource)
+            LaunchedEffect(uiState.syncToastResource) {
+                Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+                viewModel.syncToastShown()
             }
         }
 
