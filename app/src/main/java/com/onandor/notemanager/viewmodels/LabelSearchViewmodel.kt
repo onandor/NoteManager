@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.favre.lib.crypto.bcrypt.BCrypt
+import com.github.michaelbull.result.onFailure
+import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
@@ -170,6 +172,28 @@ class LabelSearchViewmodel @Inject constructor(
             initialValue = LabelSearchUiState()
         )
 
+    private fun updateForms(label: Label) {
+        _searchedLabel.update {
+            it.copy(
+                id = label.id,
+                title = label.title,
+                color = label.color,
+                creationDate = label.creationDate,
+                modificationDate = label.modificationDate
+            )
+        }
+        _editLabelForm.update {
+            it.copy(
+                id = label.id,
+                title = label.title,
+                titleValid = true,
+                color = label.color,
+                creationDate = label.creationDate,
+                modificationDate = label.modificationDate
+            )
+        }
+    }
+
     init {
         if (labelId == null) {
             _uiState.update { it.copy(snackbarResource = R.string.error_while_loading_notes) }
@@ -178,27 +202,17 @@ class LabelSearchViewmodel @Inject constructor(
                 val label = labelRepository.getLabel(labelId)
                 if (label == null) {
                     _uiState.update { it.copy(snackbarResource = R.string.error_while_loading_notes) }
-                } else {
-                    _searchedLabel.update {
-                        it.copy(
-                            id = label.id,
-                            title = label.title,
-                            color = label.color,
-                            creationDate = label.creationDate,
-                            modificationDate = label.modificationDate
-                        )
-                    }
-                    _editLabelForm.update {
-                        it.copy(
-                            id = label.id,
-                            title = label.title,
-                            titleValid = true,
-                            color = label.color,
-                            creationDate = label.creationDate,
-                            modificationDate = label.modificationDate
-                        )
-                    }
+                    return@launch
                 }
+                updateForms(label)
+                labelRepository.synchronizeSingle(labelId)
+                    .onSuccess {
+                        val label = labelRepository.getLabel(labelId) ?: return@launch
+                        updateForms(label)
+                    }
+                    .onFailure {
+                        navManager.navigateBack()
+                    }
             }
         }
     }
