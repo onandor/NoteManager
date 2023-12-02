@@ -129,7 +129,7 @@ fun ArchiveScreen(
                 modifier = Modifier.padding(innerPadding),
                 painter = painterResource(id = R.drawable.ic_archive_outlined),
                 text = stringResource(id = R.string.archive_empty),
-                refreshable = true,
+                refreshEnabled = true,
                 refreshing = uiState.synchronizing,
                 onStartRefresh = viewModel::synchronize
             )

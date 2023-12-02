@@ -11,6 +11,9 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -46,6 +49,7 @@ import com.onandor.notemanager.ui.components.MultiSelectTopAppBar
 import com.onandor.notemanager.ui.components.NoteList
 import com.onandor.notemanager.ui.components.PinButton
 import com.onandor.notemanager.ui.components.PinEntryDialog
+import com.onandor.notemanager.ui.components.PullToRefreshBox
 import com.onandor.notemanager.ui.components.SwipeableSnackbarHost
 import com.onandor.notemanager.viewmodels.NotesViewModel
 import kotlinx.coroutines.launch
@@ -144,7 +148,7 @@ fun NotesScreen(
                 modifier = Modifier.padding(innerPadding),
                 painter = painterResource(id = R.drawable.ic_drawer_notes_filled),
                 text = stringResource(id = R.string.notes_empty),
-                refreshable = true,
+                refreshEnabled = true,
                 refreshing = uiState.synchronizing,
                 onStartRefresh = viewModel::synchronize
             )
@@ -155,11 +159,11 @@ fun NotesScreen(
             exit = fadeOut()
         ) {
             NoteList(
+                modifier = Modifier.padding(innerPadding),
                 mainNotes = uiState.notes,
                 selectedNotes = uiState.selectedNotes,
                 onNoteClick = viewModel::noteClick,
                 onNoteLongClick = viewModel::noteLongClick,
-                modifier = Modifier.padding(innerPadding),
                 collapsedView = uiState.noteListState.collapsed,
                 refreshable = true,
                 refreshing = uiState.synchronizing,

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -158,13 +159,13 @@ private fun NoteListContent(
 
 ) {
     val columnModifier = if (animated)
-        modifier
-            .fillMaxWidth()
+        Modifier
+            .fillMaxSize()
             .animateContentSize()
     else
-        modifier.fillMaxWidth()
+        Modifier.fillMaxSize()
 
-    Box(modifier = Modifier.nestedScroll(pullToRefreshState.nestedScrollConnection)) {
+    Box(modifier = modifier.nestedScroll(pullToRefreshState.nestedScrollConnection)) {
         LazyColumn(
             modifier = columnModifier,
             state = scrollState
@@ -214,7 +215,7 @@ private fun NoteListContent(
         }
         if (refreshable) {
             PullToRefreshContainer(
-                modifier = modifier.align(Alignment.TopCenter),
+                modifier = Modifier.align(Alignment.TopCenter),
                 state = pullToRefreshState
             )
         }

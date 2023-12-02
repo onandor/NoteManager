@@ -137,7 +137,7 @@ fun TrashScreen(
                 modifier = Modifier.padding(innerPadding),
                 painter = painterResource(id = R.drawable.ic_trash_empty),
                 text = stringResource(id = R.string.trash_empty),
-                refreshable = true,
+                refreshEnabled = true,
                 refreshing = uiState.synchronizing,
                 onStartRefresh = viewModel::synchronize
             )
