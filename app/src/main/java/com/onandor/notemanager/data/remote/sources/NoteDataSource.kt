@@ -54,6 +54,14 @@ class NoteDataSource @Inject constructor(
         }
     }
 
+    override suspend fun synchronize(remoteNote: RemoteNote): Result<Unit, ApiError> {
+        return try {
+            Ok(noteApiService.synchronize(remoteNote))
+        } catch (e: Exception) {
+            Err(e.getApiError())
+        }
+    }
+
     override suspend fun synchronize(remoteNotes: List<RemoteNote>): Result<Unit, ApiError> {
         return try {
             Ok(noteApiService.synchronize(remoteNotes))

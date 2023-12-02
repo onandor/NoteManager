@@ -16,6 +16,8 @@ interface INoteDataSource {
 
     suspend fun update(remoteNote: RemoteNote): Result<Unit, ApiError>
 
+    suspend fun synchronize(remoteNote: RemoteNote): Result<Unit, ApiError>
+
     suspend fun synchronize(remoteNotes: List<RemoteNote>): Result<Unit, ApiError>
 
     suspend fun delete(noteId: UUID): Result<Unit, ApiError>

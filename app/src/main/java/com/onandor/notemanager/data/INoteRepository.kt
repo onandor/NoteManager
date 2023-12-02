@@ -28,6 +28,8 @@ interface INoteRepository {
 
     suspend fun getNotes(): List<Note>
 
+    suspend fun synchronizeSingle(noteId: UUID): Result<Unit, ApiError>
+
     suspend fun synchronize(): Result<Unit, ApiError>
 
     suspend fun createNote(

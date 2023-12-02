@@ -20,9 +20,11 @@ object NotLoggedIn: ApiError(0)
 
 // Notes
 object NoteNotFound: ApiError(R.string.apierror_note_not_found)
+object LocalNoteNotFound: ApiError(0)
 
 // Labels
 object LabelNotFound: ApiError(R.string.apierror_label_not_found)
+object LocalLabelNotFound: ApiError(0)
 
 // Client
 object NoInternetConnection: ApiError(R.string.apierror_no_internet_connection)

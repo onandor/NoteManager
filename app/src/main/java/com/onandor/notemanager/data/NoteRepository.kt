@@ -13,7 +13,9 @@ import com.onandor.notemanager.data.mapping.toExternal
 import com.onandor.notemanager.data.mapping.toLocal
 import com.onandor.notemanager.data.mapping.toRemote
 import com.onandor.notemanager.data.remote.models.ApiError
+import com.onandor.notemanager.data.remote.models.LocalNoteNotFound
 import com.onandor.notemanager.data.remote.models.NotLoggedIn
+import com.onandor.notemanager.data.remote.models.NoteNotFound
 import com.onandor.notemanager.data.remote.models.RemoteNote
 import com.onandor.notemanager.data.remote.sources.INoteDataSource
 import com.onandor.notemanager.di.ApplicationScope
@@ -85,6 +87,34 @@ class NoteRepository @Inject constructor(
         return withContext(dispatcher) {
             noteDao.getAll().toExternal()
         }
+    }
+
+    override suspend fun synchronizeSingle(noteId: UUID): Result<Unit, ApiError> {
+        val userId = settings.getInt(SettingsKeys.USER_ID)
+        if (userId <= 0)
+            return Err(NotLoggedIn)
+
+        val localNote = noteDao.getById(noteId)?.toExternal()?.toRemote(userId)
+            ?: return Err(LocalNoteNotFound)
+        remoteDataSource.synchronize(localNote)
+        lateinit var remoteNote: RemoteNote
+        remoteDataSource.getById(noteId)
+            .onSuccess { _remoteNote ->
+                remoteNote = _remoteNote
+            }
+            .onFailure { apiError ->
+                return Err(apiError)
+            }
+        if (localNote.modificationDate == remoteNote.modificationDate) {
+            return Ok(Unit)
+        }
+        noteDao.upsert(remoteNote.toExternal().toLocal())
+        val labels = remoteNote.labels.toExternal().toLocal()
+        noteLabelDao.deleteByNoteIdIfLabelIdNotInList(remoteNote.id, labels.map { label -> label.id })
+        labels.forEach { label ->
+            noteLabelDao.insertOrIgnore(remoteNote.id, label.id)
+        }
+        return Ok(Unit)
     }
 
     override suspend fun synchronize(): Result<Unit, ApiError> {

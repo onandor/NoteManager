@@ -15,6 +15,7 @@ import javax.inject.Inject
 private const val NOTES_ROUTE = "notes"
 private const val DELETE = "/delete"
 private const val SYNC = "/sync"
+private const val SINGLE = "/single"
 
 class NoteApiService @Inject constructor(
     private val httpClient: HttpClient
@@ -36,6 +37,12 @@ class NoteApiService @Inject constructor(
 
     override suspend fun update(remoteNote: RemoteNote) {
         httpClient.put(NOTES_ROUTE) {
+            setBody(remoteNote)
+        }
+    }
+
+    override suspend fun synchronize(remoteNote: RemoteNote) {
+        httpClient.put("$NOTES_ROUTE$SYNC$SINGLE") {
             setBody(remoteNote)
         }
     }

@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import at.favre.lib.crypto.bcrypt.BCrypt
+import com.github.michaelbull.result.onSuccess
 import com.onandor.notemanager.R
 import com.onandor.notemanager.data.ILabelRepository
 import com.onandor.notemanager.data.INoteRepository
@@ -176,30 +177,43 @@ class AddEditNoteViewModel @Inject constructor(
         return linkRanges
     }
 
+    private fun updateFullUiState(note: Note) {
+        val titleLinkRanges = findLinkRanges(note.title)
+        val contentLinkRanges = findLinkRanges(note.content)
+        _uiState.update {
+            it.copy(
+                title = TextFieldValue(note.title),
+                content = TextFieldValue(note.content),
+                location = note.location,
+                creationDate = note.creationDate,
+                modificationDate = note.modificationDate,
+                modificationDateString = dtf.format(note.modificationDate),
+                pinned = note.pinned,
+                pinHash = note.pinHash,
+                addedLabels = note.labels,
+                titleLinkRanges = titleLinkRanges,
+                contentLinkRanges = contentLinkRanges
+            )
+        }
+    }
+
     private fun loadNote(noteId: UUID) {
         viewModelScope.launch {
             noteRepository.getNote(noteId).let { note ->
                 if (note == null)
                     return@launch
-
-                val titleLinkRanges = findLinkRanges(note.title)
-                val contentLinkRanges = findLinkRanges(note.content)
-                _uiState.update {
-                    it.copy(
-                        title = TextFieldValue(note.title),
-                        content = TextFieldValue(note.content),
-                        location = note.location,
-                        creationDate = note.creationDate,
-                        modificationDate = note.modificationDate,
-                        modificationDateString = dtf.format(note.modificationDate),
-                        pinned = note.pinned,
-                        pinHash = note.pinHash,
-                        addedLabels = note.labels,
-                        titleLinkRanges = titleLinkRanges,
-                        contentLinkRanges = contentLinkRanges
-                    )
-                }
+                updateFullUiState(note)
             }
+            noteRepository.synchronizeSingle(noteId)
+                .onSuccess {
+                    noteRepository.getNote(noteId).let { note ->
+                        if (note == null)
+                            return@launch
+                        if (note.modificationDate == _uiState.value.modificationDate)
+                            return@launch
+                        updateFullUiState(note)
+                    }
+                }
         }
     }
 
