@@ -79,8 +79,12 @@ class LabelRepository @Inject constructor(
                         && remoteLabel.modificationDate == localLabel.modificationDate
             }
         }
-        localDataSource.upsertAll(modifiedLabels.toExternal().toLocal())
+        val deletedLabels = localLabels.filterNot { localLabel ->
+            remoteLabels.any { remoteLabel -> localLabel.id == remoteLabel.id }
+        }
         localDataSource.deleteAllSoftDeleted()
+        deletedLabels.forEach { label -> localDataSource.deleteById(label.id) }
+        localDataSource.upsertAll(modifiedLabels.toExternal().toLocal())
         return Ok(Unit)
     }
 

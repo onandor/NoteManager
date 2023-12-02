@@ -108,7 +108,14 @@ class NoteRepository @Inject constructor(
                         && remoteNote.modificationDate == localNote.modificationDate
             }
         }
+        val deletedNotes = localNotes.filterNot { localNote ->
+            remoteNotes.any { remoteNote -> localNote.id == remoteNote.id }
+        }
         noteDao.deleteAllSoftDeleted()
+        deletedNotes.forEach { note ->
+            noteLabelDao.deleteByNoteId(note.id)
+            noteDao.deleteById(note.id)
+        }
         noteDao.upsertAll(modifiedNotes.toExternal().toLocal())
         modifiedNotes.forEach { note ->
             val labels = note.labels.toExternal().toLocal()
