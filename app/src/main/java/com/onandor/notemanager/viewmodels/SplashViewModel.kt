@@ -46,8 +46,10 @@ class SplashViewModel @Inject constructor(
                 navManager.setInitialBackStackAction(NavActions.onboarding())
             }
             else {
-                labelRepository.synchronize()
-                noteRepository.synchronize()
+                viewModelScope.launch {
+                    labelRepository.synchronize()
+                    noteRepository.synchronize()
+                }
                 startDestination = NavDestinations.NOTES
                 navManager.setInitialBackStackAction(NavActions.notes())
             }
