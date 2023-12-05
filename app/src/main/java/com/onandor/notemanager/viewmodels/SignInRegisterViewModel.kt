@@ -39,7 +39,8 @@ data class SignInRegisterUiState(
     val loading: Boolean = false,
     val formType: SignInRegisterFormType = SignInRegisterFormType.SIGN_IN,
     val form: SignInRegisterForm = SignInRegisterForm("", "", ""),
-    val snackbarMessageResource: Int? = null
+    val snackbarMessageResource: Int? = null,
+    val successfulSignIn: Boolean = false
 )
 
 @HiltViewModel
@@ -137,6 +138,8 @@ class SignInRegisterViewModel @Inject constructor(
                     settings.save(SettingsKeys.REFRESH_TOKEN, tokenPair.refreshToken)
                     labelRepository.synchronize()
                     noteRepository.synchronize()
+                    _uiState.update { it.copy(successfulSignIn = true) }
+                    updateLoading(false)
                     navManager.navigateTo(NavActions.notes())
                 }
                 .onFailure { error ->

@@ -46,7 +46,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -89,7 +88,7 @@ fun UserDetailsScreen(
             modifier = Modifier.padding(innerPadding)
         ) {
             if (uiState.loggedIn) {
-                SignedInInComponent(
+                SignedInComponent(
                     loading = uiState.loadingRequest,
                     email = uiState.email,
                     onSignOut = viewModel::logOut,
@@ -144,7 +143,7 @@ fun UserDetailsScreen(
 }
 
 @Composable
-private fun SignedInInComponent(
+private fun SignedInComponent(
     loading: Boolean,
     email: String,
     onSignOut: () -> Unit,
@@ -160,7 +159,7 @@ private fun SignedInInComponent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(all = 12.dp)
+                .padding(start = 10.dp, end = 10.dp, top = 15.dp, bottom = 15.dp)
         ) {
             Text(stringResource(id = R.string.user_details_signed_in_as))
             Row(
@@ -234,7 +233,7 @@ private fun SignedOutComponent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(all = 10.dp)
+                .padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 15.dp)
         ) {
             Text(
                 text = stringResource(R.string.user_details_not_signed_in_title),
@@ -430,7 +429,7 @@ private fun ChangePasswordDialog(
 @Preview
 @Composable
 private fun SignedInComponentPreview() {
-    SignedInInComponent(
+    SignedInComponent(
         loading = false,
         email = "test@email.com",
         onSignOut = { },
